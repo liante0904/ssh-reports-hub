@@ -1,6 +1,20 @@
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import CompanySelect from './CompanySelect';
 import './FloatingMenu.css';
 
-function FloatingMenu({ isOpen, toggleMenu, toggleSearch, theme, toggleTheme, isFloatingNavVisible }) {
+function FloatingMenu({ 
+  isOpen, 
+  toggleMenu, 
+  toggleSearch, 
+  theme, 
+  toggleTheme, 
+  isFloatingNavVisible,
+  selectedCompany,
+  onCompanyChange
+}) {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   // 메뉴가 열렸을 때 외부 클릭으로 닫기
   const handleOverlayClick = () => {
     if (isOpen) {
@@ -8,17 +22,44 @@ function FloatingMenu({ isOpen, toggleMenu, toggleSearch, theme, toggleTheme, is
     }
   };
 
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
+  const handleSelectChange = (e) => {
+    const selectedValue = e.target.value;
+    
+    // Header.jsx의 handleCompanyChange 로직과 동일하게 구현
+    if (selectedValue) {
+      setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
+      if (typeof onCompanyChange === 'function') {
+        onCompanyChange({ query: selectedValue, category: 'company' });
+      }
+    } else {
+      setSearchParams({}, { replace: true });
+      if (typeof onCompanyChange === 'function') {
+        onCompanyChange({ query: '', category: 'company' });
+      }
+    }
+    
+    navigate({ pathname: '/' });
+    toggleMenu(); // 메뉴 닫기
+  };
+
   return (
     <>
       {isFloatingNavVisible && (
         <nav className="floating-nav" style={{ zIndex: 10 }}>
-          <button className="floating-button theme-fab" onClick={toggleTheme}>
+          <button className="floating-button theme-fab" onClick={toggleTheme} title="테마 변경">
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
-          <button className="floating-button search-fab" onClick={toggleSearch}>
+          <button className="floating-button search-fab" onClick={toggleSearch} title="검색">
             🔍
           </button>
-          <button className="floating-button menu-fab" onClick={toggleMenu}>
+          <button className="floating-button refresh-fab" onClick={handleRefresh} title="새로고침">
+            🔄
+          </button>
+          <button className="floating-button menu-fab" onClick={toggleMenu} title="메뉴">
             ☰
           </button>
         </nav>
@@ -49,11 +90,24 @@ function FloatingMenu({ isOpen, toggleMenu, toggleSearch, theme, toggleTheme, is
                 <span className="icon">🏠</span> 홈
               </a>
               <a className="menu-item" href="/global">
-                <span className="icon">🌍</span> 글로벌 레포트
+                <span className="icon">🌍</span> 글로벌
               </a>
-              <a className="menu-item" onClick={() => window.location.reload()} style={{ cursor: 'pointer' }}>
-                <span className="icon">🔄</span> 새로고침
+              <a className="menu-item" href="/industry">
+                <span className="icon">🏭</span> 산업
               </a>
+              
+              {/* 추후 작업을 위해 증권사 필터 주석 처리
+              <div className="menu-divider"></div>
+              
+              <div className="menu-item company-filter-item">
+                <span className="icon">🏦</span>
+                <CompanySelect 
+                  value={selectedCompany} 
+                  onChange={handleSelectChange}
+                  className="floating-company-select"
+                />
+              </div>
+              */}
             </div>
           </div>
         </div>

@@ -88,19 +88,20 @@
 }
 
 /* 메뉴 아이템 애니메이션 */
-.menu-panel.open .menu-item {
-  animation: slideIn 0.3s ease forwards;
+.menu-panel.open .menu-item,
+.menu-panel.open .admin-section {
+  animation: slideIn 0.4s ease forwards;
 }
 
-.menu-panel .menu-item:nth-child(1) { animation-delay: 0.1s; }
-.menu-panel .menu-item:nth-child(2) { animation-delay: 0.15s; }
-.menu-panel .menu-item:nth-child(3) { animation-delay: 0.2s; }
-.menu-panel .menu-item:nth-child(4) { animation-delay: 0.25s; }
+.menu-panel .menu-item:nth-of-type(1) { animation-delay: 0.1s; }
+.menu-panel .menu-item:nth-of-type(2) { animation-delay: 0.15s; }
+.menu-panel .menu-item:nth-of-type(3) { animation-delay: 0.2s; }
+.menu-panel .admin-section { animation-delay: 0.3s; opacity: 0; }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
@@ -136,6 +137,56 @@
 .company-select:focus {
   outline: none;
   box-shadow: 0 0 0 2px #007aff; /* index.css의 company-select 포커스 */
+}
+
+/* 관리자 섹션 스타일 */
+.admin-section {
+  margin-top: 40px; /* 고정 여백으로 변경하여 위 메뉴와 너무 떨어지지 않게 함 */
+  padding-top: 25px;
+  padding-bottom: 20px; /* 하단 여백 추가 */
+  border-top: 2px dashed #d1d1d6;
+}
+
+.admin-title {
+  color: #ff3b30; /* 관리자 느낌을 위해 빨간색 계열 사용 */
+  margin-bottom: 15px; /* 타이틀과 그리드 사이 간격 확보 */
+}
+
+.admin-links-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.admin-link {
+  font-size: 0.85em;
+  padding: 12px 5px;
+  flex-direction: column;
+  gap: 8px;
+  background-color: #fff1f0; /* 연한 빨간색 배경 */
+  color: #ff3b30;
+  border: 1px solid #ffccc7;
+  margin: 0; /* 그리드 내 간격 조절 */
+  border-radius: 12px; /* 버튼 모서리 둥글게 */
+}
+
+.admin-link:hover {
+  background-color: #ffccc7;
+  color: #d32f2f;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(255, 59, 48, 0.1);
+}
+
+.admin-link .icon {
+  margin-right: 0;
+  font-size: 1.6em;
+}
+
+/* 메뉴 패널 내부 스크롤 허용 (아이템이 많아질 경우 대비) */
+.menu-panel {
+  overflow-y: auto;
+  padding-bottom: 40px;
 }
 
 /* 모바일 화면 (최대 너비 1023px 이하일 때) */

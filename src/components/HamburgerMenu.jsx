@@ -46,6 +46,36 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
             <div className="menu-item-select">
               <CompanySelect value={selectedCompany} onChange={handleSelectChange} />
             </div>
+
+            <div className="admin-section">
+              <div className="menu-title admin-title">관리자 전용</div>
+              <div className="admin-links-grid">
+                <a
+                  className="menu-item admin-link"
+                  href="https://ssh-oci.duckdns.org/code"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="icon">💻</span> VSCode
+                </a>
+                <a
+                  className="menu-item admin-link"
+                  href="https://ssh-oci.duckdns.org/explorer/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="icon">📂</span> Explorer
+                </a>
+                <a
+                  className="menu-item admin-link"
+                  href="https://ssh-oci.duckdns.org/portainer/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="icon">🐳</span> Docker
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       )}

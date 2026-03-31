@@ -142,6 +142,8 @@ function App() {
         theme={theme}
         toggleTheme={toggleTheme}
         isFloatingNavVisible={isFloatingNavVisible}
+        selectedCompany={searchQuery.category === 'company' ? searchQuery.query : ''}
+        onCompanyChange={handleSearch}
       />
     </Router>
   );
