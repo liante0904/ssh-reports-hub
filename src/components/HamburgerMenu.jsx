@@ -52,7 +52,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               <div className="admin-links-grid">
                 <a
                   className="menu-item admin-link"
-                  href="https://ssh-oci.duckdns.org/code"
+                  href={`https://${import.meta.env.VITE_VPN_ADDR}/code`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -60,7 +60,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
                 </a>
                 <a
                   className="menu-item admin-link"
-                  href="https://ssh-oci.duckdns.org/explorer/"
+                  href={`https://${import.meta.env.VITE_VPN_ADDR}/explorer/`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -68,7 +68,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
                 </a>
                 <a
                   className="menu-item admin-link"
-                  href="https://ssh-oci.duckdns.org/portainer/"
+                  href={`https://${import.meta.env.VITE_VPN_ADDR}/portainer/`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
