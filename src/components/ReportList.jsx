@@ -17,6 +17,17 @@ function ReportList({ searchQuery }) {
   const [summaryToggles, setSummaryToggles] = useState({});
   
   const abortControllerRef = useRef(null);
+  const isLoadingRef = useRef(false);
+  const hasMoreRef = useRef(true);
+
+  // Sync refs with state
+  useEffect(() => {
+    isLoadingRef.current = isLoading;
+  }, [isLoading]);
+
+  useEffect(() => {
+    hasMoreRef.current = hasMore;
+  }, [hasMore]);
 
   // 공유 메뉴 상태
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -109,8 +120,8 @@ function ReportList({ searchQuery }) {
   }, []);
 
   const fetchReports = useCallback(async (isInitial = false) => {
-    if (!hasMore && !isInitial) return;
-    if (isLoading && !isInitial) return;
+    if (!hasMoreRef.current && !isInitial) return;
+    if (isLoadingRef.current && !isInitial) return;
 
     // 새로운 요청 시 이전 요청 취소 (레이스 컨디션 방지)
     if (isInitial && abortControllerRef.current) {
@@ -120,6 +131,7 @@ function ReportList({ searchQuery }) {
     if (isInitial) abortControllerRef.current = controller;
 
     setIsLoading(true);
+    isLoadingRef.current = true;
 
     try {
       const res = await fetch(buildApiUrl(), { signal: controller.signal });
@@ -129,22 +141,26 @@ function ReportList({ searchQuery }) {
 
       setReports((prev) => mergeReports(isInitial ? {} : prev, items));
       setOffset((prev) => (isInitial ? items.length : prev + items.length));
+      
       setHasMore(apiHasMore);
+      hasMoreRef.current = apiHasMore;
     } catch (err) {
       if (err.name === 'AbortError') return;
       console.error('❌ Error fetching reports:', err);
     } finally {
       if (!isInitial || abortControllerRef.current === controller) {
         setIsLoading(false);
+        isLoadingRef.current = false;
       }
     }
-  }, [hasMore, isLoading, buildApiUrl, mergeReports]);
+  }, [buildApiUrl, mergeReports]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     setReports({});
     setOffset(0);
     setHasMore(true);
+    hasMoreRef.current = true;
     setDateToggles({});
     setFirmToggles({});
     setSummaryToggles({});
