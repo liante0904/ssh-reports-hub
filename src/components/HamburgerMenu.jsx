@@ -193,7 +193,17 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               ) : (
                 <div className="telegram-user-card">
                   <div className="user-info-header">
-                    <span className="user-name">🔔 {telegramUser.first_name}님</span>
+                    <div className="user-name-group">
+                      <span className="user-name">🔔 {telegramUser.first_name}님</span>
+                      <a 
+                        href={`https://t.me/ssh_stock_info_noti_bot?start=${telegramUser.id}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="bot-status-tag"
+                      >
+                        봇 연결하기 🚀
+                      </a>
+                    </div>
                     <button className="logout-small-btn" onClick={handleLogout}>로그아웃</button>
                   </div>
                   

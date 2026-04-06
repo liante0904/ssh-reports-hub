@@ -213,6 +213,30 @@
   margin-bottom: 12px;
 }
 
+.user-name-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bot-status-tag {
+  display: inline-block;
+  font-size: 0.75em;
+  color: #0088cc;
+  background-color: #e0f2fe;
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  border: 1px solid #bae6fd;
+  transition: all 0.2s;
+}
+
+.bot-status-tag:hover {
+  background-color: #bae6fd;
+  transform: scale(1.02);
+}
+
 .logout-small-btn {
   background: none;
   border: 1px solid #d1d1d6;
