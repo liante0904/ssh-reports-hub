@@ -205,40 +205,108 @@
   font-size: 1.2em;
 }
 
-.user-info {
+.user-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.logout-small-btn {
+  background: none;
+  border: 1px solid #d1d1d6;
+  color: #8e8e93;
+  font-size: 0.75em;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.keyword-manager {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+}
+
+.keyword-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.keyword-input-group input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #d1d1d6;
+  border-radius: 10px;
+  font-size: 0.9em;
+  outline: none;
+}
+
+.keyword-input-group input:focus {
+  border-color: #007aff;
+}
+
+.keyword-input-group button {
+  background-color: #007aff;
+  color: white;
+  border: none;
+  padding: 0 15px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.keyword-list-container {
+  min-height: 40px;
+}
+
+.keyword-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 150px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.keyword-tag {
+  background-color: #e9ecef;
+  color: #495057;
+  padding: 4px 8px 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.user-name {
-  font-weight: bold;
-  color: #007aff;
-  font-size: 1em;
-}
-
-.user-id {
-  font-size: 0.8em;
-  color: #64748b;
-}
-
-.keyword-setup-btn {
-  background-color: #0088cc; /* 텔레그램 공식 색상 계열 */
-  color: white;
+.keyword-tag button {
+  background: none;
   border: none;
-  padding: 10px;
-  border-radius: 10px;
-  font-weight: bold;
+  color: #adb5bd;
+  font-size: 1.2em;
   cursor: pointer;
-  transition: background-color 0.2s;
+  line-height: 1;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
 }
 
-.keyword-setup-btn:hover {
-  background-color: #0077b5;
+.keyword-tag button:hover {
+  color: #fa5252;
 }
 
-/* 관리자 섹션 스타일 */
+.loading-text, .empty-text {
+  font-size: 0.85em;
+  color: #8e8e93;
+  text-align: center;
+  margin: 10px 0;
+}
+
 .admin-section {
   margin-top: 40px; /* 고정 여백으로 변경하여 위 메뉴와 너무 떨어지지 않게 함 */
   padding-top: 25px;
