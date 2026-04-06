@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import './CompanySelect.css';
 
 const firm_names = [
@@ -45,6 +46,59 @@ function CompanySelect({ value, onChange }) {
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
 
+  const overlay = (
+    <div className="grid-overlay-portal">
+      <div className="grid-overlay-header">
+        <div className="grid-header-top">
+          <h3>증권사 선택</h3>
+          <button className="grid-close-btn" onClick={() => setIsOpen(false)}>
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+        </div>
+        <div className="grid-search-wrapper">
+          <input 
+            type="text" 
+            placeholder="찾으시는 증권사를 입력하세요" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="grid-overlay-content">
+        <div className="firm-checkerboard">
+          <div 
+            className={`checker-item all ${value === "" ? 'active' : ''}`}
+            onClick={() => handleSelect("")}
+          >
+            <div className="checker-icon">ALL</div>
+            <div className="checker-name">전체보기</div>
+          </div>
+          
+          {filteredFirms.map(({ name, idx }) => {
+            const initial = name.substring(0, 1);
+            const themeColor = firm_colors[name] || '#666';
+            
+            return (
+              <div 
+                key={idx} 
+                className={`checker-item ${value.toString() === idx.toString() ? 'active' : ''}`}
+                onClick={() => handleSelect(idx)}
+              >
+                <div className="checker-icon" style={{ backgroundColor: themeColor + '15', color: themeColor }}>
+                  {initial}
+                </div>
+                <div className="checker-name">{name}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="company-grid-container">
       <button className={`grid-trigger-btn ${value !== "" ? 'selected' : ''}`} onClick={toggleOverlay}>
@@ -54,58 +108,7 @@ function CompanySelect({ value, onChange }) {
         <span>{selectedName}</span>
       </button>
 
-      {isOpen && (
-        <div className="grid-overlay-portal">
-          <div className="grid-overlay-header">
-            <div className="grid-header-top">
-              <h3>증권사 선택</h3>
-              <button className="grid-close-btn" onClick={() => setIsOpen(false)}>
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-              </button>
-            </div>
-            <div className="grid-search-wrapper">
-              <input 
-                type="text" 
-                placeholder="찾으시는 증권사를 입력하세요" 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="grid-overlay-content">
-            <div className="firm-checkerboard">
-              <div 
-                className={`checker-item all ${value === "" ? 'active' : ''}`}
-                onClick={() => handleSelect("")}
-              >
-                <div className="checker-icon">ALL</div>
-                <div className="checker-name">전체보기</div>
-              </div>
-              
-              {filteredFirms.map(({ name, idx }) => {
-                const initial = name.substring(0, 1);
-                const themeColor = firm_colors[name] || '#666';
-                
-                return (
-                  <div 
-                    key={idx} 
-                    className={`checker-item ${value.toString() === idx.toString() ? 'active' : ''}`}
-                    onClick={() => handleSelect(idx)}
-                  >
-                    <div className="checker-icon" style={{ backgroundColor: themeColor + '15', color: themeColor }}>
-                      {initial}
-                    </div>
-                    <div className="checker-name">{name}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+      {isOpen && createPortal(overlay, document.body)}
     </div>
   );
 }

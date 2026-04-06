@@ -35,6 +35,7 @@
   opacity: 0;
   transform: translateX(100%);
   transition: opacity 0.3s ease, transform 0.3s ease;
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 설정 */
 }
 
 .menu-panel.open {
@@ -89,13 +90,15 @@
 
 /* 메뉴 아이템 애니메이션 */
 .menu-panel.open .menu-item,
-.menu-panel.open .admin-section {
+.menu-panel.open .admin-section,
+.menu-panel.open .menu-item-select {
   animation: slideIn 0.4s ease forwards;
 }
 
 .menu-panel .menu-item:nth-of-type(1) { animation-delay: 0.1s; }
 .menu-panel .menu-item:nth-of-type(2) { animation-delay: 0.15s; }
 .menu-panel .menu-item:nth-of-type(3) { animation-delay: 0.2s; }
+.menu-panel .menu-item-select { animation-delay: 0.25s; opacity: 0; }
 .menu-panel .admin-section { animation-delay: 0.3s; opacity: 0; }
 
 @keyframes slideIn {
@@ -109,34 +112,130 @@
   }
 }
 
-/* 증권사 선택 스타일 */
-.company-select {
-  background-color: #f0f0f5; /* index.css의 menu-item 배경 */
-  color: #007aff; /* index.css의 menu-item 색상 */
-  border: none;
-  padding: 10px 15px; /* index.css의 menu-item 패딩 */
-  border-radius: 15px; /* index.css의 menu-item 둥근 모서리 */
-  font-size: 1.1em; /* index.css의 menu-item 폰트 크기 */
-  font-weight: bold;
-  cursor: pointer;
+/* 증권사 선택 스타일 (메뉴 내부용) */
+.menu-item-select {
   width: 100%;
   margin: 10px 0;
-  transition: background-color 0.3s ease, box-shadow 0.2s ease;
-  appearance: none;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="#007aff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-  background-repeat: no-repeat;
-  background-position: right 15px center;
-  padding-right: 40px;
+}
+
+.menu-item-select .company-grid-container {
+  width: 100%;
+}
+
+.menu-item-select .grid-trigger-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 12px 15px;
+  border-radius: 15px;
+  font-size: 1.1em;
+  font-weight: bold;
+  background-color: #f0f0f5;
+  border: none;
+  color: #007aff;
+  box-sizing: border-box;
+  height: auto;
+  min-height: 48px;
+}
+
+.menu-item-select .grid-trigger-btn:hover {
+  background-color: #e0e0e5;
+}
+
+/* 텔레그램 섹션 스타일 */
+.telegram-section {
+  margin: 15px 0;
+  padding: 15px;
+  background-color: #f0f9ff;
+  border-radius: 15px;
+  border: 1px solid #bae6fd;
+}
+
+.telegram-auth-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.telegram-desc {
+  font-size: 0.85em;
+  color: #0369a1;
+  margin: 0;
   text-align: center;
+  font-weight: 500;
 }
 
-.company-select:hover {
-  background-color: #e0e0e5; /* index.css의 menu-item 호버 */
+.telegram-login-container {
+  min-height: 40px;
+  display: flex;
+  justify-content: center;
 }
 
-.company-select:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px #007aff; /* index.css의 company-select 포커스 */
+.telegram-user-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.telegram-custom-login-btn {
+  background-color: #54a9eb;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.telegram-custom-login-btn:hover {
+  background-color: #4b97d1;
+  transform: translateY(-1px);
+}
+
+.telegram-icon {
+  font-size: 1.2em;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.user-name {
+  font-weight: bold;
+  color: #007aff;
+  font-size: 1em;
+}
+
+.user-id {
+  font-size: 0.8em;
+  color: #64748b;
+}
+
+.keyword-setup-btn {
+  background-color: #0088cc; /* 텔레그램 공식 색상 계열 */
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.keyword-setup-btn:hover {
+  background-color: #0077b5;
 }
 
 /* 관리자 섹션 스타일 */
@@ -155,20 +254,22 @@
 .admin-links-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 8px; /* 간격 축소 */
   margin-top: 10px;
 }
 
 .admin-link {
-  font-size: 0.85em;
-  padding: 12px 5px;
+  font-size: 0.8em; /* 폰트 소폭 축소 */
+  padding: 10px 2px; /* 가로 패딩 최소화 */
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   background-color: #fff1f0; /* 연한 빨간색 배경 */
   color: #ff3b30;
   border: 1px solid #ffccc7;
   margin: 0; /* 그리드 내 간격 조절 */
   border-radius: 12px; /* 버튼 모서리 둥글게 */
+  min-width: 0; /* 그리드 내부에서 넘치는 것 방지 */
+  overflow: hidden; /* 혹시 모를 넘침 방지 */
 }
 
 .admin-link:hover {
@@ -180,7 +281,7 @@
 
 .admin-link .icon {
   margin-right: 0;
-  font-size: 1.6em;
+  font-size: 1.4em; /* 아이콘 크기 소폭 조절 */
 }
 
 /* 메뉴 패널 내부 스크롤 허용 (아이템이 많아질 경우 대비) */
