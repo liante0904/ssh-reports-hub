@@ -187,6 +187,15 @@ const Header = forwardRef(({
             ★
           </button>
           {!isMobile && (
+            <div className="company-select-wrapper">
+              <CompanySelect
+                value={query}
+                onChange={handleCompanyChange}
+                className="nav-button company-select"
+              />
+            </div>
+          )}
+        </div>
       </header>
 
       <HamburgerMenu
