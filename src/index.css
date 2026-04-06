@@ -105,7 +105,6 @@ body {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   z-index: 2000;
   white-space: nowrap;
-  transition: all 0.3s ease;
 }
 
 /* 모바일에서 검색 로딩 시에만 상단으로 이동 */

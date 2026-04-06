@@ -115,7 +115,7 @@ function ReportList() {
   return (
     <div className="report-list-wrapper">
       <div className="container" id="report-container">
-        {offset === 0 && isLoading ? (
+        {offset === 0 && isLoading && !isFavoritesPage ? (
           <div className={`loading-overlay ${isSearchActive ? 'search-loading' : ''}`}>로딩 중...</div>
         ) : isFavoritesPage && filteredSortedDates.length === 0 && !isLoading ? (
           <div className="empty-favorites">

@@ -72,7 +72,7 @@ export function useReportFetch(searchQuery, pathname) {
         writer: item.writer,
         link: item.telegram_url || item.download_url || item.attach_url,
         gemini_summary: item.gemini_summary,
-        firm: firm // Store firm name in report object for easier access
+        firm: firm
       };
 
       if (!updated[date]) {
@@ -124,6 +124,7 @@ export function useReportFetch(searchQuery, pathname) {
       if (err.name === 'AbortError') return;
       console.error('❌ Error fetching reports:', err);
     } finally {
+      // Only set isLoading(false) if this is still the active controller
       if (!isInitial || abortControllerRef.current === controller) {
         setIsLoading(false);
         isLoadingRef.current = false;
@@ -133,10 +134,17 @@ export function useReportFetch(searchQuery, pathname) {
 
   // Reset logic when search or path changes
   useEffect(() => {
+    // Abort any ongoing fetch
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
     setReports({});
     setOffset(0);
     setHasMore(true);
     hasMoreRef.current = true;
+    setIsLoading(false);
+    isLoadingRef.current = false;
   }, [searchQuery, pathname]);
 
   // Initial fetch when offset is 0
