@@ -228,27 +228,27 @@ function ReportList({ searchQuery }) {
         );
       })
     : sortedDates;
-return (
-  <div className="report-list-wrapper">
-    <div className="container" id="report-container">
-      {/* 최초 로딩 시에만 풀스크린 로딩 표시, 이후는 하단 로딩바만 표시 */}
-      {offset === 0 && isLoading && Object.keys(reports).length === 0 ? (
-        <div className={`loading-overlay ${isSearchActive ? 'search-loading' : ''}`}>로딩 중...</div>
-      ) : isFavoritesPage && filteredSortedDates.length === 0 && !isLoading ? (
-        <div className="empty-favorites">
-          <div className="empty-icon">★</div>
-          <p>즐겨찾기한 레포트가 없습니다.<br/>관심 있는 레포트에 별표를 눌러보세요!</p>
-        </div>
-      ) : filteredSortedDates.length === 0 && !isLoading ? null : (
-        <InfiniteScroll
-          dataLength={offset}
-          next={fetchReports}
-          hasMore={isFavoritesPage ? false : hasMore}
-          scrollThreshold={0.6}
-          loader={isLoading && <div className="bottom-loading">더 불러오는 중...</div>}
-        >
-          {filteredSortedDates.map((date) => {
-...
+
+  return (
+    <div className="report-list-wrapper">
+      <div className="container" id="report-container">
+        {/* 최초 로딩 시에만 풀스크린 로딩 표시, 이후는 하단 로딩바만 표시 */}
+        {offset === 0 && isLoading && Object.keys(reports).length === 0 ? (
+          <div className={`loading-overlay ${isSearchActive ? 'search-loading' : ''}`}>로딩 중...</div>
+        ) : isFavoritesPage && filteredSortedDates.length === 0 && !isLoading ? (
+          <div className="empty-favorites">
+            <div className="empty-icon">★</div>
+            <p>즐겨찾기한 레포트가 없습니다.<br/>관심 있는 레포트에 별표를 눌러보세요!</p>
+          </div>
+        ) : filteredSortedDates.length === 0 && !isLoading ? null : (
+          <InfiniteScroll
+            dataLength={offset}
+            next={fetchReports}
+            hasMore={isFavoritesPage ? false : hasMore}
+            scrollThreshold={0.6}
+            loader={isLoading && <div className="bottom-loading">더 불러오는 중...</div>}
+          >
+            {filteredSortedDates.map((date) => {
               const firmsAtDate = reports[date];
               const filteredFirms = Object.entries(firmsAtDate).reduce((acc, [firm, firmReports]) => {
                 const favReports = isFavoritesPage 
