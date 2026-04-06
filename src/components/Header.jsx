@@ -128,6 +128,9 @@ const Header = forwardRef(({
               if (isFloatingMenuOpen) {
                 toggleFloatingMenu();
               }
+              // 검색 상태 및 쿼리 초기화
+              setIsSearchActive(false);
+              onSearch({ query: '', category: '' });
               setQuery('');
               setSearchParams({}, { replace: true });
               navigate({ pathname: '/' });
