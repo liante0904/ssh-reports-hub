@@ -31,7 +31,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     }
   }, [isOpen, isScriptLoaded]);
 
-  // 2. 키워드 목록 조회 (GET /keywords)
+  // 2. 초기 키워드 목록 조회 (GET /keywords)
   const fetchKeywords = async () => {
     const { cleanBaseUrl, token } = getApiConfig();
     if (!token) return;
@@ -58,54 +58,56 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     }
   };
 
-  // 3. 키워드 추가 (POST /keywords)
-  const handleAddKeyword = async () => {
-    if (!newKeyword.trim()) return;
+  // 3. 키워드 동기화 (POST /keywords/sync)
+  // 화면에 보이는 최종 키워드 배열을 서버로 전송하여 한방에 업데이트합니다.
+  const syncKeywords = async (updatedKeywords) => {
     const { cleanBaseUrl, token } = getApiConfig();
+    if (!token) return;
 
     try {
-      const response = await fetch(`${cleanBaseUrl}/keywords`, {
+      const response = await fetch(`${cleanBaseUrl}/keywords/sync`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` 
         },
-        body: JSON.stringify({ keyword: newKeyword.trim() })
+        body: JSON.stringify({ keywords: updatedKeywords })
       });
 
       if (response.ok) {
-        setNewKeyword('');
-        fetchKeywords();
+        const data = await response.json();
+        setKeywords(data.filter(k => k.is_active)); // 서버에서 받은 최신 리스트로 갱신
       } else if (response.status === 401) {
         handleLogout();
       }
     } catch (error) {
-      console.error('❌ 키워드 추가 실패:', error);
+      console.error('❌ 키워드 동기화 실패:', error);
     }
   };
 
-  // 4. 키워드 삭제 (PUT /keywords/{id} - is_active: false)
-  const handleDeleteKeyword = async (id, keywordText) => {
-    const { cleanBaseUrl, token } = getApiConfig();
-
-    try {
-      const response = await fetch(`${cleanBaseUrl}/keywords/${id}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify({ keyword: keywordText, is_active: false })
-      });
-
-      if (response.ok) {
-        fetchKeywords();
-      } else if (response.status === 401) {
-        handleLogout();
-      }
-    } catch (error) {
-      console.error('❌ 키워드 삭제 실패:', error);
+  // 키워드 추가 핸들러
+  const handleAddKeyword = () => {
+    const trimmed = newKeyword.trim();
+    if (!trimmed) return;
+    
+    // 중복 체크
+    if (keywords.some(k => k.keyword === trimmed)) {
+      setNewKeyword('');
+      return;
     }
+
+    const nextKeywords = [...keywords.map(k => k.keyword), trimmed];
+    setNewKeyword('');
+    syncKeywords(nextKeywords);
+  };
+
+  // 키워드 삭제 핸들러
+  const handleDeleteKeyword = (keywordToDelete) => {
+    const nextKeywords = keywords
+      .filter(k => k.keyword !== keywordToDelete)
+      .map(k => k.keyword);
+    
+    syncKeywords(nextKeywords);
   };
 
   const handleLogout = () => {
@@ -212,10 +214,10 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
                         <p className="loading-text">로딩 중...</p>
                       ) : keywords.length > 0 ? (
                         <div className="keyword-tags">
-                          {keywords.map((k) => (
-                            <span key={k.id} className="keyword-tag">
+                          {keywords.map((k, index) => (
+                            <span key={index} className="keyword-tag">
                               {k.keyword}
-                              <button onClick={() => handleDeleteKeyword(k.id, k.keyword)}>×</button>
+                              <button onClick={() => handleDeleteKeyword(k.keyword)}>×</button>
                             </span>
                           ))}
                         </div>
