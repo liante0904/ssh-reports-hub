@@ -213,28 +213,49 @@
   margin-bottom: 12px;
 }
 
-.user-name-group {
+.bot-connect-banner {
+  background-color: #fff9db;
+  border: 1px solid #ffe066;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 15px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 10px;
 }
 
-.bot-status-tag {
-  display: inline-block;
-  font-size: 0.75em;
-  color: #0088cc;
-  background-color: #e0f2fe;
-  padding: 2px 8px;
-  border-radius: 6px;
+.bot-connect-desc {
+  font-size: 0.85em;
+  color: #856404;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.bot-connect-btn {
+  background-color: #0088cc;
+  color: white;
   text-decoration: none;
+  padding: 10px;
+  border-radius: 10px;
   font-weight: bold;
-  border: 1px solid #bae6fd;
+  font-size: 0.9em;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 136, 204, 0.2);
 }
 
-.bot-status-tag:hover {
-  background-color: #bae6fd;
-  transform: scale(1.02);
+.bot-connect-btn:hover {
+  background-color: #0077b5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 136, 204, 0.3);
+}
+
+.bot-connect-btn:active {
+  transform: translateY(0);
 }
 
 .logout-small-btn {
