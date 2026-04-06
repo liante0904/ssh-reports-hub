@@ -19,6 +19,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
   const [newKeyword, setNewKeyword] = useState('');
   const [isLoadingKeywords, setIsLoadingKeywords] = useState(false);
   const [isKeywordOverlayOpen, setIsKeywordOverlayOpen] = useState(false);
+  const [lastDeleted, setLastDeleted] = useState(null); // { type: 'single'|'bulk', data: [...] }
 
   // API 호출 공통 설정
   const getApiConfig = () => {
@@ -97,13 +98,35 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     syncKeywords(nextKeywords);
   };
 
-  // 키워드 삭제 핸들러
+  // 키워드 삭제 핸들러 (삭제 취소 기능 포함)
   const handleDeleteKeyword = (keywordToDelete) => {
     const nextKeywords = keywords
       .filter(k => k.keyword !== keywordToDelete)
       .map(k => k.keyword);
     
+    setLastDeleted({ type: 'single', data: [keywordToDelete] });
     syncKeywords(nextKeywords);
+  };
+
+  // 전체 삭제 핸들러
+  const handleDeleteAllKeywords = () => {
+    if (keywords.length === 0) return;
+    if (!window.confirm('정말로 모든 키워드를 삭제하시겠습니까?')) return;
+
+    const currentKeywords = keywords.map(k => k.keyword);
+    setLastDeleted({ type: 'bulk', data: currentKeywords });
+    syncKeywords([]);
+  };
+
+  // 삭제 취소(Undo) 핸들러
+  const handleUndoDelete = () => {
+    if (!lastDeleted) return;
+
+    const currentKeywordList = keywords.map(k => k.keyword);
+    const restoredKeywords = [...new Set([...currentKeywordList, ...lastDeleted.data])];
+    
+    syncKeywords(restoredKeywords);
+    setLastDeleted(null);
   };
 
   const handleLogout = () => {
@@ -222,6 +245,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
 
   const toggleKeywordOverlay = () => {
     setIsKeywordOverlayOpen(!isKeywordOverlayOpen);
+    setLastDeleted(null);
   };
 
   // 알림 설정 오버레이 (Portal)
@@ -243,7 +267,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
         <div className="grid-search-wrapper keyword-input-wrapper">
           <input 
             type="text" 
-            placeholder="키워드 입력 (예: 삼성전자, 반도체)" 
+            placeholder="키워드 입력" 
             value={newKeyword}
             onChange={(e) => setNewKeyword(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleAddKeyword()}
@@ -256,6 +280,9 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
         <div className="keyword-management-container">
           <div className="keyword-status-info">
             <span className="count-badge">등록된 키워드: {keywords.length}개</span>
+            {keywords.length > 0 && (
+              <button className="delete-all-btn" onClick={handleDeleteAllKeywords}>전체 삭제</button>
+            )}
           </div>
           
           <div className="keyword-large-list">
@@ -286,6 +313,17 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
           </div>
         </div>
       </div>
+
+      {lastDeleted && (
+        <div className="undo-bar-container">
+          <div className="undo-bar">
+            <span className="undo-msg">
+              {lastDeleted.type === 'bulk' ? '전체 삭제되었습니다' : `'${lastDeleted.data[0]}' 키워드가 삭제되었습니다`}
+            </span>
+            <button className="undo-btn" onClick={handleUndoDelete}>삭제 취소</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -324,10 +362,6 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
                     <button className="logout-small-btn" onClick={handleLogout}>로그아웃</button>
                   </div>
 
-                  <button className="open-keyword-overlay-btn" onClick={toggleKeywordOverlay}>
-                    <span className="icon">⚙️</span> 키워드 알림 설정하기
-                  </button>
-
                   <div className="bot-connect-banner">
                     <a 
                       href={`https://t.me/${import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot'}?start=${telegramUser.id}`} 
@@ -338,6 +372,10 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
                       <span className="icon">🚀</span> 텔레그램 봇 연결하기 (필수)
                     </a>
                   </div>
+
+                  <button className="open-keyword-overlay-btn" onClick={toggleKeywordOverlay}>
+                    <span className="icon">⚙️</span> 키워드 알림 설정하기
+                  </button>
                 </div>
               )}
             </div>

@@ -314,23 +314,127 @@
   font-weight: 600;
 }
 
+.keyword-status-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.delete-all-btn {
+  background: none;
+  border: 1px solid #ff3b30;
+  color: #ff3b30;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.85em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-all-btn:hover {
+  background-color: #ff3b30;
+  color: white;
+}
+
+/* 삭제 취소 바 스타일 */
+.undo-bar-container {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0 20px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.undo-bar {
+  background-color: #323232;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 500px;
+  pointer-events: auto;
+  animation: slideUp 0.3s ease;
+}
+
+.undo-msg {
+  font-size: 0.95em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.undo-btn {
+  background: none;
+  border: none;
+  color: #007aff;
+  font-weight: bold;
+  font-size: 0.95em;
+  cursor: pointer;
+  padding: 0;
+  white-space: nowrap;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* 모바일/태블릿 여백 최적화 */
+.keyword-setup-overlay {
+  padding: 0 !important;
+}
+
+.keyword-setup-overlay .grid-overlay-header {
+  padding: 20px 20px 15px 20px;
+}
+
+.keyword-setup-overlay .grid-overlay-content {
+  padding: 0 20px 80px 20px; /* 취소 바 공간 확보 */
+}
+
+@media (max-width: 480px) {
+  .keyword-input-wrapper {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  
+  .keyword-add-btn {
+    padding: 0 15px;
+  }
+
+  .keyword-setup-overlay .grid-header-top h3 {
+    font-size: 1.2em;
+  }
+}
+
 .keyword-grid {
   display: grid;
-  grid-template-columns: 1fr; /* 기본 모바일: 1줄에 1개 */
+  grid-template-columns: 1fr;
   gap: 12px;
 }
 
 /* 태블릿 (768px 이상) */
 @media (min-width: 768px) {
   .keyword-grid {
-    grid-template-columns: repeat(2, 1fr); /* 1줄에 2개 */
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 /* PC (1024px 이상) */
 @media (min-width: 1024px) {
   .keyword-grid {
-    grid-template-columns: repeat(3, 1fr); /* 1줄에 3개 */
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
