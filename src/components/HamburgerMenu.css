@@ -154,7 +154,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+}
+
+.telegram-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
 }
 
 .telegram-desc {
@@ -163,6 +170,7 @@
   margin: 0;
   text-align: center;
   font-weight: 500;
+  margin-bottom: 4px;
 }
 
 .telegram-login-container {
@@ -177,14 +185,12 @@
   gap: 12px;
 }
 
-.telegram-custom-login-btn {
-  background-color: #54a9eb;
-  color: white;
+.telegram-custom-login-btn, .telegram-app-login-btn {
   border: none;
-  padding: 12px 20px;
+  padding: 12px 15px;
   border-radius: 12px;
   font-weight: bold;
-  font-size: 1em;
+  font-size: 0.95em;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -196,9 +202,203 @@
   box-sizing: border-box;
 }
 
+.telegram-custom-login-btn {
+  background-color: #0088cc;
+  color: white;
+}
+
 .telegram-custom-login-btn:hover {
-  background-color: #4b97d1;
+  background-color: #0077b5;
   transform: translateY(-1px);
+}
+
+.telegram-app-login-btn {
+  background-color: #ffffff;
+  color: #0088cc;
+  border: 1px solid #0088cc;
+}
+
+.telegram-app-login-btn:hover {
+  background-color: #f0f9ff;
+  transform: translateY(-1px);
+}
+
+.open-keyword-overlay-btn {
+  background-color: #f0f0f5;
+  color: #007aff;
+  border: 1px solid #d1d1d6;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 0.95em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.open-keyword-overlay-btn:hover {
+  background-color: #e5e5ea;
+  border-color: #007aff;
+}
+
+.open-keyword-overlay-btn .icon {
+  font-size: 1.1em;
+}
+
+/* 알림 설정 오버레이 전용 스타일 */
+.keyword-setup-overlay .grid-overlay-header {
+  padding-bottom: 20px;
+}
+
+.keyword-overlay-desc {
+  font-size: 0.9em;
+  color: #666;
+  margin: 10px 0 15px 0;
+  line-height: 1.4;
+}
+
+.keyword-input-wrapper {
+  display: flex;
+  gap: 10px;
+  background: none !important;
+  padding: 0 !important;
+}
+
+.keyword-input-wrapper input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid #e5e5ea;
+  border-radius: 12px;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.keyword-input-wrapper input:focus {
+  border-color: #007aff;
+}
+
+.keyword-add-btn {
+  background-color: #007aff;
+  color: white;
+  border: none;
+  padding: 0 20px;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.keyword-add-btn:hover {
+  background-color: #0056b3;
+}
+
+.keyword-management-container {
+  padding: 10px 0;
+}
+
+.keyword-status-info {
+  margin-bottom: 20px;
+}
+
+.count-badge {
+  background-color: #007aff15;
+  color: #007aff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.keyword-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.keyword-large-tag {
+  background-color: #f2f2f7;
+  border-radius: 15px;
+  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.keyword-large-tag:hover {
+  background-color: #e5e5ea;
+}
+
+.keyword-text {
+  font-weight: 600;
+  color: #1c1c1e;
+  font-size: 1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.keyword-delete-btn {
+  background: none;
+  border: none;
+  color: #ff3b30;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.keyword-delete-btn:hover {
+  background-color: #ff3b3015;
+}
+
+.keyword-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #8e8e93;
+}
+
+.empty-icon {
+  font-size: 3em;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.loading-spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  color: #8e8e93;
+}
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #007aff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+  .keyword-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .telegram-icon {

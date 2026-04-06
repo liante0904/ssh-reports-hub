@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import CompanySelect from './CompanySelect'; // CompanySelect 임포트
 import './HamburgerMenu.css';
 
 function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChange, handleHeaderClick }) {
   const [telegramUser, setTelegramUser] = useState(null);
-  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [keywords, setKeywords] = useState([]);
   const [newKeyword, setNewKeyword] = useState('');
   const [isLoadingKeywords, setIsLoadingKeywords] = useState(false);
+  const [isKeywordOverlayOpen, setIsKeywordOverlayOpen] = useState(false);
 
   // API 호출 공통 설정
   const getApiConfig = () => {
@@ -18,18 +19,8 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     return { cleanBaseUrl, token };
   };
 
-  // 1. 텔레그램 위젯 스크립트 동적 로드
-  useEffect(() => {
-    if (isOpen && !isScriptLoaded) {
-      const script = document.createElement('script');
-      script.src = "https://telegram.org/js/telegram-widget.js?22";
-      script.async = true;
-      script.onload = () => {
-        setIsScriptLoaded(true);
-      };
-      document.body.appendChild(script);
-    }
-  }, [isOpen, isScriptLoaded]);
+  // 1. 텔레그램 위젯 스크립트는 이제 index.html에서 로드됨
+  // window.Telegram.Login 사용 가능 여부만 체크
 
   // 2. 초기 키워드 목록 조회 (GET /keywords)
   const fetchKeywords = async () => {
@@ -59,7 +50,6 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
   };
 
   // 3. 키워드 동기화 (POST /keywords/sync)
-  // 화면에 보이는 최종 키워드 배열을 서버로 전송하여 한방에 업데이트합니다.
   const syncKeywords = async (updatedKeywords) => {
     const { cleanBaseUrl, token } = getApiConfig();
     if (!token) return;
@@ -114,6 +104,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     localStorage.removeItem('auth_token');
     setTelegramUser(null);
     setKeywords([]);
+    setIsKeywordOverlayOpen(false);
   };
 
   // 로그인 상태가 되면 키워드 자동 로드
@@ -123,13 +114,13 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     }
   }, [telegramUser]);
 
+  // 텔레그램 위젯 방식 로그인
   const loginWithTelegram = () => {
     if (!window.Telegram || !window.Telegram.Login) {
-      alert('텔레그램 스크립트가 로딩 중입니다.');
+      alert('텔레그램 스크립트가 로딩 중입니다. 잠시 후 다시 시도해주세요.');
       return;
     }
 
-    // 텔레그램 공식 API 호출
     const botId = import.meta.env.VITE_TELEGRAM_BOT_ID || '1372612160';
     if (!botId) return;
 
@@ -163,10 +154,86 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     );
   };
 
+  // 텔레그램 앱 연결 방식 (딥링크)
+  const loginWithTelegramApp = () => {
+    const botName = import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot';
+    // 앱 연결 방식은 보통 봇으로 이동하여 /start를 누르게 유도합니다.
+    // 여기서는 사용자가 직접 앱에서 인증할 수 있도록 안내하는 링크로 동작합니다.
+    window.open(`https://t.me/${botName}`, '_blank');
+  };
+
   const handleSelectChange = (e) => {
     handleCompanyChange(e);
     toggleMenu();
   };
+
+  const toggleKeywordOverlay = () => {
+    setIsKeywordOverlayOpen(!isKeywordOverlayOpen);
+  };
+
+  // 알림 설정 오버레이 (Portal)
+  const keywordOverlay = (
+    <div className="grid-overlay-portal keyword-setup-overlay">
+      <div className="grid-overlay-header">
+        <div className="grid-header-top">
+          <h3>알림 키워드 설정</h3>
+          <button className="grid-close-btn" onClick={toggleKeywordOverlay}>
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+        </div>
+        <div className="keyword-overlay-desc">
+          관심 있는 키워드를 등록하면 텔레그램으로 즉시 알림을 보내드립니다.
+        </div>
+        <div className="grid-search-wrapper keyword-input-wrapper">
+          <input 
+            type="text" 
+            placeholder="키워드 입력 (예: 삼성전자, 반도체)" 
+            value={newKeyword}
+            onChange={(e) => setNewKeyword(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleAddKeyword()}
+          />
+          <button className="keyword-add-btn" onClick={handleAddKeyword}>추가</button>
+        </div>
+      </div>
+
+      <div className="grid-overlay-content">
+        <div className="keyword-management-container">
+          <div className="keyword-status-info">
+            <span className="count-badge">등록된 키워드: {keywords.length}개</span>
+          </div>
+          
+          <div className="keyword-large-list">
+            {isLoadingKeywords ? (
+              <div className="loading-spinner-container">
+                <div className="spinner"></div>
+                <p>로딩 중...</p>
+              </div>
+            ) : keywords.length > 0 ? (
+              <div className="keyword-grid">
+                {keywords.map((k, index) => (
+                  <div key={index} className="keyword-large-tag">
+                    <span className="keyword-text">{k.keyword}</span>
+                    <button className="keyword-delete-btn" onClick={() => handleDeleteKeyword(k.keyword)}>
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="keyword-empty-state">
+                <div className="empty-icon">🔔</div>
+                <p>등록된 키워드가 없습니다.<br/>위에서 키워드를 추가해보세요!</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -182,14 +249,19 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               <CompanySelect value={selectedCompany} onChange={handleSelectChange} />
             </div>
 
-            <div className="menu-title">키워드 알림</div>
+            <div className="menu-title">알림 서비스</div>
             <div className="telegram-section">
               {!telegramUser ? (
                 <div className="telegram-auth-box">
                   <p className="telegram-desc">텔레그램 로그인 후 알림을 받으세요</p>
-                  <button className="telegram-custom-login-btn" onClick={loginWithTelegram} disabled={isAuthenticating}>
-                    <span className="telegram-icon">✈️</span> {isAuthenticating ? '인증 중...' : 'Telegram으로 로그인'}
-                  </button>
+                  <div className="telegram-btn-group">
+                    <button className="telegram-custom-login-btn" onClick={loginWithTelegram} disabled={isAuthenticating}>
+                      <span className="telegram-icon">✈️</span> {isAuthenticating ? '인증 중...' : '브라우저로 로그인'}
+                    </button>
+                    <button className="telegram-app-login-btn" onClick={loginWithTelegramApp}>
+                      <span className="telegram-icon">📲</span> 앱으로 연결
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="telegram-user-card">
@@ -198,48 +270,19 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
                     <button className="logout-small-btn" onClick={handleLogout}>로그아웃</button>
                   </div>
 
+                  <button className="open-keyword-overlay-btn" onClick={toggleKeywordOverlay}>
+                    <span className="icon">⚙️</span> 키워드 알림 설정하기
+                  </button>
+
                   <div className="bot-connect-banner">
-                    <p className="bot-connect-desc">
-                      ⚠️ <b>최초 1회 필수:</b> 아래 버튼을 눌러 텔레그램 봇을 시작해야 알림이 활성화됩니다.
-                    </p>
                     <a 
                       href={`https://t.me/${import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot'}?start=${telegramUser.id}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="bot-connect-btn"
                     >
-                      <span className="icon">🚀</span> 텔레그램 봇 연결하기 (클릭)
+                      <span className="icon">🚀</span> 텔레그램 봇 연결하기 (필수)
                     </a>
-                  </div>
-                  
-                  <div className="keyword-manager">
-                    <div className="keyword-input-group">
-                      <input 
-                        type="text" 
-                        placeholder="키워드 입력 (예: 삼성전자)" 
-                        value={newKeyword}
-                        onChange={(e) => setNewKeyword(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleAddKeyword()}
-                      />
-                      <button onClick={handleAddKeyword}>추가</button>
-                    </div>
-
-                    <div className="keyword-list-container">
-                      {isLoadingKeywords ? (
-                        <p className="loading-text">로딩 중...</p>
-                      ) : keywords.length > 0 ? (
-                        <div className="keyword-tags">
-                          {keywords.map((k, index) => (
-                            <span key={index} className="keyword-tag">
-                              {k.keyword}
-                              <button onClick={() => handleDeleteKeyword(k.keyword)}>×</button>
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="empty-text">등록된 키워드가 없습니다.</p>
-                      )}
-                    </div>
                   </div>
                 </div>
               )}
@@ -256,6 +299,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
           </div>
         </div>
       )}
+      {isKeywordOverlayOpen && createPortal(keywordOverlay, document.body)}
     </>
   );
 }
