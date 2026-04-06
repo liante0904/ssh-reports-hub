@@ -45,13 +45,26 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
           setIsAuthenticating(true);
 
           try {
-            // FastAPI 서버 주소 (환경변수 권장)
-            const API_BASE_URL = import.meta.env.VITE_API_URL || `https://${import.meta.env.VITE_VPN_ADDR}/api`;
+            // 1. 유저가 제공한 환경변수 우선 사용, 없으면 VPN 주소 사용
+            let baseUrl = import.meta.env.VITE_API_URL;
             
-            const response = await fetch(`${API_BASE_URL}/auth/telegram`, {
+            // 만약 baseUrl이 없으면 VPN 주소를 기반으로 생성
+            if (!baseUrl) {
+              baseUrl = `https://${import.meta.env.VITE_VPN_ADDR}`;
+            }
+
+            // 끝에 슬래시 제거 (일관성을 위해)
+            const cleanBaseUrl = baseUrl.replace(/\/$/, '');
+            
+            // 명세에 따른 최종 URL: https://ssh-oci.duckdns.org/auth/telegram
+            const finalUrl = `${cleanBaseUrl}/auth/telegram`;
+            
+            console.log('📡 서버로 요청 전송:', finalUrl);
+            
+            const response = await fetch(finalUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(user), // id, first_name, last_name, username, photo_url, auth_date, hash 포함
+              body: JSON.stringify(user),
             });
 
             if (!response.ok) {
