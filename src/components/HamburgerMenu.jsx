@@ -369,7 +369,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
                       rel="noopener noreferrer"
                       className="bot-connect-btn"
                     >
-                      <span className="icon">🚀</span> 텔레그램 봇 연결하기 (필수)
+                      <span className="icon">🚀</span> 텔레그램 봇 연결하기 (최초 1회 필수)
                     </a>
                   </div>
 
