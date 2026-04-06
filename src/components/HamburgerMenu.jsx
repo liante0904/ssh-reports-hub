@@ -196,7 +196,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
                     <div className="user-name-group">
                       <span className="user-name">🔔 {telegramUser.first_name}님</span>
                       <a 
-                        href={`https://t.me/ssh_stock_info_noti_bot?start=${telegramUser.id}`} 
+                        href={`https://t.me/${import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ssh_stock_info_noti_bot'}?start=${telegramUser.id}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="bot-status-tag"
