@@ -129,7 +129,8 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
       return;
     }
 
-    const botId = import.meta.env.VITE_TELEGRAM_BOT_ID;
+    // 텔레그램 공식 API 호출
+    const botId = import.meta.env.VITE_TELEGRAM_BOT_ID || '1372612160';
     if (!botId) return;
 
     window.Telegram.Login.auth(
