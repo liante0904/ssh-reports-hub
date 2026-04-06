@@ -45,18 +45,13 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
           setIsAuthenticating(true);
 
           try {
-            // 1. 유저가 제공한 환경변수 우선 사용, 없으면 VPN 주소 사용
-            let baseUrl = import.meta.env.VITE_API_URL;
-            
-            // 만약 baseUrl이 없으면 VPN 주소를 기반으로 생성
-            if (!baseUrl) {
-              baseUrl = `https://${import.meta.env.VITE_VPN_ADDR}`;
-            }
+            // 1. 환경변수 확인 -> 없으면 DuckDNS(기본) -> 없으면 VPN(최후수단)
+            const baseUrl = import.meta.env.VITE_API_URL || 
+                            'https://ssh-oci.duckdns.org' || 
+                            `https://${import.meta.env.VITE_VPN_ADDR}`;
 
-            // 끝에 슬래시 제거 (일관성을 위해)
+            // 끝에 슬래시 제거 및 경로 결합
             const cleanBaseUrl = baseUrl.replace(/\/$/, '');
-            
-            // 명세에 따른 최종 URL: https://ssh-oci.duckdns.org/auth/telegram
             const finalUrl = `${cleanBaseUrl}/auth/telegram`;
             
             console.log('📡 서버로 요청 전송:', finalUrl);
