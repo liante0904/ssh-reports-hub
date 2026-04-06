@@ -164,54 +164,39 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     );
   };
 
-  // 텔레그램 앱 연결 방식 (딥링크 + 폴링 로그인)
-  const loginWithTelegramApp = async () => {
-    if (isPolling) return; // 이미 진행 중이면 중복 실행 방지
+  // 텔레그램 앱 연결 방식 (단순 딥링크 - 백엔드 준비 전까지는 단순 연결용)
+  const loginWithTelegramApp = () => {
+    const botName = import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot';
+    // 로그인 전이라면 일반 연결, 로그인 후라면 start 파라미터 포함
+    const startParam = telegramUser ? `?start=${telegramUser.id}` : '';
+    window.open(`https://t.me/${botName}${startParam}`, '_blank');
+  };
 
+  /* 백엔드 API 준비 후 사용할 폴링 로직 (주석 처리)
+  const loginWithTelegramAppReal = async () => {
+    if (isPolling) return;
     const botName = import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot';
     const { cleanBaseUrl } = getApiConfig();
-
     try {
       setIsAuthenticating(true);
-      // 1. 서버에 임시 인증 코드 요청
-      const response = await fetch(`${cleanBaseUrl}/auth/telegram/request`, {
-        method: 'POST'
-      });
-      
+      const response = await fetch(`${cleanBaseUrl}/auth/telegram/request`, { method: 'POST' });
       if (!response.ok) throw new Error('인증 요청 실패');
-      
       const { temp_code } = await response.json();
-      
-      // 2. 텔레그램 앱 실행 (start 파라미터에 temp_code 포함)
       window.open(`https://t.me/${botName}?start=${temp_code}`, '_blank');
-      
-      // 3. 폴링 시작
       startPolling(temp_code);
     } catch (error) {
       console.error('앱 로그인 요청 실패:', error);
-      alert('앱 연결 요청 중 오류가 발생했습니다.');
       setIsAuthenticating(false);
     }
   };
 
-  // 서버 상태 주기적 확인 (Polling)
   const startPolling = (temp_code) => {
     setIsPolling(true);
     const { cleanBaseUrl } = getApiConfig();
-    
     let pollCount = 0;
-    const maxPolls = 60; // 최대 2분 (2초 * 60회)
-    
     const interval = setInterval(async () => {
       pollCount++;
-      if (pollCount > maxPolls) {
-        clearInterval(interval);
-        setIsPolling(false);
-        setIsAuthenticating(false);
-        alert('인증 시간이 초과되었습니다. 다시 시도해 주세요.');
-        return;
-      }
-
+      if (pollCount > 60) { clearInterval(interval); setIsPolling(false); setIsAuthenticating(false); return; }
       try {
         const response = await fetch(`${cleanBaseUrl}/auth/telegram/check/${temp_code}`);
         if (response.ok) {
@@ -220,21 +205,15 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
             clearInterval(interval);
             setIsPolling(false);
             setIsAuthenticating(false);
-            
-            // 로그인 성공 처리
-            if (result.access_token) {
-              localStorage.setItem('auth_token', result.access_token);
-            }
-            const userData = result.user;
-            setTelegramUser(userData);
-            localStorage.setItem('telegram_user', JSON.stringify(userData));
+            if (result.access_token) localStorage.setItem('auth_token', result.access_token);
+            setTelegramUser(result.user);
+            localStorage.setItem('telegram_user', JSON.stringify(result.user));
           }
         }
-      } catch (error) {
-        console.error('폴링 에러:', error);
-      }
-    }, 2000); // 2초 간격
+      } catch (e) {}
+    }, 2000);
   };
+  */
 
   const handleSelectChange = (e) => {
     handleCompanyChange(e);
@@ -327,28 +306,15 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
             <div className="telegram-section">
               {!telegramUser ? (
                 <div className="telegram-auth-box">
-                  {isPolling ? (
-                    <div className="polling-waiting-box">
-                      <div className="spinner"></div>
-                      <p className="polling-desc">
-                        텔레그램 앱에서 <b>[시작]</b> 버튼을 눌러주세요.<br/>
-                        인증 완료 시 자동으로 로그인됩니다.
-                      </p>
-                      <button className="cancel-polling-btn" onClick={() => { setIsPolling(false); setIsAuthenticating(false); }}>취소</button>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="telegram-desc">텔레그램 로그인 후 알림을 받으세요</p>
-                      <div className="telegram-btn-group">
-                        <button className="telegram-custom-login-btn" onClick={loginWithTelegram} disabled={isAuthenticating}>
-                          <span className="telegram-icon">✈️</span> {isAuthenticating ? '인증 중...' : '브라우저로 로그인'}
-                        </button>
-                        <button className="telegram-app-login-btn" onClick={loginWithTelegramApp} disabled={isAuthenticating}>
-                          <span className="telegram-icon">📲</span> {isAuthenticating ? '준비 중...' : '앱으로 로그인'}
-                        </button>
-                      </div>
-                    </>
-                  )}
+                  <p className="telegram-desc">텔레그램 로그인 후 알림을 받으세요</p>
+                  <div className="telegram-btn-group">
+                    <button className="telegram-custom-login-btn" onClick={loginWithTelegram} disabled={isAuthenticating}>
+                      <span className="telegram-icon">✈️</span> {isAuthenticating ? '인증 중...' : '브라우저로 로그인'}
+                    </button>
+                    <button className="telegram-app-login-btn" onClick={loginWithTelegramApp}>
+                      <span className="telegram-icon">📲</span> 앱으로 연결
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="telegram-user-card">
