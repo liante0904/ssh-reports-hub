@@ -175,27 +175,18 @@ const Header = forwardRef(({
             산업
           </button>
           <button
+            className={`nav-button ${isSearchActive ? 'active' : ''}`}
+            onClick={() => handleButtonClick('search')}
+          >
+            검색
+          </button>
+          <button
             className={`nav-button ${isFavorites && !isSearchActive ? 'active' : ''}`}
             onClick={() => handleButtonClick('favorites')}
           >
             ★
           </button>
           {!isMobile && (
-            <div className="company-select-wrapper">
-              <CompanySelect
-                value={query}
-                onChange={handleCompanyChange}
-                className="nav-button company-select"
-              />
-            </div>
-          )}
-          <button
-            className={`nav-button ${isSearchActive ? 'active' : ''}`}
-            onClick={() => handleButtonClick('search')}
-          >
-            검색
-          </button>
-        </div>
       </header>
 
       <HamburgerMenu
