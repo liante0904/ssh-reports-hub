@@ -213,6 +213,30 @@
   margin-bottom: 2px;
   color: var(--text-color);
 }
+.favorite-button {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, transform 0.2s;
+  flex-shrink: 0;
+  margin-right: -4px;
+}
+.favorite-button:hover {
+  background-color: rgba(255, 215, 0, 0.1);
+  transform: scale(1.1);
+}
+.favorite-button.active {
+  color: #FFD700;
+}
+.favorite-button svg {
+  display: block;
+}
 .share-button {
   background: none;
   border: none;

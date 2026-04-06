@@ -341,11 +341,11 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               <CompanySelect value={selectedCompany} onChange={handleSelectChange} />
             </div>
 
-            <div className="menu-title">알림 서비스</div>
+            <div className="menu-title">알림 & 즐겨찾기</div>
             <div className="telegram-section">
               {!telegramUser ? (
                 <div className="telegram-auth-box">
-                  <p className="telegram-desc">텔레그램 로그인 후 알림을 받으세요</p>
+                  <p className="telegram-desc">텔레그램 로그인</p>
                   <div className="telegram-btn-group">
                     <button className="telegram-custom-login-btn" onClick={loginWithTelegram} disabled={isAuthenticating}>
                       <span className="telegram-icon">✈️</span> {isAuthenticating ? '인증 중...' : '브라우저로 로그인'}

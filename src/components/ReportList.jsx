@@ -15,6 +15,14 @@ function ReportList({ searchQuery }) {
   const [dateToggles, setDateToggles] = useState({});
   const [firmToggles, setFirmToggles] = useState({});
   const [summaryToggles, setSummaryToggles] = useState({});
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem('report_favorites');
+    try {
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
   
   const abortControllerRef = useRef(null);
   const isLoadingRef = useRef(false);
@@ -203,6 +211,14 @@ function ReportList({ searchQuery }) {
     setSummaryToggles(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const toggleFavorite = (id) => {
+    setFavorites(prev => {
+      const next = { ...prev, [id]: !prev[id] };
+      localStorage.setItem('report_favorites', JSON.stringify(next));
+      return next;
+    });
+  };
+
   const sortedDates = Object.keys(reports).sort((a, b) => b.localeCompare(a));
 
   const isSearchActive = !!(searchQuery.query || searchQuery.category === 'company');
@@ -241,10 +257,23 @@ function ReportList({ searchQuery }) {
                           
                           const hasSummary = gemini_summary && gemini_summary.trim() !== "" && gemini_summary.trim() !== " ";
                           const isSummaryExpanded = summaryToggles[id];
+                          const isFavorite = !!favorites[id];
 
                           return (
                             <div className={`report-container-item ${hasSummary ? 'has-summary' : ''}`} key={id}>
                               <div className="report">
+                                <button 
+                                  className={`favorite-button ${isFavorite ? 'active' : ''}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleFavorite(id);
+                                  }}
+                                  title={isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+                                >
+                                  <svg viewBox="0 0 24 24" width="20" height="20" fill={isFavorite ? '#FFD700' : 'none'} stroke={isFavorite ? '#FFD700' : 'currentColor'} strokeWidth="2">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/>
+                                  </svg>
+                                </button>
                                 <div className="report-content">
                                   <div className="report-header">
                                     <a href={finalLink} target="_blank" rel="noopener noreferrer">
