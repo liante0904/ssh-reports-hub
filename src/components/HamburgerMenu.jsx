@@ -203,7 +203,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
                       ⚠️ <b>최초 1회 필수:</b> 아래 버튼을 눌러 텔레그램 봇을 시작해야 알림이 활성화됩니다.
                     </p>
                     <a 
-                      href={`https://t.me/${import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ssh_stock_info_noti_bot'}?start=${telegramUser.id}`} 
+                      href={`https://t.me/${import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot'}?start=${telegramUser.id}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="bot-connect-btn"
