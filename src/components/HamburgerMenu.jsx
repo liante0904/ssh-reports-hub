@@ -4,7 +4,15 @@ import CompanySelect from './CompanySelect'; // CompanySelect 임포트
 import './HamburgerMenu.css';
 
 function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChange, handleHeaderClick }) {
-  const [telegramUser, setTelegramUser] = useState(null);
+  // 초기 상태를 localStorage에서 불러오도록 수정
+  const [telegramUser, setTelegramUser] = useState(() => {
+    const saved = localStorage.getItem('telegram_user');
+    try {
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [keywords, setKeywords] = useState([]);
   const [newKeyword, setNewKeyword] = useState('');
@@ -102,6 +110,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('telegram_user');
     setTelegramUser(null);
     setKeywords([]);
     setIsKeywordOverlayOpen(false);
@@ -142,7 +151,9 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               if (result.access_token) {
                 localStorage.setItem('auth_token', result.access_token);
               }
-              setTelegramUser({ ...user, ...result.user });
+              const userData = { ...user, ...result.user };
+              setTelegramUser(userData);
+              localStorage.setItem('telegram_user', JSON.stringify(userData));
             }
           } catch (error) {
             console.error('로그인 에러:', error);
@@ -157,9 +168,9 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
   // 텔레그램 앱 연결 방식 (딥링크)
   const loginWithTelegramApp = () => {
     const botName = import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot';
-    // 앱 연결 방식은 보통 봇으로 이동하여 /start를 누르게 유도합니다.
-    // 여기서는 사용자가 직접 앱에서 인증할 수 있도록 안내하는 링크로 동작합니다.
-    window.open(`https://t.me/${botName}`, '_blank');
+    // 로그인 전이라면 일반 연결, 로그인 후라면 start 파라미터 포함
+    const startParam = telegramUser ? `?start=${telegramUser.id}` : '';
+    window.open(`https://t.me/${botName}${startParam}`, '_blank');
   };
 
   const handleSelectChange = (e) => {
@@ -266,7 +277,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               ) : (
                 <div className="telegram-user-card">
                   <div className="user-info-header">
-                    <span className="user-name">🔔 {telegramUser.first_name}님</span>
+                    <span className="user-name">🔔 {telegramUser.first_name}님 <small style={{fontSize: '0.8em', color: '#8e8e93', fontWeight: 'normal'}}>(ID:{telegramUser.id})</small></span>
                     <button className="logout-small-btn" onClick={handleLogout}>로그아웃</button>
                   </div>
 
