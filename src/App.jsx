@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'; // useLocation 임포트
 import Header from './components/Header';
 import SearchOverlay from './components/SearchOverlay';
 import ReportList from './components/ReportList';
@@ -21,6 +21,8 @@ function AppContent() {
     theme,
     toggleTheme
   } = useReport();
+
+  const location = useLocation(); // useLocation 훅 사용
 
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isFloatingNavVisible, setIsFloatingNavVisible] = useState(true);
@@ -94,10 +96,11 @@ function AppContent() {
       
       <main className="main-content">
         <Routes>
-          <Route path="/" element={<ReportList />} />
-          <Route path="/global" element={<ReportList />} />
-          <Route path="/industry" element={<ReportList />} />
-          <Route path="/favorites" element={<ReportList />} />
+          {/* ReportList에 key prop을 추가하여 탭 전환 시 컴포넌트 재생성 보장 */}
+          <Route path="/" element={<ReportList key={location.pathname === '/' ? 'recent' : location.pathname} />} />
+          <Route path="/global" element={<ReportList key="global" />} />
+          <Route path="/industry" element={<ReportList key="industry" />} />
+          <Route path="/favorites" element={<ReportList key="favorites" />} />
         </Routes>
       </main>
       <SearchOverlay />

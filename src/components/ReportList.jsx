@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import ShareMenu from './ShareMenu';
-import { ReportItem } from './report/ReportItem';
+import ReportItem from './report/ReportItem';
 import { useReportFetch } from '../hooks/useReportFetch';
 import { useReport } from '../context/ReportContext';
 import './ReportList.css';
@@ -35,22 +35,25 @@ function ReportList() {
   const [selectedReport, setSelectedReport] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
+  // Reset state when component mounts (due to key prop in App.jsx)
+  // This effect will run ONCE when the component is mounted due to the key prop.
   useEffect(() => {
     window.scrollTo(0, 0);
     setDateToggles({});
     setFirmToggles({});
     setSummaryToggles({});
-  }, [searchQuery, location.pathname]);
+    // Initial fetch is handled by useReportFetch hook's mount effect
+  }, [location.pathname, searchQuery]); // Depend on pathname and searchQuery for state reset
 
   useEffect(() => {
     const reportDates = Object.keys(reports);
-    if (reportDates.length === 0) return;
+    if (reportDates.length === 0 && !isLoading) return; // Don't trigger if reports are empty and not loading
 
     const allCollapsed = reportDates.every(date => dateToggles[date] === true);
 
     if (allCollapsed) {
       if (hasMore && !isLoading) {
-        fetchReports();
+        fetchReports(); // Load more data if all collapsed and hasMore
       }
     }
   }, [dateToggles, reports, hasMore, isLoading, fetchReports]);
@@ -102,7 +105,6 @@ function ReportList() {
   const isSearchActive = !!(searchQuery.query || searchQuery.category === 'company');
   const isFavoritesPage = location.pathname.includes('favorites');
 
-  // 즐겨찾기 페이지인 경우 데이터 필터링
   const filteredSortedDates = isFavoritesPage 
     ? sortedDates.filter(date => {
         const firms = reports[date];
@@ -115,7 +117,7 @@ function ReportList() {
   return (
     <div className="report-list-wrapper">
       <div className="container" id="report-container">
-        {offset === 0 && isLoading && !isFavoritesPage ? (
+        {offset === 0 && isLoading ? (
           <div className={`loading-overlay ${isSearchActive ? 'search-loading' : ''}`}>로딩 중...</div>
         ) : isFavoritesPage && filteredSortedDates.length === 0 && !isLoading ? (
           <div className="empty-favorites">
@@ -123,57 +125,61 @@ function ReportList() {
             <p>즐겨찾기한 레포트가 없습니다.<br/>관심 있는 레포트에 별표를 눌러보세요!</p>
           </div>
         ) : filteredSortedDates.length === 0 && !isLoading ? null : (
-          <InfiniteScroll
-            dataLength={offset}
-            next={fetchReports}
-            hasMore={isFavoritesPage ? false : hasMore}
-            scrollThreshold={0.6}
-            loader={isLoading && <div className="bottom-loading">더 불러오는 중...</div>}
-          >
-            {filteredSortedDates.map((date) => {
-              const firmsAtDate = reports[date];
-              const filteredFirms = Object.entries(firmsAtDate).reduce((acc, [firm, firmReports]) => {
-                const favReports = isFavoritesPage 
-                  ? firmReports.filter(r => !!favorites[r.id])
-                  : firmReports;
-                
-                if (favReports.length > 0) acc[firm] = favReports;
-                return acc;
-              }, {});
+          <>
+            <InfiniteScroll
+              dataLength={offset}
+              next={fetchReports} // This calls fetchReports for "load more"
+              hasMore={isFavoritesPage ? false : hasMore} // Favorites page doesn't load more
+              scrollThreshold={0.6}
+            >
+              {filteredSortedDates.map((date) => {
+                const firmsAtDate = reports[date];
+                const filteredFirms = Object.entries(firmsAtDate).reduce((acc, [firm, firmReports]) => {
+                  const favReports = isFavoritesPage 
+                    ? firmReports.filter(r => !!favorites[r.id])
+                    : firmReports;
+                  
+                  if (favReports.length > 0) acc[firm] = favReports;
+                  return acc;
+                }, {});
 
-              if (Object.keys(filteredFirms).length === 0) return null;
+                if (Object.keys(filteredFirms).length === 0) return null;
 
-              return (
-                <div className="date-group" key={date}>
-                  <div className={`date-title ${!dateToggles[date] ? 'expanded' : ''}`} onClick={() => toggleDate(date)}>
-                    {date}
-                  </div>
-                  <div className={`company-group-wrapper ${dateToggles[date] ? 'collapsed' : ''}`}>
-                    {Object.entries(filteredFirms).map(([firm, firmReports]) => (
-                      <div className="company-group" key={firm}>
-                        <div className={`company-title ${!firmToggles[date]?.[firm] ? 'expanded' : ''}`} onClick={() => toggleFirm(date, firm)}>
-                          {firm}
+                return (
+                  <div className="date-group" key={date}>
+                    <div className={`date-title ${!dateToggles[date] ? 'expanded' : ''}`} onClick={() => toggleDate(date)}>
+                      {date}
+                    </div>
+                    <div className={`company-group-wrapper ${dateToggles[date] ? 'collapsed' : ''}`}>
+                      {Object.entries(filteredFirms).map(([firm, firmReports]) => (
+                        <div className="company-group" key={firm}>
+                          <div className={`company-title ${!firmToggles[date]?.[firm] ? 'expanded' : ''}`} onClick={() => toggleFirm(date, firm)}>
+                            {firm}
+                          </div>
+                          <div className={`report-wrapper ${firmToggles[date]?.[firm] ? 'collapsed' : ''}`}>
+                            {firmReports.map((report) => (
+                              <ReportItem 
+                                key={report.id}
+                                report={report}
+                                isFavorite={!!favorites[report.id]}
+                                isSummaryExpanded={summaryToggles[report.id]}
+                                onToggleFavorite={toggleFavorite}
+                                onToggleSummary={toggleSummary}
+                                onOpenShareMenu={handleOpenShareMenu}
+                              />
+                            ))}
+                          </div>
                         </div>
-                        <div className={`report-wrapper ${firmToggles[date]?.[firm] ? 'collapsed' : ''}`}>
-                          {firmReports.map((report) => (
-                            <ReportItem 
-                              key={report.id}
-                              report={report}
-                              isFavorite={!!favorites[report.id]}
-                              isSummaryExpanded={summaryToggles[report.id]}
-                              onToggleFavorite={toggleFavorite}
-                              onToggleSummary={toggleSummary}
-                              onOpenShareMenu={handleOpenShareMenu}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </InfiniteScroll>
+                );
+              })}
+            </InfiniteScroll>
+            {isLoading && hasMore && (
+              <div className="loading-overlay">로딩 중...</div>
+            )}
+          </>
         )}
       </div>
 
