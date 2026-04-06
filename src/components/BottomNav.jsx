@@ -1,6 +1,9 @@
+import { useReport } from '../context/ReportContext';
 import './BottomNav.css';
 
-function BottomNav({ isNavVisible, toggleSearch, toggleFloatingNav }) {
+function BottomNav({ isNavVisible, toggleFloatingNav }) {
+  const { toggleSearch } = useReport();
+  
   return (
     <nav className={`bottom-nav ${isNavVisible ? '' : 'hidden'}`}>
       <button className="nav-button" onClick={() => (window.location.href = '/')}>

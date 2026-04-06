@@ -2,23 +2,25 @@ import React, { useState, useEffect, forwardRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import HamburgerMenu from './HamburgerMenu';
 import CompanySelect from './CompanySelect';
+import { useReport } from '../context/ReportContext';
 import './Header.css';
 
-const Header = forwardRef(({
-  toggleSearch,
-  toggleMenuTop,
-  isTopMenuOpen,
-  toggleFloatingMenu,
-  isFloatingMenuOpen,
-  onSearch,
-  isNavVisible
-}, ref) => {
+const Header = forwardRef(({ isNavVisible }, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1023);
+
+  const { 
+    toggleSearch, 
+    isTopMenuOpen, 
+    toggleMenuTop, 
+    isMenuOpen, 
+    toggleMenu, 
+    handleSearch 
+  } = useReport();
 
   useEffect(() => {
     const handleResize = () => {
@@ -46,12 +48,10 @@ const Header = forwardRef(({
   ];
 
   const handleButtonClick = (buttonName) => {
-    // 1. 공통 메뉴/검색 상태 초기화
     if (isTopMenuOpen) toggleMenuTop();
-    if (isFloatingMenuOpen) toggleFloatingMenu();
+    if (isMenuOpen) toggleMenu();
     
-    // 2. 검색 상태 초기화
-    onSearch({ query: '', category: '' });
+    handleSearch({ query: '', category: '' });
     setIsSearchActive(buttonName === 'search');
     
     if (buttonName !== 'search') {
@@ -59,7 +59,6 @@ const Header = forwardRef(({
       setSearchParams({}, { replace: true });
     }
 
-    // 3. 경로 매핑 처리
     const PATH_MAP = {
       recent: '/',
       global: '/global',
@@ -73,7 +72,6 @@ const Header = forwardRef(({
       navigate({ pathname: targetPath });
     }
 
-    // 4. 검색 버튼 전용 로직
     if (buttonName === 'search') {
       setQuery('');
       toggleSearch();
@@ -81,25 +79,18 @@ const Header = forwardRef(({
   };
 
   const handleCompanyChange = (e) => {
-    const selectedValue = e.target.value; // <option>의 value (인덱스)
+    const selectedValue = e.target.value;
     const company = selectedValue ? firm_names[selectedValue] : '';
-    console.log('Header: 선택된 회사:', { selectedValue, company });
 
     setQuery(selectedValue);
     setIsSearchActive(true);
 
     if (selectedValue) {
       setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
-      if (typeof onSearch === 'function') {
-        onSearch({ query: selectedValue, category: 'company' });
-      } else {
-        console.warn('onSearch is not a function');
-      }
+      handleSearch({ query: selectedValue, category: 'company' });
     } else {
       setSearchParams({}, { replace: true });
-      if (typeof onSearch === 'function') {
-        onSearch({ query: '', category: 'company' });
-      }
+      handleSearch({ query: '', category: 'company' });
     }
 
     navigate({ pathname: '/' });
@@ -116,27 +107,21 @@ const Header = forwardRef(({
     }
   }, [searchParams]);
 
+  const handleTitleClick = () => {
+    if (isTopMenuOpen) toggleMenuTop();
+    if (isMenuOpen) toggleMenu();
+    setIsSearchActive(false);
+    handleSearch({ query: '', category: '' });
+    setQuery('');
+    setSearchParams({}, { replace: true });
+    navigate({ pathname: '/' });
+  };
+
   return (
     <>
       <header ref={ref} className={!isNavVisible && isMobile ? 'nav-hidden' : ''}>
         <div className="header-top">
-          <div
-            className="title"
-            onClick={() => {
-              if (isTopMenuOpen) {
-                toggleMenuTop();
-              }
-              if (isFloatingMenuOpen) {
-                toggleFloatingMenu();
-              }
-              // 검색 상태 및 쿼리 초기화
-              setIsSearchActive(false);
-              onSearch({ query: '', category: '' });
-              setQuery('');
-              setSearchParams({}, { replace: true });
-              navigate({ pathname: '/' });
-            }}
-          >
+          <div className="title" onClick={handleTitleClick}>
             🏠 증권사 레포트 리스트
           </div>
           {isMobile && (
