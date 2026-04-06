@@ -237,7 +237,8 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
           </button>
         </div>
         <div className="keyword-overlay-desc">
-          관심 있는 키워드를 등록하면 텔레그램으로 즉시 알림을 보내드립니다.
+          관심 있는 <b>종목명(예: 삼성전자)</b>이나 <b>애널리스트 이름</b>을 등록해 보세요.<br/>
+          레포트 제목이나 작성자 정보에 해당 키워드가 포함되면 즉시 알려드립니다.
         </div>
         <div className="grid-search-wrapper keyword-input-wrapper">
           <input 
