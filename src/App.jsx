@@ -123,6 +123,7 @@ function App() {
           <Route path="/" element={<ReportList searchQuery={searchQuery} />} />
           <Route path="/global" element={<ReportList searchQuery={searchQuery} />} />
           <Route path="/industry" element={<ReportList searchQuery={searchQuery} />} />
+          <Route path="/favorites" element={<ReportList searchQuery={searchQuery} />} />
         </Routes>
       </main>
       <SearchOverlay

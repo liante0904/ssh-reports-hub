@@ -34,6 +34,7 @@ const Header = forwardRef(({
   const isRecent = location.pathname === '/';
   const isGlobal = location.pathname.includes('global');
   const isIndustry = location.pathname.includes('industry');
+  const isFavorites = location.pathname.includes('favorites');
   const isCompany = location.pathname.startsWith('/company');
 
   const firm_names = [
@@ -49,7 +50,7 @@ const Header = forwardRef(({
     if (isTopMenuOpen) toggleMenuTop();
     if (isFloatingMenuOpen) toggleFloatingMenu();
     
-    // 2. 검색 상태 초기화 (검색 버튼 클릭 시에도 일단 초기화 후 활성화)
+    // 2. 검색 상태 초기화
     onSearch({ query: '', category: '' });
     setIsSearchActive(buttonName === 'search');
     
@@ -63,6 +64,7 @@ const Header = forwardRef(({
       recent: '/',
       global: '/global',
       industry: '/industry',
+      favorites: '/favorites',
       search: '/'
     };
 
@@ -89,7 +91,7 @@ const Header = forwardRef(({
     if (selectedValue) {
       setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
       if (typeof onSearch === 'function') {
-        onSearch({ query: selectedValue, category: 'company' }); // query에 selectedValue 전달
+        onSearch({ query: selectedValue, category: 'company' });
       } else {
         console.warn('onSearch is not a function');
       }
@@ -101,7 +103,6 @@ const Header = forwardRef(({
     }
 
     navigate({ pathname: '/' });
-    // toggleSearch();
   };
 
   useEffect(() => {
@@ -156,7 +157,7 @@ const Header = forwardRef(({
 
         <div className="header-nav">
           <button
-            className={`nav-button ${isRecent && !isSearchActive && !isCompany ? 'active' : ''}`}
+            className={`nav-button ${isRecent && !isSearchActive && !isCompany && !isFavorites ? 'active' : ''}`}
             onClick={() => handleButtonClick('recent')}
           >
             최근
@@ -172,6 +173,12 @@ const Header = forwardRef(({
             onClick={() => handleButtonClick('industry')}
           >
             산업
+          </button>
+          <button
+            className={`nav-button ${isFavorites && !isSearchActive ? 'active' : ''}`}
+            onClick={() => handleButtonClick('favorites')}
+          >
+            ★
           </button>
           {!isMobile && (
             <div className="company-select-wrapper">

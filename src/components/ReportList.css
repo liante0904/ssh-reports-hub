@@ -257,3 +257,22 @@
 .share-button svg {
   display: block;
 }
+
+.empty-favorites {
+  text-align: center;
+  padding: 100px 20px;
+  color: var(--text-color);
+}
+
+.empty-favorites .empty-icon {
+  font-size: 4em;
+  margin-bottom: 20px;
+  color: #FFD700;
+  opacity: 0.5;
+}
+
+.empty-favorites p {
+  font-size: 1.1em;
+  line-height: 1.6;
+  opacity: 0.8;
+}
