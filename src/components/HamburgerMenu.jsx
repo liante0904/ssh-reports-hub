@@ -20,6 +20,8 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     }
   }, [isOpen, isScriptLoaded]);
 
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
   // 2. 실제 버튼 클릭 시 실행될 로그인 함수
   const loginWithTelegram = () => {
     if (!window.Telegram || !window.Telegram.Login) {
@@ -29,27 +31,50 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
 
     console.log('🚀 텔레그램 로그인 시도 중...');
 
-    // 텔레그램 공식 API 호출
     const botId = import.meta.env.VITE_TELEGRAM_BOT_ID;
-    
     if (!botId) {
       console.error('❌ 환경 변수 VITE_TELEGRAM_BOT_ID가 설정되지 않았습니다.');
-      alert('로그인 설정을 불러올 수 없습니다. 관리자에게 문의하세요.');
       return;
     }
 
     window.Telegram.Login.auth(
       { bot_id: botId, request_access: 'write', embed: 1 },
-      (user) => {
+      async (user) => {
         if (user) {
-          // 사용자가 요청한 대로 "절대 빼먹지 않고" 콘솔에 꽂아버립니다.
-          console.log('=========================================');
-          console.log('🔥 텔레그램 로그인 성공!!!');
-          console.log('👤 ID:', user.id);
-          console.log('🔑 HASH:', user.hash);
-          console.log('📦 전체유저데이터:', user);
-          console.log('=========================================');
-          setTelegramUser(user);
+          console.log('🔥 텔레그램 인증 성공, 서버로 전송합니다...');
+          setIsAuthenticating(true);
+
+          try {
+            // FastAPI 서버 주소 (환경변수 권장)
+            const API_BASE_URL = import.meta.env.VITE_API_URL || `https://${import.meta.env.VITE_VPN_ADDR}/api`;
+            
+            const response = await fetch(`${API_BASE_URL}/auth/telegram`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(user), // id, first_name, last_name, username, photo_url, auth_date, hash 포함
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.detail || '서버 인증 실패');
+            }
+
+            const result = await response.json();
+            console.log('✅ 서버 로그인 성공:', result);
+            
+            // 서버에서 받은 유저 정보와 토큰 저장
+            setTelegramUser({ ...user, ...result.user });
+            if (result.access_token) {
+              localStorage.setItem('auth_token', result.access_token);
+            }
+            alert(`${user.first_name}님, 환영합니다!`);
+
+          } catch (error) {
+            console.error('❌ 서버 통신 에러:', error);
+            alert(`로그인 실패: ${error.message}`);
+          } finally {
+            setIsAuthenticating(false);
+          }
         } else {
           console.error('❌ 텔레그램 로그인 실패 또는 사용자가 창을 닫음');
         }
