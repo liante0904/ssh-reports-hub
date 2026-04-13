@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useReport } from '../context/ReportContext';
 import './SearchOverlay.css';
 import CompanySelect from './CompanySelect';
 
-function SearchOverlay({ isOpen, toggleSearch, onSearch, searchQuery }) {
+function SearchOverlay() {
+  const { isSearchOpen, toggleSearch, handleSearch: onSearch, searchQuery } = useReport();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('title');
   const [toast, setToast] = useState({ visible: false, message: '' });
@@ -13,7 +15,7 @@ function SearchOverlay({ isOpen, toggleSearch, onSearch, searchQuery }) {
 
   // 오버레이 열릴 때 상태 복원 및 외부(searchQuery) 동기화
   useEffect(() => {
-    if (isOpen) {
+    if (isSearchOpen) {
       // 1. 외부에서 클릭(예: 작성자 클릭)을 통한 정보가 있으면 우선 사용
       if (searchQuery?.query && searchQuery.category === 'writer') {
         setQuery(searchQuery.query);
@@ -33,9 +35,8 @@ function SearchOverlay({ isOpen, toggleSearch, onSearch, searchQuery }) {
       setCategory('title');
       isInitialMount.current = true;
     }
-  }, [isOpen, searchParams, searchQuery]);
+  }, [isSearchOpen, searchParams, searchQuery]);
 
-  // 토스트 도우미
   const showToast = useCallback((message) => {
     setToast({ visible: true, message });
     setTimeout(() => {
@@ -43,14 +44,13 @@ function SearchOverlay({ isOpen, toggleSearch, onSearch, searchQuery }) {
     }, 2000);
   }, []);
 
-  // 포커스 처리
   useEffect(() => {
-    if (isOpen && inputRef.current && category !== 'company') {
+    if (isSearchOpen && inputRef.current && category !== 'company') {
       inputRef.current.focus();
     }
-  }, [isOpen, category]);
+  }, [isSearchOpen, category]);
 
-  const handleSearch = useCallback(() => {
+  const handleSearchClick = useCallback(() => {
     const trimmedQuery = query.trim();
     if (!trimmedQuery && category !== 'company') {
       showToast('검색어를 입력해주세요.');
@@ -64,19 +64,10 @@ function SearchOverlay({ isOpen, toggleSearch, onSearch, searchQuery }) {
   const handleKeyDown = useCallback(
     (e) => {
       if (e.key === 'Enter') {
-        handleSearch();
+        handleSearchClick();
       }
     },
-    [handleSearch]
-  );
-
-  const handleButtonClick = useCallback(
-    (buttonName) => {
-      if (buttonName === 'search') {
-        handleSearch();
-      }
-    },
-    [handleSearch]
+    [handleSearchClick]
   );
 
   const handleCategoryChange = useCallback(
@@ -103,13 +94,13 @@ function SearchOverlay({ isOpen, toggleSearch, onSearch, searchQuery }) {
     [onSearch, setSearchParams]
   );
 
-  if (!isOpen) {
+  if (!isSearchOpen) {
     return null;
   }
 
   return (
     <>
-      <div className={`search-overlay ${isOpen ? 'visible' : ''}`} id="searchOverlay" onClick={toggleSearch}>
+      <div className={`search-overlay ${isSearchOpen ? 'visible' : ''}`} id="searchOverlay" onClick={toggleSearch}>
         <div className="search-container" onClick={(e) => e.stopPropagation()}>
           <select
             id="searchCategory"
@@ -140,7 +131,7 @@ function SearchOverlay({ isOpen, toggleSearch, onSearch, searchQuery }) {
           {category !== 'company' && (
             <button
               className="search-submit"
-              onClick={() => handleButtonClick('search')}
+              onClick={handleSearchClick}
             >
               검색
             </button>
@@ -148,7 +139,6 @@ function SearchOverlay({ isOpen, toggleSearch, onSearch, searchQuery }) {
         </div>
       </div>
       
-      {/* 토스트 알림 */}
       <div className={`toast-container ${toast.visible ? 'visible' : ''}`}>
         {toast.message}
       </div>

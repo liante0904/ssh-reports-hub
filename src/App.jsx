@@ -1,38 +1,33 @@
 import { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import SearchOverlay from './components/SearchOverlay';
 import ReportList from './components/ReportList';
 import BottomNav from './components/BottomNav';
 import FloatingMenu from './components/FloatingMenu';
+import { ReportProvider, useReport } from './context/ReportContext';
 import './index.css';
 
-function App() {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isTopMenuOpen, setIsTopMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState({ query: '', category: '' });
-  const [sortBy, setSortBy] = useState('time'); // 'time' (등록 시간순) or 'company' (회사 번호별)
+function AppContent() {
+  const { 
+    isSearchOpen, 
+    setIsSearchOpen,
+    isMenuOpen, 
+    setIsMenuOpen,
+    isTopMenuOpen, 
+    setIsTopMenuOpen,
+    searchQuery,
+    setSearchQuery,
+    handleSearch,
+    sortBy,
+    setSortBy
+  } = useReport();
+
+  const location = useLocation();
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isFloatingNavVisible, setIsFloatingNavVisible] = useState(true);
   const lastScrollY = useRef(window.scrollY);
   const headerRef = useRef(null);
-
-  // Theme state management
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return savedTheme || (userPrefersDark ? 'dark' : 'light');
-  });
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
-  };
 
   const toggleFloatingNav = () => setIsFloatingNavVisible(p => !p);
 
@@ -75,7 +70,7 @@ function App() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isMenuOpen, isTopMenuOpen]);
+  }, [isMenuOpen, isTopMenuOpen, setIsMenuOpen, setIsTopMenuOpen]);
 
   useEffect(() => {
     const headerNode = headerRef.current;
@@ -98,22 +93,9 @@ function App() {
     };
   }, []);
 
-  const toggleSearch = () => {
-    setIsSearchOpen((prev) => !prev);
-  };
-
-  const toggleMenuTop = () => setIsTopMenuOpen((prev) => !prev);
-  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
-
   const handleWriterSearch = (writer) => {
     setIsSearchOpen(true);
     setSearchQuery({ query: writer, category: 'writer' });
-  };
-
-  const handleSearch = ({ query, category }) => {
-    setSearchQuery({ query, category });
-    if (isMenuOpen) setIsMenuOpen(false);
-    if (isTopMenuOpen) setIsTopMenuOpen(false);
   };
 
   const handleHomeClick = () => {
@@ -123,17 +105,10 @@ function App() {
   };
 
   return (
-    <Router>
+    <>
       <Header
         ref={headerRef}
         isNavVisible={isNavVisible}
-        toggleSearch={toggleSearch}
-        toggleMenuTop={toggleMenuTop}
-        isTopMenuOpen={isTopMenuOpen}
-        toggleFloatingMenu={toggleMenu}
-        isFloatingMenuOpen={isMenuOpen}
-        onSearch={handleSearch}
-        setSortBy={setSortBy}
       />
       
       <main 
@@ -144,34 +119,32 @@ function App() {
         }}
       >
         <Routes>
-          <Route path="/" element={<ReportList searchQuery={searchQuery} sortBy={sortBy} setSortBy={setSortBy} onWriterClick={handleWriterSearch} />} />
-          <Route path="/global" element={<ReportList searchQuery={searchQuery} sortBy={sortBy} setSortBy={setSortBy} onWriterClick={handleWriterSearch} />} />
-          <Route path="/industry" element={<ReportList searchQuery={searchQuery} sortBy={sortBy} setSortBy={setSortBy} onWriterClick={handleWriterSearch} />} />
+          <Route path="/" element={<ReportList key={location.pathname === '/' ? 'recent' : location.pathname} onWriterClick={handleWriterSearch} />} />
+          <Route path="/global" element={<ReportList key="global" onWriterClick={handleWriterSearch} />} />
+          <Route path="/industry" element={<ReportList key="industry" onWriterClick={handleWriterSearch} />} />
+          <Route path="/favorites" element={<ReportList key="favorites" onWriterClick={handleWriterSearch} />} />
         </Routes>
       </main>
-      <SearchOverlay
-        isOpen={isSearchOpen}
-        toggleSearch={toggleSearch}
-        onSearch={handleSearch}
-        searchQuery={searchQuery} // 전달: SearchOverlay에서 입력값 동기화
-      />
+      <SearchOverlay />
       <BottomNav 
         isNavVisible={isNavVisible} 
-        toggleSearch={toggleSearch} 
         toggleFloatingNav={toggleFloatingNav}
         onHomeClick={handleHomeClick}
       />
       <FloatingMenu
-        isOpen={isMenuOpen}
-        toggleMenu={toggleMenu}
-        toggleSearch={toggleSearch}
-        theme={theme}
-        toggleTheme={toggleTheme}
         isFloatingNavVisible={isFloatingNavVisible}
-        selectedCompany={searchQuery.category === 'company' ? searchQuery.query : ''}
-        onCompanyChange={handleSearch}
       />
-    </Router>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <ReportProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </ReportProvider>
   );
 }
 

@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom';
+import { useReport } from '../context/ReportContext';
 import './BottomNav.css';
 
-function BottomNav({ isNavVisible, toggleSearch, toggleFloatingNav, onHomeClick }) {
+function BottomNav({ isNavVisible, toggleFloatingNav, onHomeClick }) {
+  const { toggleSearch } = useReport();
   const navigate = useNavigate();
 
   return (
@@ -14,6 +16,9 @@ function BottomNav({ isNavVisible, toggleSearch, toggleFloatingNav, onHomeClick 
       </button>
       <button className="nav-button" onClick={toggleSearch}>
         <span>🔍</span>
+      </button>
+      <button className="nav-button" onClick={() => navigate('/favorites')}>
+        <span>⭐</span>
       </button>
       <button className="nav-button" onClick={toggleFloatingNav}>
         <span>☰</span>
