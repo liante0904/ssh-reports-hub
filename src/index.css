@@ -87,8 +87,7 @@ body {
 }
 .main-content {
   flex-grow: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  /* 브라우저 기본 스크롤 사용을 위해 overflow 제거 */
   /* 헤더 높이가 계산되기 전 기본 여백 확보 (Layout Shift 방지) */
   padding-top: calc(var(--header-height, 110px) + 20px); 
 }
