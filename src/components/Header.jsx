@@ -52,8 +52,14 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     if (isTopMenuOpen) toggleMenuTop();
     if (isMenuOpen) toggleMenu();
     
-    handleSearch({ query: '', category: '' });
-    setIsSearchActive(buttonName === 'search');
+    // 검색 탭을 누를 때는 배경 리스트를 초기화(검색 취소)하지 않음. 
+    // 다른 네비게이션 탭(최근, 글로벌 등)을 누를 때만 기존 검색 상태를 초기화함.
+    if (buttonName !== 'search') {
+      handleSearch({ query: '', category: '' });
+      setIsSearchActive(false);
+    } else {
+      setIsSearchActive(true);
+    }
     
     // 최근 탭 클릭 시 정렬 초기화
     if (buttonName === 'recent') {
@@ -74,7 +80,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     };
 
     const targetPath = PATH_MAP[buttonName];
-    if (targetPath) {
+    if (targetPath && buttonName !== 'search') {
       navigate({ pathname: targetPath });
     }
 
