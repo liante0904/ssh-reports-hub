@@ -13,6 +13,7 @@ export function useReport() {
 export function ReportProvider({ children }) {
   // Search state
   const [searchQuery, setSearchQuery] = useState({ query: '', category: '' });
+  const [pendingSearch, setPendingSearch] = useState({ query: '', category: '' }); // UI에 미리 채우기용
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTopMenuOpen, setIsTopMenuOpen] = useState(false);
@@ -69,11 +70,6 @@ export function ReportProvider({ children }) {
 
   return (
     <ReportContext.Provider value={value}>
-      {children}
-    </ReportContext.Provider>
-  );
-}
-r value={value}>
       {children}
     </ReportContext.Provider>
   );
