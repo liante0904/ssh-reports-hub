@@ -80,7 +80,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
     if (buttonName === 'search') {
       setQuery('');
-      setSearchQuery({ query: '', category: '' });
+      // setSearchQuery({ query: '', category: '' }); // 제거
       toggleSearch();
     }
   };

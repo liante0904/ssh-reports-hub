@@ -7,7 +7,7 @@ function BottomNav({ isNavVisible, toggleFloatingNav, onHomeClick }) {
   const navigate = useNavigate();
 
   const handleSearchClick = () => {
-    setSearchQuery({ query: '', category: '' });
+    // setSearchQuery({ query: '', category: '' }); // 제거: 오픈 시점에 초기화하지 않음
     toggleSearch();
   };
 
