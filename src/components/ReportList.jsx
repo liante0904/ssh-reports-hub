@@ -143,8 +143,8 @@ function ReportList({ onWriterClick }) {
                   </div>
 
                   <div className={`company-group-wrapper ${dateToggles[date] ? 'collapsed' : ''}`}>
-                    {sortBy === 'time' || isFavoritesPage ? (
-                      /* 평탄화 리스트 (시간순 또는 즐겨찾기) */
+                    {sortBy === 'time' || isFavoritesPage || Array.isArray(itemsAtDate) ? (
+                      /* 평탄화 리스트 (시간순, 즐겨찾기, 또는 데이터가 아직 배열인 경우) */
                       <div className="report-wrapper">
                         {(Array.isArray(itemsAtDate) ? itemsAtDate : Object.values(itemsAtDate).flat())
                           .filter(r => !isFavoritesPage || favorites[r.id])
@@ -164,14 +164,14 @@ function ReportList({ onWriterClick }) {
                         }
                       </div>
                     ) : (
-                      /* 증권사별 그룹화 리스트 (회사별 모드) */
+                      /* 증권사별 그룹화 리스트 (회사별 모드 + 데이터가 객체인 경우) */
                       Object.entries(itemsAtDate).map(([firm, firmReports]) => (
                         <div className="company-group" key={firm}>
                           <div className={`company-title ${!firmToggles[date]?.[firm] ? 'expanded' : ''}`} onClick={() => toggleFirm(date, firm)}>
                             {firm}
                           </div>
                           <div className={`report-wrapper ${firmToggles[date]?.[firm] ? 'collapsed' : ''}`}>
-                            {firmReports.map(report => (
+                            {Array.isArray(firmReports) ? firmReports.map(report => (
                               <ReportItem 
                                 key={report.id}
                                 report={report}
@@ -183,7 +183,7 @@ function ReportList({ onWriterClick }) {
                                 showFirmTag={false}
                                 onWriterClick={onWriterClick}
                               />
-                            ))}
+                            )) : null}
                           </div>
                         </div>
                       ))
