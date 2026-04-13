@@ -3,8 +3,13 @@ import { useReport } from '../context/ReportContext';
 import './BottomNav.css';
 
 function BottomNav({ isNavVisible, toggleFloatingNav, onHomeClick }) {
-  const { toggleSearch } = useReport();
+  const { toggleSearch, setSearchQuery } = useReport();
   const navigate = useNavigate();
+
+  const handleSearchClick = () => {
+    setSearchQuery({ query: '', category: '' });
+    toggleSearch();
+  };
 
   return (
     <nav className={`bottom-nav ${isNavVisible ? '' : 'hidden'}`}>
@@ -14,7 +19,7 @@ function BottomNav({ isNavVisible, toggleFloatingNav, onHomeClick }) {
       }}>
         <span>🏠</span>
       </button>
-      <button className="nav-button" onClick={toggleSearch}>
+      <button className="nav-button" onClick={handleSearchClick}>
         <span>🔍</span>
       </button>
       <button className="nav-button" onClick={() => navigate('/favorites')}>

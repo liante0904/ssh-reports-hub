@@ -7,7 +7,8 @@
   justify-content: space-around;
   background-color: #007aff;
   padding-top: 10px;
-  padding-bottom: calc(15px + env(safe-area-inset-bottom, 0px));
+  /* env(safe-area-inset-bottom)이 있으면 그 값을 쓰고, 없으면 15px 기본값 */
+  padding-bottom: env(safe-area-inset-bottom, 15px);
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease-in-out;
   transform: translateY(0);
@@ -27,7 +28,7 @@
   color: white;
   font-size: 16px;
   cursor: pointer;
-  padding-bottom: 5px; /* 버튼 자체에도 약간의 여백 */
+  padding-bottom: 5px;
 }
 
 .nav-button span:first-child {
@@ -38,9 +39,10 @@
   opacity: 0.8;
 }
 
-/* PWA 독립 실행 모드일 때만 실행 (추가 여백이 필요한 경우) */
+/* PWA 독립 실행 모드일 때만 실행 (기본 padding-bottom이 충분하지 않을 때 약간만 보정) */
 @media (display-mode: standalone) {
   .bottom-nav {
-    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    /* 홈바 영역 확보를 위해 env가 0인 경우(일부 안드로이드/데스크탑) 최소 15px 유지 */
+    padding-bottom: max(15px, env(safe-area-inset-bottom));
   }
 }
