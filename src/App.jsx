@@ -94,8 +94,8 @@ function AppContent() {
   }, []);
 
   const handleWriterSearch = (writer) => {
+    setPendingSearch({ query: writer, category: 'writer' });
     setIsSearchOpen(true);
-    setSearchQuery({ query: writer, category: 'writer' });
   };
 
   const handleHomeClick = () => {

@@ -48,6 +48,8 @@ export function ReportProvider({ children }) {
   const value = {
     searchQuery,
     setSearchQuery,
+    pendingSearch,
+    setPendingSearch,
     handleSearch,
     isSearchOpen,
     setIsSearchOpen,
@@ -67,6 +69,11 @@ export function ReportProvider({ children }) {
 
   return (
     <ReportContext.Provider value={value}>
+      {children}
+    </ReportContext.Provider>
+  );
+}
+r value={value}>
       {children}
     </ReportContext.Provider>
   );

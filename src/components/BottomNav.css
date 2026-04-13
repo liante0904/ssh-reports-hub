@@ -42,7 +42,7 @@
 /* PWA 독립 실행 모드일 때 */
 @media (display-mode: standalone) {
   .bottom-nav {
-    /* 홈바 영역 확보를 위해 env가 0인 경우라도 최소 7px(약 1/3 축소)만 유지 */
-    padding-bottom: env(safe-area-inset-bottom, 7px);
+    /* 홈바 영역 확보를 위해 env가 0인 경우라도 최소 4px만 유지 */
+    padding-bottom: env(safe-area-inset-bottom, 4px);
   }
 }

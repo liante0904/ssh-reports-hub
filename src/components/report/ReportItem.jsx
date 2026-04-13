@@ -41,7 +41,7 @@ const ReportItem = ({
           </div>
           <div className="report-footer">
             <p className="report-writer" onClick={() => onWriterClick?.(writer)} style={{cursor: onWriterClick ? 'pointer' : 'default'}}>
-              작성자: {writer}
+              작성자: {writer} <span className="writer-search-icon">🔍</span>
             </p>
             <div className="report-actions">
               {hasSummary && (

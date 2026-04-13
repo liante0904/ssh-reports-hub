@@ -5,39 +5,44 @@ import './SearchOverlay.css';
 import CompanySelect from './CompanySelect';
 
 function SearchOverlay() {
-  const { isSearchOpen, toggleSearch, handleSearch: onSearch, searchQuery } = useReport();
+  const { 
+    isSearchOpen, 
+    toggleSearch, 
+    handleSearch: onSearch, 
+    searchQuery,
+    pendingSearch,
+    setPendingSearch
+  } = useReport();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('title');
   const [toast, setToast] = useState({ visible: false, message: '' });
   const [searchParams, setSearchParams] = useSearchParams();
   const inputRef = useRef(null);
-  const isInitialMount = useRef(true);
 
-  // 오버레이 열릴 때 상태 복원 및 외부(searchQuery) 동기화
+  // 오버레이 열릴 때 상태 복원 및 외부(pendingSearch) 동기화
   useEffect(() => {
     if (isSearchOpen) {
       // 1. 외부에서 클릭(예: 작성자 클릭)을 통한 정보가 있으면 우선 사용
-      if (searchQuery?.query && searchQuery.category === 'writer') {
-        setQuery(searchQuery.query);
-        setCategory('writer');
+      if (pendingSearch?.query) {
+        setQuery(pendingSearch.query);
+        setCategory(pendingSearch.category || 'title');
+        // 사용했으니 비워줌
+        setPendingSearch({ query: '', category: '' });
       } 
       // 2. 그 외 일반 오픈 시에는 URL 파라미터가 있을 때만 복원
       else {
         const urlQuery = searchParams.get('q') || '';
         const urlCategory = searchParams.get('category') || 'title';
-        // URL에 검색어가 있을 때만 상태 동기화
         if (urlQuery) {
           setQuery(urlQuery);
           setCategory(urlCategory);
         } else {
-          // URL에 검색어가 없으면 깨끗한 상태로 시작
           setQuery('');
           setCategory('title');
         }
       }
     }
-    // 닫힐 때 굳이 상태를 초기화해서 Re-render를 유발하지 않음 (다시 열 때 위 로직이 처리함)
-  }, [isSearchOpen, searchParams, searchQuery]);
+  }, [isSearchOpen, searchParams, pendingSearch, setPendingSearch]);
 
   const showToast = useCallback((message) => {
     setToast({ visible: true, message });
