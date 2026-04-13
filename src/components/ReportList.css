@@ -101,18 +101,17 @@
 }
 
 .report { 
-<<<<<<< HEAD
   border: 1px solid var(--loading-border-color); 
   border-radius: 12px; 
   padding: 12px 16px; 
   background: var(--card-background-color); 
   font-size: 1.1em; 
   box-shadow: 0 1px 3px var(--card-shadow-color);
-=======
-  border: 1px solid var(--loading-border-color); border-radius: 12px; padding: 16px; 
-  background: var(--card-background-color); font-size: 1.15em; box-shadow: 0 1px 3px var(--card-shadow-color);
->>>>>>> cca408c628028f08e8eb2c796a49cb0308d0bf6a
   transition: background-color 0.3s, border-color 0.3s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
   position: relative;
   z-index: 2;
 }
@@ -124,7 +123,6 @@
 
 .report-header {
   display: flex;
-<<<<<<< HEAD
   flex-direction: row; /* 기본 가로 정렬 (태블릿/PC) */
   align-items: center;
   gap: 8px;
@@ -164,50 +162,18 @@
   justify-content: space-between;
   align-items: flex-end;
   margin-top: 10px;
-=======
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.report-header a {
-  flex: 1;
-  text-decoration: none; 
-  color: var(--primary-color); 
-  font-weight: bold;
-  word-break: keep-all;
-  line-height: 1.4;
-  display: block;
-}
-
-.report-header a:hover { 
-  text-decoration: underline; 
-}
-
-.report-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
->>>>>>> cca408c628028f08e8eb2c796a49cb0308d0bf6a
 }
 
 .report-writer {
   margin: 0 !important;
   font-size: 0.9em;
   color: var(--text-color);
-<<<<<<< HEAD
-  font-weight: 500; /* 약간 더 선명하게 */
-=======
-  opacity: 0.8;
->>>>>>> cca408c628028f08e8eb2c796a49cb0308d0bf6a
+  font-weight: 500;
 }
 
 .report-actions {
   display: flex;
   align-items: center;
-<<<<<<< HEAD
   gap: 12px;
 }
 
@@ -220,11 +186,8 @@
   font-weight: bold;
   display: inline-block;
   opacity: 0.9;
-  white-space: nowrap; /* 줄바꿈 방지 */
-  flex-shrink: 0; /* 제목에 밀리지 않도록 설정 */
-=======
-  gap: 4px;
->>>>>>> cca408c628028f08e8eb2c796a49cb0308d0bf6a
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .ai-badge {
@@ -238,11 +201,7 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   display: inline-flex;
   align-items: center;
-<<<<<<< HEAD
   height: 18px;
-=======
-  height: 20px;
->>>>>>> cca408c628028f08e8eb2c796a49cb0308d0bf6a
   flex-shrink: 0;
 }
 
@@ -255,12 +214,7 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-<<<<<<< HEAD
   padding: 0;
-=======
-  padding: 4px 0;
-  margin-top: 8px;
->>>>>>> cca408c628028f08e8eb2c796a49cb0308d0bf6a
   gap: 4px;
   transition: opacity 0.2s;
 }
@@ -327,14 +281,12 @@
   flex: 1;
 }
 
-<<<<<<< HEAD
-=======
 .favorite-button {
   background: none;
   border: none;
   color: var(--primary-color);
   cursor: pointer;
-  padding: 6px;
+  padding: 4px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -342,27 +294,26 @@
   transition: background-color 0.2s, transform 0.2s;
   flex-shrink: 0;
 }
+
 .favorite-button:hover {
   background-color: rgba(255, 215, 0, 0.1);
   transform: scale(1.1);
 }
+
 .favorite-button.active {
   color: #FFD700;
 }
+
 .favorite-button svg {
   display: block;
 }
->>>>>>> cca408c628028f08e8eb2c796a49cb0308d0bf6a
+
 .share-button {
   background: none;
   border: none;
   color: var(--primary-color);
   cursor: pointer;
-<<<<<<< HEAD
   padding: 4px;
-=======
-  padding: 6px;
->>>>>>> cca408c628028f08e8eb2c796a49cb0308d0bf6a
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -378,27 +329,6 @@
 
 .share-button svg {
   display: block;
-}
-<<<<<<< HEAD
-=======
-
-@media (max-width: 1023px) {
-  .report {
-    padding: 12px;
-    font-size: 1.05em;
-  }
-  
-  .report-header {
-    gap: 8px;
-  }
-  
-  .report-meta {
-    margin-top: 8px;
-  }
-  
-  .report-writer {
-    font-size: 0.85em;
-  }
 }
 
 .empty-favorites {
@@ -419,13 +349,3 @@
   line-height: 1.6;
   opacity: 0.8;
 }
-
-.bottom-loading {
-  text-align: center;
-  padding: 20px 0;
-  color: var(--primary-color);
-  font-weight: bold;
-  font-size: 0.9em;
-  opacity: 0.7;
-}
->>>>>>> cca408c628028f08e8eb2c796a49cb0308d0bf6a
