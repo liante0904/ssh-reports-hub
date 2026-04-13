@@ -35,7 +35,10 @@ export function ReportProvider({ children }) {
   };
 
   const handleSearch = ({ query, category }) => {
-    setSearchQuery({ query, category });
+    setSearchQuery(prev => {
+      if (prev.query === query && prev.category === category) return prev;
+      return { query, category };
+    });
   };
 
   const toggleSearch = () => setIsSearchOpen(prev => !prev);

@@ -7,10 +7,6 @@ function BottomNav({ isNavVisible, toggleFloatingNav, onHomeClick }) {
   const navigate = useNavigate();
 
   const handleSearchClick = () => {
-    // 오버레이를 열 때만(현재 닫혀있을 때만) 검색어 초기화
-    if (!isSearchOpen) {
-      setSearchQuery({ query: '', category: '' });
-    }
     toggleSearch();
   };
 
