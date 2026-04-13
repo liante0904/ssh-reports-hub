@@ -16,6 +16,7 @@ export function ReportProvider({ children }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTopMenuOpen, setIsTopMenuOpen] = useState(false);
+  const [sortBy, setSortBy] = useState('time'); // 'time' or 'company'
 
   // Theme state
   const [theme, setTheme] = useState(() => {
@@ -64,10 +65,6 @@ export function ReportProvider({ children }) {
   return (
     <ReportContext.Provider value={value}>
       {children}
-    </ReportContext.Provider>
-  );
-}
-ldren}
     </ReportContext.Provider>
   );
 }
