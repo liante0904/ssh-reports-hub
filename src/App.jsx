@@ -112,6 +112,7 @@ function AppContent() {
       />
       
       <main 
+        id="main-content"
         className="main-content" 
         onClick={() => {
           if (isMenuOpen) setIsMenuOpen(false);

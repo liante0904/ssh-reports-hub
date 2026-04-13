@@ -35,7 +35,8 @@ function ReportList({ onWriterClick }) {
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const scroller = document.getElementById('main-content');
+    if (scroller) scroller.scrollTo(0, 0);
     setDateToggles({});
     setFirmToggles({});
     setSummaryToggles({});
