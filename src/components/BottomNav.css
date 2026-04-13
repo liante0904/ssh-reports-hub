@@ -6,8 +6,8 @@
   display: flex;
   justify-content: space-around;
   background-color: #007aff;
-  padding: 10px 0;
-  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  padding-top: 10px;
+  padding-bottom: calc(15px + env(safe-area-inset-bottom, 0px));
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease-in-out;
   transform: translateY(0);
@@ -27,6 +27,7 @@
   color: white;
   font-size: 16px;
   cursor: pointer;
+  padding-bottom: 5px; /* 버튼 자체에도 약간의 여백 */
 }
 
 .nav-button span:first-child {
@@ -37,9 +38,9 @@
   opacity: 0.8;
 }
 
-/* PWA 독립 실행 모드일 때만 실행 */
+/* PWA 독립 실행 모드일 때만 실행 (추가 여백이 필요한 경우) */
 @media (display-mode: standalone) {
   .bottom-nav {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 15px);
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   }
 }
