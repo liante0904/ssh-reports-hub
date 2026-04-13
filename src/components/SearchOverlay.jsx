@@ -3,13 +3,37 @@ import { useSearchParams } from 'react-router-dom';
 import './SearchOverlay.css';
 import CompanySelect from './CompanySelect';
 
-function SearchOverlay({ isOpen, toggleSearch, onSearch }) {
+function SearchOverlay({ isOpen, toggleSearch, onSearch, searchQuery }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('title');
   const [toast, setToast] = useState({ visible: false, message: '' });
   const [searchParams, setSearchParams] = useSearchParams();
   const inputRef = useRef(null);
   const isInitialMount = useRef(true);
+
+  // 오버레이 열릴 때 상태 복원 및 외부(searchQuery) 동기화
+  useEffect(() => {
+    if (isOpen) {
+      // 1. 외부에서 클릭(예: 작성자 클릭)을 통한 정보가 있으면 우선 사용
+      if (searchQuery?.query && searchQuery.category === 'writer') {
+        setQuery(searchQuery.query);
+        setCategory('writer');
+      } 
+      // 2. 그 외 초기 오픈 시 URL 파라미터에서 복원
+      else if (isInitialMount.current) {
+        const urlQuery = searchParams.get('q') || '';
+        const urlCategory = searchParams.get('category') || 'title';
+        setQuery(urlQuery);
+        setCategory(urlCategory);
+        isInitialMount.current = false;
+      }
+    } else {
+      // 닫힐 때 초기화
+      setQuery('');
+      setCategory('title');
+      isInitialMount.current = true;
+    }
+  }, [isOpen, searchParams, searchQuery]);
 
   // 토스트 도우미
   const showToast = useCallback((message) => {
@@ -18,24 +42,6 @@ function SearchOverlay({ isOpen, toggleSearch, onSearch }) {
       setToast({ visible: false, message: '' });
     }, 2000);
   }, []);
-
-  // 오버레이 열릴 때 상태 복원
-  useEffect(() => {
-    console.log('SearchOverlay: isOpen changed to:', isOpen);
-    if (isOpen && isInitialMount.current) {
-      const urlQuery = searchParams.get('q') || '';
-      const urlCategory = searchParams.get('category') || 'title';
-      setQuery(urlQuery);
-      setCategory(urlCategory);
-      console.log('SearchOverlay: Restored state:', { urlQuery, urlCategory });
-      isInitialMount.current = false;
-    }
-    if (!isOpen) {
-      setQuery('');
-      setCategory('title');
-      isInitialMount.current = true; // 다음 오버레이 열림 시 초기화
-    }
-  }, [isOpen, searchParams]);
 
   // 포커스 처리
   useEffect(() => {
@@ -51,10 +57,8 @@ function SearchOverlay({ isOpen, toggleSearch, onSearch }) {
       return;
     }
 
-    console.log('SearchOverlay: Executing search:', { query: trimmedQuery, category });
     setSearchParams({ q: trimmedQuery, category });
     onSearch({ query: trimmedQuery, category });
-    // toggleSearch() 제거: 검색 후 오버레이 유지
   }, [query, category, onSearch, setSearchParams, showToast]);
 
   const handleKeyDown = useCallback(
@@ -78,10 +82,9 @@ function SearchOverlay({ isOpen, toggleSearch, onSearch }) {
   const handleCategoryChange = useCallback(
     (e) => {
       const newCategory = e.target.value;
-      console.log('SearchOverlay: Category changed to:', newCategory);
       setCategory(newCategory);
       setQuery('');
-      setSearchParams({}, { replace: true }); // 즉시 URL 파라미터 초기화, 히스토리 대체
+      setSearchParams({}, { replace: true });
     },
     [setSearchParams]
   );
@@ -89,12 +92,10 @@ function SearchOverlay({ isOpen, toggleSearch, onSearch }) {
   const handleCompanyChange = useCallback(
     (e) => {
       const selectedValue = e.target.value;
-      console.log('SearchOverlay: Company selected:', selectedValue);
       setQuery(selectedValue);
       if (selectedValue) {
         setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
         onSearch({ query: selectedValue, category: 'company' });
-        // toggleSearch() 제거: 회사 선택 후 오버레이 유지
       } else {
         setSearchParams({}, { replace: true });
       }
@@ -103,7 +104,6 @@ function SearchOverlay({ isOpen, toggleSearch, onSearch }) {
   );
 
   if (!isOpen) {
-    console.log('SearchOverlay: Not rendering (isOpen is false)');
     return null;
   }
 

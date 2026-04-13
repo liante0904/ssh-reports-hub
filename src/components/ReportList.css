@@ -1,11 +1,61 @@
+.date-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sort-options {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-right: 4px;
+}
+
+.sort-btn {
+  background: none;
+  border: none;
+  font-size: 0.9em;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  opacity: 0.5;
+  position: relative;
+}
+
+.sort-btn.active {
+  color: var(--primary-color);
+  font-weight: bold;
+  opacity: 1;
+}
+
+.sort-btn:not(.active):hover {
+  opacity: 0.8;
+}
+
+.sort-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  background-color: var(--primary-color);
+  border-radius: 2px;
+}
+
 .date-group { margin-bottom: 25px; }
+
 .date-title { 
-  font-size: 1.5em; font-weight: bold; margin-bottom: 12px; color: var(--text-color);
+  font-size: 1.5em; font-weight: bold; color: var(--text-color);
   cursor: pointer;
   position: relative;
   display: flex;
   align-items: center;
 }
+
 .company-group { margin-bottom: 20px; }
 .company-title { 
   font-size: 1.3em; font-weight: bold; margin-bottom: 10px; color: var(--primary-color); cursor: pointer; 
@@ -31,8 +81,8 @@
 }
 
 .company-group-wrapper, .report-wrapper {
-  max-height: 100000px; /* 충분히 큰 값으로 상향 */
-  overflow: visible;    /* 펼쳐진 상태에서는 내용이 잘리지 않도록 */
+  max-height: 100000px;
+  overflow: visible;
   transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out;
   opacity: 1;
 }
@@ -40,7 +90,7 @@
 .collapsed {
   max-height: 0 !important;
   opacity: 0 !important;
-  overflow: hidden !important; /* 닫혔을 때만 내용 숨김 */
+  overflow: hidden !important;
 }
 
 .report-container-item {
@@ -51,8 +101,12 @@
 }
 
 .report { 
-  border: 1px solid var(--loading-border-color); border-radius: 12px; padding: 12px 16px; 
-  background: var(--card-background-color); font-size: 1.15em; box-shadow: 0 1px 3px var(--card-shadow-color);
+  border: 1px solid var(--loading-border-color); 
+  border-radius: 12px; 
+  padding: 12px 16px; 
+  background: var(--card-background-color); 
+  font-size: 1.1em; 
+  box-shadow: 0 1px 3px var(--card-shadow-color);
   transition: background-color 0.3s, border-color 0.3s;
   display: flex;
   justify-content: space-between;
@@ -69,10 +123,71 @@
 
 .report-header {
   display: flex;
-  align-items: flex-start;
-  flex-wrap: wrap;
+  flex-direction: row; /* 기본 가로 정렬 (태블릿/PC) */
+  align-items: center;
   gap: 8px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+/* 모바일 화면 (767px 이하)에서만 수직 쌓기 */
+@media (max-width: 767px) {
+  .report-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+
+.report-title-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.report-title {
+  flex: 1;
+  line-height: 1.4;
+  text-decoration: none; 
+  color: var(--primary-color); 
+  font-weight: bold;
+}
+
+.report-title:hover {
+  text-decoration: underline;
+}
+
+.report-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 10px;
+}
+
+.report-writer {
+  margin: 0 !important;
+  font-size: 0.9em;
+  color: var(--text-color);
+  font-weight: 500; /* 약간 더 선명하게 */
+}
+
+.report-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.firm-tag {
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 0.75em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  display: inline-block;
+  opacity: 0.9;
+  white-space: nowrap; /* 줄바꿈 방지 */
+  flex-shrink: 0; /* 제목에 밀리지 않도록 설정 */
 }
 
 .ai-badge {
@@ -86,7 +201,8 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   display: inline-flex;
   align-items: center;
-  height: 20px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 .summary-toggle-btn {
@@ -98,8 +214,7 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 4px 0;
-  margin-top: 4px;
+  padding: 0;
   gap: 4px;
   transition: opacity 0.2s;
 }
@@ -134,7 +249,7 @@
 }
 
 .summary-content.expanded {
-  max-height: 5000px; /* 대폭 상향하여 긴 요약문도 잘리지 않게 함 */
+  max-height: 5000px;
   opacity: 1;
   padding-bottom: 8px;
 }
@@ -162,63 +277,16 @@
   color: var(--text-color);
 }
 
-.summary-text h1, .summary-text h2, .summary-text h3 {
-  margin-top: 16px;
-  margin-bottom: 8px;
-  color: var(--primary-color);
-  font-weight: 700;
-}
-
-.summary-text h1 { font-size: 1.3em; border-bottom: 1px solid var(--loading-border-color); padding-bottom: 4px; }
-.summary-text h2 { font-size: 1.15em; }
-.summary-text h3 { font-size: 1.05em; }
-
-.summary-text p {
-  margin: 8px 0;
-}
-
-.summary-text ul, .summary-text ol {
-  padding-left: 20px;
-  margin: 8px 0;
-}
-
-.summary-text li {
-  margin-bottom: 4px;
-}
-
-.summary-text strong {
-  color: var(--primary-color);
-  font-weight: 600;
-}
-
-.summary-text blockquote {
-  border-left: 4px solid var(--primary-color);
-  margin: 8px 0;
-  padding-left: 12px;
-  color: #666;
-  background-color: rgba(0,0,0,0.02);
-}
-
 .report-content {
   flex: 1;
 }
-.report a { 
-  text-decoration: none; color: var(--primary-color); font-weight: bold; 
-}
-.report a:hover { 
-  text-decoration: underline; 
-}
-.report p { 
-  margin-top: 10px;
-  margin-bottom: 2px;
-  color: var(--text-color);
-}
+
 .share-button {
   background: none;
   border: none;
   color: var(--primary-color);
   cursor: pointer;
-  padding: 8px;
+  padding: 4px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -226,10 +294,12 @@
   transition: background-color 0.2s, transform 0.2s;
   flex-shrink: 0;
 }
+
 .share-button:hover {
   background-color: rgba(0, 122, 255, 0.1);
   transform: scale(1.1);
 }
+
 .share-button svg {
   display: block;
 }

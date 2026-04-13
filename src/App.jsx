@@ -12,6 +12,7 @@ function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTopMenuOpen, setIsTopMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState({ query: '', category: '' });
+  const [sortBy, setSortBy] = useState('time'); // 'time' (등록 시간순) or 'company' (회사 번호별)
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isFloatingNavVisible, setIsFloatingNavVisible] = useState(true);
   const lastScrollY = useRef(window.scrollY);
@@ -25,13 +26,11 @@ function App() {
   });
 
   useEffect(() => {
-    console.log(`Theme changed to: ${theme}`); // <-- Log added
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    console.log('Toggling theme...'); // <-- Log added
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
@@ -40,13 +39,13 @@ function App() {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 640) {
-        setIsFloatingNavVisible(true); // Always visible on desktop
+        setIsFloatingNavVisible(true);
       } else {
-        setIsFloatingNavVisible(false); // Hidden by default on mobile
+        setIsFloatingNavVisible(false);
       }
     };
     window.addEventListener('resize', handleResize);
-    handleResize(); // Initial check
+    handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -55,12 +54,17 @@ function App() {
       const currentScrollY = window.scrollY;
       const isDesktop = window.innerWidth >= 1024;
 
+      // 스크롤 발생 시 모든 메뉴 닫기
+      if (Math.abs(currentScrollY - lastScrollY.current) > 20) {
+        if (isMenuOpen) setIsMenuOpen(false);
+        if (isTopMenuOpen) setIsTopMenuOpen(false);
+      }
+
       if (isDesktop) {
         setIsNavVisible(false);
         return;
       }
 
-      // Hide nav on scroll down, show on scroll up
       if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
         setIsNavVisible(false);
       } else {
@@ -71,7 +75,7 @@ function App() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isMenuOpen, isTopMenuOpen]);
 
   useEffect(() => {
     const headerNode = headerRef.current;
@@ -101,8 +105,21 @@ function App() {
   const toggleMenuTop = () => setIsTopMenuOpen((prev) => !prev);
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
+  const handleWriterSearch = (writer) => {
+    setIsSearchOpen(true);
+    setSearchQuery({ query: writer, category: 'writer' });
+  };
+
   const handleSearch = ({ query, category }) => {
     setSearchQuery({ query, category });
+    if (isMenuOpen) setIsMenuOpen(false);
+    if (isTopMenuOpen) setIsTopMenuOpen(false);
+  };
+
+  const handleHomeClick = () => {
+    setSearchQuery({ query: '', category: '' });
+    if (isTopMenuOpen) setIsTopMenuOpen(false);
+    if (isMenuOpen) setIsMenuOpen(false);
   };
 
   return (
@@ -113,27 +130,36 @@ function App() {
         toggleSearch={toggleSearch}
         toggleMenuTop={toggleMenuTop}
         isTopMenuOpen={isTopMenuOpen}
-        toggleFloatingMenu={toggleMenu} // Pass the floating menu toggle
-        isFloatingMenuOpen={isMenuOpen} // Pass the floating menu state
+        toggleFloatingMenu={toggleMenu}
+        isFloatingMenuOpen={isMenuOpen}
         onSearch={handleSearch}
+        setSortBy={setSortBy}
       />
       
-      <main className="main-content">
+      <main 
+        className="main-content" 
+        onClick={() => {
+          if (isMenuOpen) setIsMenuOpen(false);
+          if (isTopMenuOpen) setIsTopMenuOpen(false);
+        }}
+      >
         <Routes>
-          <Route path="/" element={<ReportList searchQuery={searchQuery} />} />
-          <Route path="/global" element={<ReportList searchQuery={searchQuery} />} />
-          <Route path="/industry" element={<ReportList searchQuery={searchQuery} />} />
+          <Route path="/" element={<ReportList searchQuery={searchQuery} sortBy={sortBy} setSortBy={setSortBy} onWriterClick={handleWriterSearch} />} />
+          <Route path="/global" element={<ReportList searchQuery={searchQuery} sortBy={sortBy} setSortBy={setSortBy} onWriterClick={handleWriterSearch} />} />
+          <Route path="/industry" element={<ReportList searchQuery={searchQuery} sortBy={sortBy} setSortBy={setSortBy} onWriterClick={handleWriterSearch} />} />
         </Routes>
       </main>
       <SearchOverlay
         isOpen={isSearchOpen}
         toggleSearch={toggleSearch}
         onSearch={handleSearch}
+        searchQuery={searchQuery} // 전달: SearchOverlay에서 입력값 동기화
       />
       <BottomNav 
         isNavVisible={isNavVisible} 
         toggleSearch={toggleSearch} 
         toggleFloatingNav={toggleFloatingNav}
+        onHomeClick={handleHomeClick}
       />
       <FloatingMenu
         isOpen={isMenuOpen}

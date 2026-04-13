@@ -74,12 +74,12 @@ body {
 }
 .main-content {
   /* 헤더 높이가 계산되기 전 기본 여백 확보 (Layout Shift 방지) */
-  padding-top: var(--header-height, 110px); 
+  padding-top: calc(var(--header-height, 110px) + 20px); 
 }
 
 @media (min-width: 1024px) {
   .main-content {
-    padding-top: var(--header-height, 130px); /* 데스크탑은 좀 더 넓게 */
+    padding-top: calc(var(--header-height, 130px) + 30px); /* 데스크탑은 좀 더 넓게 */
   }
 }
 

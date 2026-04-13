@@ -1,9 +1,15 @@
+import { useNavigate } from 'react-router-dom';
 import './BottomNav.css';
 
-function BottomNav({ isNavVisible, toggleSearch, toggleFloatingNav }) {
+function BottomNav({ isNavVisible, toggleSearch, toggleFloatingNav, onHomeClick }) {
+  const navigate = useNavigate();
+
   return (
     <nav className={`bottom-nav ${isNavVisible ? '' : 'hidden'}`}>
-      <button className="nav-button" onClick={() => (window.location.href = '/')}>
+      <button className="nav-button" onClick={() => {
+        onHomeClick();
+        navigate('/');
+      }}>
         <span>🏠</span>
       </button>
       <button className="nav-button" onClick={toggleSearch}>

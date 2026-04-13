@@ -11,7 +11,8 @@ const Header = forwardRef(({
   toggleFloatingMenu,
   isFloatingMenuOpen,
   onSearch,
-  isNavVisible
+  isNavVisible,
+  setSortBy
 }, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -53,6 +54,11 @@ const Header = forwardRef(({
     onSearch({ query: '', category: '' });
     setIsSearchActive(buttonName === 'search');
     
+    // 최근 탭 클릭 시 정렬 초기화
+    if (buttonName === 'recent') {
+      setSortBy('company');
+    }
+
     if (buttonName !== 'search') {
       setQuery('');
       setSearchParams({}, { replace: true });
@@ -81,10 +87,10 @@ const Header = forwardRef(({
   const handleCompanyChange = (e) => {
     const selectedValue = e.target.value; // <option>의 value (인덱스)
     const company = selectedValue ? firm_names[selectedValue] : '';
-    console.log('Header: 선택된 회사:', { selectedValue, company });
 
     setQuery(selectedValue);
     setIsSearchActive(true);
+    setSortBy('time'); // 회사 선택 시 정렬 초기화
 
     if (selectedValue) {
       setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
