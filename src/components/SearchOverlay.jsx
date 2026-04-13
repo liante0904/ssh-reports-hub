@@ -5,13 +5,50 @@ import './SearchOverlay.css';
 import CompanySelect from './CompanySelect';
 
 function SearchOverlay() {
-  const { isSearchOpen, toggleSearch, handleSearch: onSearch } = useReport();
+  const { 
+    isSearchOpen, 
+    toggleSearch, 
+    handleSearch: onSearch, 
+    searchQuery,
+    pendingSearch,
+    setPendingSearch
+  } = useReport();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('title');
   const [toast, setToast] = useState({ visible: false, message: '' });
   const [searchParams, setSearchParams] = useSearchParams();
   const inputRef = useRef(null);
-  const isInitialMount = useRef(true);
+
+  // 오버레이 열릴 때 상태 복원 및 외부(pendingSearch) 동기화
+  useEffect(() => {
+    if (isSearchOpen) {
+      // 1. 외부에서 클릭(예: 작성자 클릭)을 통한 정보가 있으면 우선 사용
+      if (pendingSearch?.query) {
+        const { query: pQuery, category: pCategory } = pendingSearch;
+        setQuery(pQuery);
+        setCategory(pCategory || 'title');
+        
+        // 검색 자동 실행
+        onSearch({ query: pQuery, category: pCategory || 'title' });
+        setSearchParams({ q: pQuery, category: pCategory || 'title' });
+
+        // 사용했으니 비워줌
+        setPendingSearch({ query: '', category: '' });
+      } 
+      // 2. 그 외 일반 오픈 시에는 URL 파라미터가 있을 때만 복원
+      else {
+        const urlQuery = searchParams.get('q') || '';
+        const urlCategory = searchParams.get('category') || 'title';
+        if (urlQuery) {
+          setQuery(urlQuery);
+          setCategory(urlCategory);
+        } else {
+          setQuery('');
+          setCategory('title');
+        }
+      }
+    }
+  }, [isSearchOpen, searchParams, pendingSearch, setPendingSearch]);
 
   const showToast = useCallback((message) => {
     setToast({ visible: true, message });
@@ -19,21 +56,6 @@ function SearchOverlay() {
       setToast({ visible: false, message: '' });
     }, 2000);
   }, []);
-
-  useEffect(() => {
-    if (isSearchOpen && isInitialMount.current) {
-      const urlQuery = searchParams.get('q') || '';
-      const urlCategory = searchParams.get('category') || 'title';
-      setQuery(urlQuery);
-      setCategory(urlCategory);
-      isInitialMount.current = false;
-    }
-    if (!isSearchOpen) {
-      setQuery('');
-      setCategory('title');
-      isInitialMount.current = true;
-    }
-  }, [isSearchOpen, searchParams]);
 
   useEffect(() => {
     if (isSearchOpen && inputRef.current && category !== 'company') {

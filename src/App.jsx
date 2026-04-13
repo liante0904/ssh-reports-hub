@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'; // useLocation 임포트
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import SearchOverlay from './components/SearchOverlay';
 import ReportList from './components/ReportList';
@@ -11,19 +11,20 @@ import './index.css';
 function AppContent() {
   const { 
     isSearchOpen, 
-    toggleSearch, 
+    setIsSearchOpen,
     isMenuOpen, 
-    toggleMenu, 
+    setIsMenuOpen,
     isTopMenuOpen, 
-    toggleMenuTop,
+    setIsTopMenuOpen,
     searchQuery,
+    setSearchQuery,
+    setPendingSearch,
     handleSearch,
-    theme,
-    toggleTheme
+    sortBy,
+    setSortBy
   } = useReport();
 
-  const location = useLocation(); // useLocation 훅 사용
-
+  const location = useLocation();
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isFloatingNavVisible, setIsFloatingNavVisible] = useState(true);
   const lastScrollY = useRef(window.scrollY);
@@ -47,11 +48,11 @@ function AppContent() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      const isDesktop = window.innerWidth >= 1024;
 
-      if (isDesktop) {
-        setIsNavVisible(false);
-        return;
+      // 스크롤 발생 시 모든 메뉴 닫기
+      if (Math.abs(currentScrollY - lastScrollY.current) > 20) {
+        if (isMenuOpen) setIsMenuOpen(false);
+        if (isTopMenuOpen) setIsTopMenuOpen(false);
       }
 
       if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
@@ -64,7 +65,7 @@ function AppContent() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isMenuOpen, isTopMenuOpen, setIsMenuOpen, setIsTopMenuOpen]);
 
   useEffect(() => {
     const headerNode = headerRef.current;
@@ -87,6 +88,17 @@ function AppContent() {
     };
   }, []);
 
+  const handleWriterSearch = (writer) => {
+    setPendingSearch({ query: writer, category: 'writer' });
+    setIsSearchOpen(true);
+  };
+
+  const handleHomeClick = () => {
+    setSearchQuery({ query: '', category: '' });
+    if (isTopMenuOpen) setIsTopMenuOpen(false);
+    if (isMenuOpen) setIsMenuOpen(false);
+  };
+
   return (
     <>
       <Header
@@ -94,19 +106,26 @@ function AppContent() {
         isNavVisible={isNavVisible}
       />
       
-      <main className="main-content">
+      <main 
+        id="main-content"
+        className="main-content" 
+        onClick={() => {
+          if (isMenuOpen) setIsMenuOpen(false);
+          if (isTopMenuOpen) setIsTopMenuOpen(false);
+        }}
+      >
         <Routes>
-          {/* ReportList에 key prop을 추가하여 탭 전환 시 컴포넌트 재생성 보장 */}
-          <Route path="/" element={<ReportList key={location.pathname === '/' ? 'recent' : location.pathname} />} />
-          <Route path="/global" element={<ReportList key="global" />} />
-          <Route path="/industry" element={<ReportList key="industry" />} />
-          <Route path="/favorites" element={<ReportList key="favorites" />} />
+          <Route path="/" element={<ReportList key={location.pathname === '/' ? 'recent' : location.pathname} onWriterClick={handleWriterSearch} />} />
+          <Route path="/global" element={<ReportList key="global" onWriterClick={handleWriterSearch} />} />
+          <Route path="/industry" element={<ReportList key="industry" onWriterClick={handleWriterSearch} />} />
+          <Route path="/favorites" element={<ReportList key="favorites" onWriterClick={handleWriterSearch} />} />
         </Routes>
       </main>
       <SearchOverlay />
       <BottomNav 
         isNavVisible={isNavVisible} 
         toggleFloatingNav={toggleFloatingNav}
+        onHomeClick={handleHomeClick}
       />
       <FloatingMenu
         isFloatingNavVisible={isFloatingNavVisible}

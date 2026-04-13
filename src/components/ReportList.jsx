@@ -7,8 +7,8 @@ import { useReportFetch } from '../hooks/useReportFetch';
 import { useReport } from '../context/ReportContext';
 import './ReportList.css';
 
-function ReportList() {
-  const { searchQuery } = useReport();
+function ReportList({ onWriterClick }) {
+  const { searchQuery, sortBy, setSortBy } = useReport();
   const location = useLocation();
   const { 
     reports, 
@@ -16,7 +16,7 @@ function ReportList() {
     hasMore, 
     offset, 
     fetchReports 
-  } = useReportFetch(searchQuery, location.pathname);
+  } = useReportFetch(searchQuery, location.pathname, sortBy);
 
   const [dateToggles, setDateToggles] = useState({});
   const [firmToggles, setFirmToggles] = useState({});
@@ -30,32 +30,23 @@ function ReportList() {
     }
   });
 
-  // 공유 메뉴 상태
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
-  // Reset state when component mounts (due to key prop in App.jsx)
-  // This effect will run ONCE when the component is mounted due to the key prop.
   useEffect(() => {
     window.scrollTo(0, 0);
     setDateToggles({});
     setFirmToggles({});
     setSummaryToggles({});
-    // Initial fetch is handled by useReportFetch hook's mount effect
-  }, [location.pathname, searchQuery]); // Depend on pathname and searchQuery for state reset
+  }, [location.pathname, searchQuery, sortBy]);
 
   useEffect(() => {
     const reportDates = Object.keys(reports);
-    if (reportDates.length === 0 && !isLoading) return; // Don't trigger if reports are empty and not loading
+    if (reportDates.length === 0 && !isLoading) return;
 
     const allCollapsed = reportDates.every(date => dateToggles[date] === true);
-
-    if (allCollapsed) {
-      if (hasMore && !isLoading) {
-        fetchReports(); // Load more data if all collapsed and hasMore
-      }
-    }
+    if (allCollapsed && hasMore && !isLoading) fetchReports();
   }, [dateToggles, reports, hasMore, isLoading, fetchReports]);
 
   const toggleDate = (date) => {
@@ -65,10 +56,7 @@ function ReportList() {
   const toggleFirm = (date, firm) => {
     setFirmToggles(prev => ({
       ...prev,
-      [date]: {
-        ...prev[date],
-        [firm]: !prev[date]?.[firm]
-      }
+      [date]: { ...prev[date], [firm]: !prev[date]?.[firm] }
     }));
   };
 
@@ -104,11 +92,16 @@ function ReportList() {
   const sortedDates = Object.keys(reports).sort((a, b) => b.localeCompare(a));
   const isSearchActive = !!(searchQuery.query || searchQuery.category === 'company');
   const isFavoritesPage = location.pathname.includes('favorites');
+  const isRecent = location.pathname === '/';
 
+  // 필터링된 날짜 리스트 (즐겨찾기 페이지 대응)
   const filteredSortedDates = isFavoritesPage 
     ? sortedDates.filter(date => {
-        const firms = reports[date];
-        return Object.values(firms).some(firmReports => 
+        const items = reports[date];
+        if (Array.isArray(items)) {
+          return items.some(report => !!favorites[report.id]);
+        }
+        return Object.values(items).some(firmReports => 
           firmReports.some(report => !!favorites[report.id])
         );
       })
@@ -125,39 +118,60 @@ function ReportList() {
             <p>즐겨찾기한 레포트가 없습니다.<br/>관심 있는 레포트에 별표를 눌러보세요!</p>
           </div>
         ) : filteredSortedDates.length === 0 && !isLoading ? null : (
-          <>
-            <InfiniteScroll
-              dataLength={offset}
-              next={fetchReports} // This calls fetchReports for "load more"
-              hasMore={isFavoritesPage ? false : hasMore} // Favorites page doesn't load more
-              scrollThreshold={0.6}
-            >
-              {filteredSortedDates.map((date) => {
-                const firmsAtDate = reports[date];
-                const filteredFirms = Object.entries(firmsAtDate).reduce((acc, [firm, firmReports]) => {
-                  const favReports = isFavoritesPage 
-                    ? firmReports.filter(r => !!favorites[r.id])
-                    : firmReports;
-                  
-                  if (favReports.length > 0) acc[firm] = favReports;
-                  return acc;
-                }, {});
-
-                if (Object.keys(filteredFirms).length === 0) return null;
-
-                return (
-                  <div className="date-group" key={date}>
+          <InfiniteScroll
+            dataLength={offset}
+            next={fetchReports}
+            hasMore={isFavoritesPage ? false : hasMore}
+            scrollThreshold={0.6}
+          >
+            {filteredSortedDates.map((date, index) => {
+              const itemsAtDate = reports[date];
+              
+              // 시간순(배열) 또는 회사별(객체) 처리
+              return (
+                <div className="date-group" key={date}>
+                  <div className="date-header">
                     <div className={`date-title ${!dateToggles[date] ? 'expanded' : ''}`} onClick={() => toggleDate(date)}>
                       {date}
                     </div>
-                    <div className={`company-group-wrapper ${dateToggles[date] ? 'collapsed' : ''}`}>
-                      {Object.entries(filteredFirms).map(([firm, firmReports]) => (
+                    {index === 0 && isRecent && !isSearchActive && (
+                      <div className="sort-options">
+                        <button className={`sort-btn ${sortBy === 'time' ? 'active' : ''}`} onClick={() => setSortBy('time')}>시간순</button>
+                        <button className={`sort-btn ${sortBy === 'company' ? 'active' : ''}`} onClick={() => setSortBy('company')}>회사별</button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={`company-group-wrapper ${dateToggles[date] ? 'collapsed' : ''}`}>
+                    {sortBy === 'time' || isFavoritesPage || Array.isArray(itemsAtDate) ? (
+                      /* 평탄화 리스트 (시간순, 즐겨찾기, 또는 데이터가 아직 배열인 경우) */
+                      <div className="report-wrapper">
+                        {(Array.isArray(itemsAtDate) ? itemsAtDate : Object.values(itemsAtDate).flat())
+                          .filter(r => !isFavoritesPage || favorites[r.id])
+                          .map(report => (
+                            <ReportItem 
+                              key={report.id}
+                              report={report}
+                              isFavorite={!!favorites[report.id]}
+                              isSummaryExpanded={summaryToggles[report.id]}
+                              onToggleFavorite={toggleFavorite}
+                              onToggleSummary={toggleSummary}
+                              onOpenShareMenu={handleOpenShareMenu}
+                              showFirmTag={true}
+                              onWriterClick={onWriterClick}
+                            />
+                          ))
+                        }
+                      </div>
+                    ) : (
+                      /* 증권사별 그룹화 리스트 (회사별 모드 + 데이터가 객체인 경우) */
+                      Object.entries(itemsAtDate).map(([firm, firmReports]) => (
                         <div className="company-group" key={firm}>
                           <div className={`company-title ${!firmToggles[date]?.[firm] ? 'expanded' : ''}`} onClick={() => toggleFirm(date, firm)}>
                             {firm}
                           </div>
                           <div className={`report-wrapper ${firmToggles[date]?.[firm] ? 'collapsed' : ''}`}>
-                            {firmReports.map((report) => (
+                            {Array.isArray(firmReports) ? firmReports.map(report => (
                               <ReportItem 
                                 key={report.id}
                                 report={report}
@@ -166,21 +180,21 @@ function ReportList() {
                                 onToggleFavorite={toggleFavorite}
                                 onToggleSummary={toggleSummary}
                                 onOpenShareMenu={handleOpenShareMenu}
+                                showFirmTag={false}
+                                onWriterClick={onWriterClick}
                               />
-                            ))}
+                            )) : null}
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      ))
+                    )}
                   </div>
-                );
-              })}
-            </InfiniteScroll>
-            {isLoading && hasMore && (
-              <div className="loading-overlay">로딩 중...</div>
-            )}
-          </>
+                </div>
+              );
+            })}
+          </InfiniteScroll>
         )}
+        {isLoading && hasMore && <div className="loading-overlay">로딩 중...</div>}
       </div>
 
       <ShareMenu 

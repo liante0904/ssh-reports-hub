@@ -2,14 +2,16 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-function ReportItem({ 
+const ReportItem = ({ 
   report, 
   isFavorite, 
   isSummaryExpanded, 
   onToggleFavorite, 
   onToggleSummary, 
-  onOpenShareMenu 
-}) {
+  onOpenShareMenu,
+  showFirmTag,
+  onWriterClick
+}) => {
   const { id, title, writer, link, gemini_summary, firm } = report;
   
   const isDsSec = link && link.includes('ds-sec.co.kr');
@@ -21,33 +23,48 @@ function ReportItem({
   const hasSummary = gemini_summary && gemini_summary.trim() !== "" && gemini_summary.trim() !== " ";
 
   return (
-    <div className={`report-container-item ${hasSummary ? 'has-summary' : ''}`}>
+    <div className={`report-container-item ${hasSummary ? 'has-summary' : ''}`} key={id}>
       <div className="report">
         <div className="report-content">
           <div className="report-header">
-            <a href={finalLink} target="_blank" rel="noopener noreferrer">
-              {title}
-            </a>
-            {hasSummary && (
-              <span className="ai-badge" onClick={() => onToggleSummary(id)}>
-                AI 요약
-              </span>
-            )}
+            {showFirmTag && <span className="firm-tag">{firm}</span>}
+            <div className="report-title-container">
+              <a href={finalLink} target="_blank" rel="noopener noreferrer" className="report-title">
+                {title}
+              </a>
+              {hasSummary && (
+                <span className="ai-badge" onClick={() => onToggleSummary(id)}>
+                  AI 요약
+                </span>
+              )}
+            </div>
           </div>
-          
-          <div className="report-meta">
-            <p className="report-writer">작성자: {writer}</p>
+          <div className="report-footer">
+            <p className="report-writer" onClick={() => onWriterClick?.(writer)} style={{cursor: onWriterClick ? 'pointer' : 'default'}}>
+              작성자: {writer} <span className="writer-search-icon">🔍</span>
+            </p>
             <div className="report-actions">
+              {hasSummary && (
+                <button 
+                  className={`summary-toggle-btn ${isSummaryExpanded ? 'active' : ''}`}
+                  onClick={() => onToggleSummary(id)}
+                >
+                  {isSummaryExpanded ? '요약 닫기' : 'AI 요약 보기'}
+                  <svg className="chevron-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+                  </svg>
+                </button>
+              )}
               <button 
                 className={`favorite-button ${isFavorite ? 'active' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleFavorite(id);
-                }}
-                title={isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+                onClick={() => onToggleFavorite(id)}
+                title={isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"}
               >
-                <svg viewBox="0 0 24 24" width="20" height="20" fill={isFavorite ? '#FFD700' : 'none'} stroke={isFavorite ? '#FFD700' : 'currentColor'} strokeWidth="2">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d={isFavorite 
+                    ? "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                    : "M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"}
+                  />
                 </svg>
               </button>
               <button 
@@ -61,18 +78,6 @@ function ReportItem({
               </button>
             </div>
           </div>
-
-          {hasSummary && (
-            <button 
-              className={`summary-toggle-btn ${isSummaryExpanded ? 'active' : ''}`}
-              onClick={() => onToggleSummary(id)}
-            >
-              {isSummaryExpanded ? '요약 닫기' : 'AI 요약 보기'}
-              <svg className="chevron-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-              </svg>
-            </button>
-          )}
         </div>
       </div>
       {hasSummary && (
@@ -94,6 +99,6 @@ function ReportItem({
       )}
     </div>
   );
-}
+};
 
 export default ReportItem;

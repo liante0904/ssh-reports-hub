@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 
-export function useReportFetch(searchQuery, pathname) {
+export function useReportFetch(searchQuery, pathname, sortBy) {
   const [reports, setReports] = useState({});
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -37,12 +37,16 @@ export function useReportFetch(searchQuery, pathname) {
 
     params.append('offset', offset);
 
+    if (sortBy === 'company') {
+      params.append('sort', 'company');
+    }
+
     if (searchQuery.query && searchQuery.category) {
       params.append(searchQuery.category, searchQuery.query);
     }
 
     return `${apiUrl}?${params.toString()}`;
-  }, [offset, searchQuery, pathname, BASE_URL, TABLE_NAME]);
+  }, [offset, searchQuery, pathname, BASE_URL, TABLE_NAME, sortBy]);
 
   const mergeReports = useCallback((prev, newItems) => {
     const updated = { ...prev };
@@ -55,14 +59,7 @@ export function useReportFetch(searchQuery, pathname) {
         date = `${rawDate.substring(0, 4)}-${rawDate.substring(4, 6)}-${rawDate.substring(6, 8)}`;
       } else {
         const match = rawDate.match(/^(\d{4}-\d{2}-\d{2})/);
-        if (match) {
-          date = match[1];
-        } else {
-          const altMatch = rawDate.match(/^(\d{4}[./]\d{2}[./]\d{2})/);
-          if (altMatch) {
-            date = altMatch[1].replace(/\./g, '-').replace(/\//g, '-');
-          }
-        }
+        if (match) date = match[1];
       }
       
       const firm = item.firm_nm ? item.firm_nm.trim() : 'Unknown';
@@ -72,29 +69,25 @@ export function useReportFetch(searchQuery, pathname) {
         writer: item.writer,
         link: item.telegram_url || item.download_url || item.attach_url,
         gemini_summary: item.gemini_summary,
-        firm: firm // Store firm name in report object for easier access
+        firm: firm 
       };
 
-      if (!updated[date]) {
-        updated[date] = {};
+      // sortBy === 'time'일 때는 배열로 저장하여 서버 순차 정렬 유지
+      // sortBy === 'company'일 때는 기존처럼 증권사별 객체로 저장 (리팩토링 대상이나 일단 호환성 유지)
+      if (sortBy === 'time') {
+        if (!updated[date] || !Array.isArray(updated[date])) updated[date] = [];
+        const exists = updated[date].some((r) => r.id === report.id);
+        if (!exists) updated[date].push(report);
       } else {
-        updated[date] = { ...updated[date] };
-      }
-
-      if (!updated[date][firm]) {
-        updated[date][firm] = [];
-      } else {
-        updated[date][firm] = [...updated[date][firm]];
-      }
-
-      const exists = updated[date][firm].some((r) => r.id === report.id);
-      if (!exists) {
-        updated[date][firm].push(report);
+        if (!updated[date] || Array.isArray(updated[date])) updated[date] = {};
+        if (!updated[date][firm]) updated[date][firm] = [];
+        const exists = updated[date][firm].some((r) => r.id === report.id);
+        if (!exists) updated[date][firm].push(report);
       }
     }
 
     return updated;
-  }, []);
+  }, [sortBy]);
 
   const fetchReports = useCallback(async (isInitial = false) => {
     if (!hasMoreRef.current && !isInitial) return;
@@ -131,15 +124,13 @@ export function useReportFetch(searchQuery, pathname) {
     }
   }, [buildApiUrl, mergeReports]);
 
-  // Reset logic when search or path changes
   useEffect(() => {
     setReports({});
     setOffset(0);
     setHasMore(true);
     hasMoreRef.current = true;
-  }, [searchQuery, pathname]);
+  }, [searchQuery, pathname, sortBy]);
 
-  // Initial fetch when offset is 0
   useEffect(() => {
     if (offset === 0) {
       fetchReports(true);
