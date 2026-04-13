@@ -9,6 +9,7 @@
   --loading-background-color: rgba(255, 255, 255, 0.8);
   --loading-text-color: #555;
   --loading-border-color: #ddd;
+  --app-height: 100dvh;
 }
 
 html[data-theme='dark'] {
@@ -23,21 +24,30 @@ html[data-theme='dark'] {
   --loading-border-color: #444;
 }
 
-
-
-
 html, body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   width: 100%;
+  height: var(--app-height);
+  overflow: hidden; /* root에서 스크롤 관리 */
 }
+
 body { 
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 1em; 
   background-color: var(--background-color); 
   color: var(--text-color);
   transition: background-color 0.3s, color 0.3s;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .home-logo {
@@ -73,6 +83,9 @@ body {
   font-size: 1.2em; font-weight: bold; color: var(--primary-color); margin-bottom: 10px;
 }
 .main-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   /* 헤더 높이가 계산되기 전 기본 여백 확보 (Layout Shift 방지) */
   padding-top: calc(var(--header-height, 110px) + 20px); 
 }
