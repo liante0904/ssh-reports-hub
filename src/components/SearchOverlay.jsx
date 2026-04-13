@@ -24,8 +24,14 @@ function SearchOverlay() {
     if (isSearchOpen) {
       // 1. 외부에서 클릭(예: 작성자 클릭)을 통한 정보가 있으면 우선 사용
       if (pendingSearch?.query) {
-        setQuery(pendingSearch.query);
-        setCategory(pendingSearch.category || 'title');
+        const { query: pQuery, category: pCategory } = pendingSearch;
+        setQuery(pQuery);
+        setCategory(pCategory || 'title');
+        
+        // 검색 자동 실행
+        onSearch({ query: pQuery, category: pCategory || 'title' });
+        setSearchParams({ q: pQuery, category: pCategory || 'title' });
+
         // 사용했으니 비워줌
         setPendingSearch({ query: '', category: '' });
       } 

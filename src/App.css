@@ -48,7 +48,6 @@
 
 
 .main-content {
-
-  padding-bottom: 80px; /* 바텀 네비게이션 높이만큼 여백 추가 */
-
+  /* 바텀 네비게이션 높이 + 하단 세이프 영역 고려한 충분한 여백 확보 */
+  padding-bottom: calc(85px + env(safe-area-inset-bottom, 20px));
 }

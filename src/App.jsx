@@ -18,6 +18,7 @@ function AppContent() {
     setIsTopMenuOpen,
     searchQuery,
     setSearchQuery,
+    setPendingSearch,
     handleSearch,
     sortBy,
     setSortBy
@@ -47,17 +48,11 @@ function AppContent() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      const isDesktop = window.innerWidth >= 1024;
 
       // 스크롤 발생 시 모든 메뉴 닫기
       if (Math.abs(currentScrollY - lastScrollY.current) > 20) {
         if (isMenuOpen) setIsMenuOpen(false);
         if (isTopMenuOpen) setIsTopMenuOpen(false);
-      }
-
-      if (isDesktop) {
-        setIsNavVisible(false);
-        return;
       }
 
       if (currentScrollY > lastScrollY.current && currentScrollY > 100) {

@@ -82,15 +82,15 @@ function FloatingMenu({ isFloatingNavVisible }) {
             style={{ zIndex: 10 }}
           >
             <div className="floating-menu-content">
-              <a className="menu-item" href="/">
+              <div className="menu-item" onClick={() => { navigate('/'); toggleMenu(); }}>
                 <span className="icon">🏠</span> 홈
-              </a>
-              <a className="menu-item" href="/global">
+              </div>
+              <div className="menu-item" onClick={() => { navigate('/global'); toggleMenu(); }}>
                 <span className="icon">🌍</span> 글로벌
-              </a>
-              <a className="menu-item" href="/industry">
+              </div>
+              <div className="menu-item" onClick={() => { navigate('/industry'); toggleMenu(); }}>
                 <span className="icon">🏭</span> 산업
-              </a>
+              </div>
             </div>
           </div>
         </div>

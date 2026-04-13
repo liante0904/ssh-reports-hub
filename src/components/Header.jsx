@@ -20,7 +20,8 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     isMenuOpen, 
     toggleMenu, 
     handleSearch,
-    setSortBy
+    setSortBy,
+    firm_names
   } = useReport();
 
   useEffect(() => {
@@ -40,20 +41,10 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const isFavorites = location.pathname.includes('favorites');
   const isCompany = location.pathname.startsWith('/company');
 
-  const firm_names = [
-    "LS증권", "신한증권", "NH투자증권", "하나증권", "KB증권", "삼성증권",
-    "상상인증권", "신영증권", "미래에셋증권", "현대차증권", "키움증권", "DS투자증권",
-    "유진투자증권", "한국투자증권", "다올투자증권", "토스증권", "리딩투자증권", "대신증권",
-    "IM증권", "DB금융투자", "메리츠증권", "한화투자증권", "한양증권", "BNK투자증권",
-    "교보증권", "IBK투자증권"
-  ];
-
   const handleButtonClick = (buttonName) => {
     if (isTopMenuOpen) toggleMenuTop();
     if (isMenuOpen) toggleMenu();
     
-    // 검색 탭을 누를 때는 배경 리스트를 초기화(검색 취소)하지 않음. 
-    // 다른 네비게이션 탭(최근, 글로벌 등)을 누를 때만 기존 검색 상태를 초기화함.
     if (buttonName !== 'search') {
       handleSearch({ query: '', category: '' });
       setIsSearchActive(false);
@@ -61,7 +52,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
       setIsSearchActive(true);
     }
     
-    // 최근 탭 클릭 시 정렬 초기화
     if (buttonName === 'recent') {
       setSortBy('time');
     }
@@ -96,7 +86,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
     setQuery(selectedValue);
     setIsSearchActive(true);
-    setSortBy('time'); // 회사 선택 시 정렬 초기화
+    setSortBy('time');
 
     if (selectedValue) {
       setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
@@ -133,7 +123,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
   return (
     <>
-      <header ref={ref} className={!isNavVisible && isMobile ? 'nav-hidden' : ''}>
+      <header ref={ref} className={!isNavVisible ? 'nav-hidden' : ''}>
         <div className="header-top">
           <div className="title" onClick={handleTitleClick}>
             🏠 증권사 레포트 리스트
