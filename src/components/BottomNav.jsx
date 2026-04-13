@@ -3,11 +3,14 @@ import { useReport } from '../context/ReportContext';
 import './BottomNav.css';
 
 function BottomNav({ isNavVisible, toggleFloatingNav, onHomeClick }) {
-  const { toggleSearch, setSearchQuery } = useReport();
+  const { toggleSearch, isSearchOpen, setSearchQuery } = useReport();
   const navigate = useNavigate();
 
   const handleSearchClick = () => {
-    // setSearchQuery({ query: '', category: '' }); // 제거: 오픈 시점에 초기화하지 않음
+    // 오버레이를 열 때만(현재 닫혀있을 때만) 검색어 초기화
+    if (!isSearchOpen) {
+      setSearchQuery({ query: '', category: '' });
+    }
     toggleSearch();
   };
 

@@ -21,20 +21,22 @@ function SearchOverlay() {
         setQuery(searchQuery.query);
         setCategory('writer');
       } 
-      // 2. 그 외 초기 오픈 시 URL 파라미터에서 복원
-      else if (isInitialMount.current) {
+      // 2. 그 외 일반 오픈 시에는 URL 파라미터가 있을 때만 복원
+      else {
         const urlQuery = searchParams.get('q') || '';
         const urlCategory = searchParams.get('category') || 'title';
-        setQuery(urlQuery);
-        setCategory(urlCategory);
-        isInitialMount.current = false;
+        // URL에 검색어가 있을 때만 상태 동기화
+        if (urlQuery) {
+          setQuery(urlQuery);
+          setCategory(urlCategory);
+        } else {
+          // URL에 검색어가 없으면 깨끗한 상태로 시작
+          setQuery('');
+          setCategory('title');
+        }
       }
-    } else {
-      // 닫힐 때 초기화
-      setQuery('');
-      setCategory('title');
-      isInitialMount.current = true;
     }
+    // 닫힐 때 굳이 상태를 초기화해서 Re-render를 유발하지 않음 (다시 열 때 위 로직이 처리함)
   }, [isSearchOpen, searchParams, searchQuery]);
 
   const showToast = useCallback((message) => {
