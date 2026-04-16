@@ -1,66 +1,60 @@
 import { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import SearchOverlay from './components/SearchOverlay';
 import ReportList from './components/ReportList';
 import BottomNav from './components/BottomNav';
 import FloatingMenu from './components/FloatingMenu';
+import { ReportProvider, useReport } from './context/ReportContext';
 import './index.css';
 
-function App() {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isTopMenuOpen, setIsTopMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState({ query: '', category: '' });
+function AppContent() {
+  const { 
+    isSearchOpen, 
+    setIsSearchOpen,
+    isMenuOpen, 
+    setIsMenuOpen,
+    isTopMenuOpen, 
+    setIsTopMenuOpen,
+    searchQuery,
+    setSearchQuery,
+    setPendingSearch,
+    handleSearch,
+    sortBy,
+    setSortBy
+  } = useReport();
+
+  const location = useLocation();
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isFloatingNavVisible, setIsFloatingNavVisible] = useState(true);
   const lastScrollY = useRef(window.scrollY);
   const headerRef = useRef(null);
-
-  // Theme state management
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return savedTheme || (userPrefersDark ? 'dark' : 'light');
-  });
-
-  useEffect(() => {
-    console.log(`Theme changed to: ${theme}`); // <-- Log added
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    console.log('Toggling theme...'); // <-- Log added
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
-  };
 
   const toggleFloatingNav = () => setIsFloatingNavVisible(p => !p);
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 640) {
-        setIsFloatingNavVisible(true); // Always visible on desktop
+        setIsFloatingNavVisible(true);
       } else {
-        setIsFloatingNavVisible(false); // Hidden by default on mobile
+        setIsFloatingNavVisible(false);
       }
     };
     window.addEventListener('resize', handleResize);
-    handleResize(); // Initial check
+    handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      const isDesktop = window.innerWidth >= 1024;
 
-      if (isDesktop) {
-        setIsNavVisible(false);
-        return;
+      // 스크롤 발생 시 모든 메뉴 닫기
+      if (Math.abs(currentScrollY - lastScrollY.current) > 20) {
+        if (isMenuOpen) setIsMenuOpen(false);
+        if (isTopMenuOpen) setIsTopMenuOpen(false);
       }
 
-      // Hide nav on scroll down, show on scroll up
       if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
         setIsNavVisible(false);
       } else {
@@ -71,7 +65,7 @@ function App() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isMenuOpen, isTopMenuOpen, setIsMenuOpen, setIsTopMenuOpen]);
 
   useEffect(() => {
     const headerNode = headerRef.current;
@@ -94,58 +88,59 @@ function App() {
     };
   }, []);
 
-  const toggleSearch = () => {
-    setIsSearchOpen((prev) => !prev);
+  const handleWriterSearch = (writer) => {
+    setPendingSearch({ query: writer, category: 'writer' });
+    setIsSearchOpen(true);
   };
 
-  const toggleMenuTop = () => setIsTopMenuOpen((prev) => !prev);
-  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
-
-  const handleSearch = ({ query, category }) => {
-    setSearchQuery({ query, category });
+  const handleHomeClick = () => {
+    setSearchQuery({ query: '', category: '' });
+    if (isTopMenuOpen) setIsTopMenuOpen(false);
+    if (isMenuOpen) setIsMenuOpen(false);
   };
 
   return (
-    <Router>
+    <>
       <Header
         ref={headerRef}
         isNavVisible={isNavVisible}
-        toggleSearch={toggleSearch}
-        toggleMenuTop={toggleMenuTop}
-        isTopMenuOpen={isTopMenuOpen}
-        toggleFloatingMenu={toggleMenu} // Pass the floating menu toggle
-        isFloatingMenuOpen={isMenuOpen} // Pass the floating menu state
-        onSearch={handleSearch}
       />
       
-      <main className="main-content">
+      <main 
+        id="main-content"
+        className="main-content" 
+        onClick={() => {
+          if (isMenuOpen) setIsMenuOpen(false);
+          if (isTopMenuOpen) setIsTopMenuOpen(false);
+        }}
+      >
         <Routes>
-          <Route path="/" element={<ReportList searchQuery={searchQuery} />} />
-          <Route path="/global" element={<ReportList searchQuery={searchQuery} />} />
-          <Route path="/industry" element={<ReportList searchQuery={searchQuery} />} />
+          <Route path="/" element={<ReportList key={location.pathname === '/' ? 'recent' : location.pathname} onWriterClick={handleWriterSearch} />} />
+          <Route path="/global" element={<ReportList key="global" onWriterClick={handleWriterSearch} />} />
+          <Route path="/industry" element={<ReportList key="industry" onWriterClick={handleWriterSearch} />} />
+          <Route path="/favorites" element={<ReportList key="favorites" onWriterClick={handleWriterSearch} />} />
         </Routes>
       </main>
-      <SearchOverlay
-        isOpen={isSearchOpen}
-        toggleSearch={toggleSearch}
-        onSearch={handleSearch}
-      />
+      <SearchOverlay />
       <BottomNav 
         isNavVisible={isNavVisible} 
-        toggleSearch={toggleSearch} 
         toggleFloatingNav={toggleFloatingNav}
+        onHomeClick={handleHomeClick}
       />
       <FloatingMenu
-        isOpen={isMenuOpen}
-        toggleMenu={toggleMenu}
-        toggleSearch={toggleSearch}
-        theme={theme}
-        toggleTheme={toggleTheme}
         isFloatingNavVisible={isFloatingNavVisible}
-        selectedCompany={searchQuery.category === 'company' ? searchQuery.query : ''}
-        onCompanyChange={handleSearch}
       />
-    </Router>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <ReportProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </ReportProvider>
   );
 }
 

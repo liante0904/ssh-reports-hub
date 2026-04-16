@@ -2,29 +2,49 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>증권사 레포트 리스트</title>
-    <!-- 파비콘 및 앱 아이콘 설정 -->
-    <link rel="apple-touch-icon" sizes="57x57" href="/assets/icons/apple-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="/assets/icons/apple-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="/assets/icons/apple-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="/assets/icons/apple-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="/assets/icons/apple-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="/assets/icons/apple-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/assets/icons/apple-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/assets/icons/apple-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/assets/icons/favicon-96x96.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
-    <link rel="manifest" href="/manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>ssh-reports-hub</title>
+    <!-- 파비콘 및 앱 아이콘 설정 (캐시 우회를 위해 버전 파라미터 추가) -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/assets/icons/apple-icon-57x57.png?v=2">
+    <link rel="apple-touch-icon" sizes="60x60" href="/assets/icons/apple-icon-60x60.png?v=2">
+    <link rel="apple-touch-icon" sizes="72x72" href="/assets/icons/apple-icon-72x72.png?v=2">
+    <link rel="apple-touch-icon" sizes="76x76" href="/assets/icons/apple-icon-76x76.png?v=2">
+    <link rel="apple-touch-icon" sizes="114x114" href="/assets/icons/apple-icon-114x114.png?v=2">
+    <link rel="apple-touch-icon" sizes="120x120" href="/assets/icons/apple-icon-120x120.png?v=2">
+    <link rel="apple-touch-icon" sizes="144x144" href="/assets/icons/apple-icon-144x144.png?v=2">
+    <link rel="apple-touch-icon" sizes="152x152" href="/assets/icons/apple-icon-152x152.png?v=2">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-icon-180x180.png?v=2">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/android-icon-192x192.png?v=2">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png?v=2">
+    <link rel="icon" type="image/png" sizes="96x96" href="/assets/icons/favicon-96x96.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png?v=2">
+    <link rel="manifest" href="/manifest.json?v=2">
     <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" content="/assets/icons/ms-icon-144x144.png">
+    <meta name="msapplication-TileImage" content="/assets/icons/ms-icon-144x144.png?v=2">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ssh-reports-hub">
     <meta name="theme-color" content="#007AFF">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ssh-oci.netlify.app/">
+    <meta property="og:title" content="ssh-reports-hub">
+    <meta property="og:description" content="주요 증권사 레포트를 한눈에 확인하세요.">
+    <meta property="og:image" content="https://ssh-oci.netlify.app/og-image.png?v=2">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://ssh-oci.netlify.app/">
+    <meta property="twitter:title" content="ssh-reports-hub">
+    <meta property="twitter:description" content="주요 증권사 레포트를 한눈에 확인하세요.">
+    <meta property="twitter:image" content="https://ssh-oci.netlify.app/og-image.png?v=2">
+
+    <!-- 텔레그램 위젯 선행 로드 -->
+    <script async src="https://telegram.org/js/telegram-widget.js?22"></script>
+    <!-- 카카오 SDK 로드 -->
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js" integrity="sha384-l+xbElFSnPZ2rOaPrU//2FF5B4LB8FiX5q4fXYTlfcG4PGpMkE1vcL7kNXI6Cci0" crossorigin="anonymous"></script>
 </head>
 <body>
     <div id="root"></div>

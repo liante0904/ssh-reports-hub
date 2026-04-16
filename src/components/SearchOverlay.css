@@ -9,7 +9,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-start; /* 모바일에서는 상단 정렬 */
-  padding-top: 10vh; /* 20vh에서 10vh로 조정하여 키보드 공간 확보 */
+  padding-top: calc(10vh + env(safe-area-inset-top, 0px)); /* 20vh에서 10vh로 조정하여 키보드 공간 확보 */
   z-index: 1000;
   box-sizing: border-box;
 }

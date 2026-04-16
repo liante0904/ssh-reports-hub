@@ -1,6 +1,6 @@
 {
- "name": "App",
- "short_name": "레포트 리스트",
+ "name": "ssh-reports-hub",
+ "short_name": "ssh-reports-hub",
  "description": "증권사 레포트 목록을 제공하는 웹 애플리케이션",
  "start_url": "/",
  "display": "standalone",

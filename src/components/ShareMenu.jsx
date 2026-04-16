@@ -47,8 +47,33 @@ function ShareMenu({ isOpen, onClose, reportData, position }) {
   };
 
   const handleKakaoShare = () => {
-    const encodedUrl = encodeURIComponent(shareUrl);
-    window.open(`https://sharer.kakao.com/talk/friends/picker/link?url=${encodedUrl}`, '_blank');
+    if (window.Kakao && window.Kakao.isInitialized()) {
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: `[${firm}] ${title}`,
+          description: writer ? `작성자: ${writer}` : '증권사 레포트 리스트',
+          imageUrl: 'https://ssh-oci.netlify.app/og-image.png',
+          link: {
+            mobileWebUrl: shareUrl,
+            webUrl: shareUrl,
+          },
+        },
+        buttons: [
+          {
+            title: '레포트 보기',
+            link: {
+              mobileWebUrl: shareUrl,
+              webUrl: shareUrl,
+            },
+          },
+        ],
+      });
+    } else {
+      // SDK 미로딩 시 폴백: 기존 URL 방식
+      const encodedUrl = encodeURIComponent(shareUrl);
+      window.open(`https://sharer.kakao.com/talk/friends/picker/link?url=${encodedUrl}`, '_blank');
+    }
     onClose();
   };
 

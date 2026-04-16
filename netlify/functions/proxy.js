@@ -1,76 +1,74 @@
 export const handler = async (event) => {
-  const { url, filename } = event.queryStringParameters;
+  const { url, filename, referer } = event.queryStringParameters;
+  if (!url) return { statusCode: 400, body: 'URL missing' };
 
-  if (!url) {
-    return { statusCode: 400, body: 'Missing URL parameter' };
-  }
-
-  const displayFilename = filename ? decodeURIComponent(filename) : 'report.pdf';
+  const targetUrl = decodeURIComponent(url);
+  const boardUrl = referer ? decodeURIComponent(referer) : targetUrl.replace('download.php', 'board.php');
 
   try {
-    const targetUrl = decodeURIComponent(url);
-    const urlObj = new URL(targetUrl);
-    const wr_id = urlObj.searchParams.get('wr_id');
-    const bo_table = urlObj.searchParams.get('bo_table');
-    const boardUrl = `https://www.ds-sec.co.kr/bbs/board.php?bo_table=${bo_table}&wr_id=${wr_id}`;
-
+    // curl 명령어를 100% 완벽하게 모사한 헤더 세트 (보안 우회)
     const baseHeaders = {
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-      'Accept-Language': 'ko-KR,ko;q=0.9',
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      'Accept-Language': 'ko,en-US;q=0.9,en;q=0.8',
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Sec-Ch-Ua': '"Chromium";v="146", "Not-A.Brand";v="24", "Google Chrome";v="146"',
+      'Sec-Ch-Ua-Mobile': '?0',
+      'Sec-Ch-Ua-Platform': '"macOS"',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'same-origin',
+      'Sec-Fetch-User': '?1',
+      'Upgrade-Insecure-Requests': '1',
       'Connection': 'keep-alive',
     };
 
-    console.log(`[Proxy] Step 1: Visiting ${boardUrl}`);
-    const boardRes = await fetch(boardUrl, { headers: baseHeaders });
+    console.log(`[Proxy] 1. 방문 및 쿠키 획득 시도...`);
+    const boardRes = await fetch(boardUrl, { headers: baseHeaders, redirect: 'follow' });
     
-    const allCookies = boardRes.headers.getSetCookie 
-      ? boardRes.headers.getSetCookie().join('; ') 
-      : boardRes.headers.get('set-cookie') || '';
+    // AWS Lambda(Netlify) 환경 호환을 위한 완벽한 쿠키 파싱 로직
+    let cookies = '';
+    if (boardRes.headers.getSetCookie) {
+      cookies = boardRes.headers.getSetCookie().map(c => c.split(';')[0]).join('; ');
+    } else {
+      const fallbackCookie = boardRes.headers.get('set-cookie');
+      cookies = fallbackCookie ? fallbackCookie.split(',').map(c => c.split(';')[0]).join('; ') : '';
+    }
 
-    console.log(`[Proxy] Step 2: Requesting download with cookies...`);
+    console.log(`[Proxy] 2. 다운로드 시도... (Cookies: ${cookies ? 'YES' : 'NO'})`);
+    const dlHeaders = { ...baseHeaders, 'Referer': boardUrl, 'Cookie': cookies };
+    const res = await fetch(targetUrl, { headers: dlHeaders, redirect: 'follow' });
 
-    const response = await fetch(targetUrl, {
-      headers: {
-        ...baseHeaders,
-        'Referer': boardUrl,
-        'Cookie': allCookies,
-      }
-    });
+    const contentType = res.headers.get('content-type') || '';
+    const buffer = await res.arrayBuffer();
 
-    const contentType = response.headers.get('content-type');
-    const buffer = await response.arrayBuffer();
+    console.log(`[Proxy] 응답 Content-Type: ${contentType}, Size: ${buffer.byteLength} bytes`);
 
-    if (contentType && contentType.includes('text/html')) {
+    // DS 서버 차단 시 HTML이 반환됨
+    if (contentType.includes('text/html') || buffer.byteLength < 5000) {
       const htmlText = Buffer.from(buffer).toString('utf-8');
-      
-      if (htmlText.includes('alert(')) {
-        const msg = htmlText.match(/alert\("([^"]+)"\)/)?.[1] || '알 수 없는 경고창';
-        console.error(`[Proxy Error Message from Server]: ${msg}`);
-      } else {
-        console.log(`[Proxy HTML Body]: ${htmlText.substring(0, 500)}...`);
-      }
-
-      return {
-        statusCode: 200,
+      console.error(`[Proxy] 에러 응답 내용 일부: ${htmlText.substring(0, 300)}`);
+      return { 
+        statusCode: 502, 
         headers: { 'Content-Type': 'text/html; charset=utf-8' },
-        body: htmlText,
+        body: `<h3>DS투자증권 차단 또는 세션 만료</h3><pre>${htmlText.substring(0, 500)}</pre>` 
       };
     }
 
-    console.log(`[Proxy Success] Serving PDF with filename: ${displayFilename}`);
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `inline; filename="${encodeURIComponent(displayFilename)}"`,
+        'Content-Disposition': `inline; filename="${encodeURIComponent(filename || 'report.pdf')}"`,
         'X-Content-Type-Options': 'nosniff',
+        'Cache-Control': 'no-store', // 브라우저 캐싱 방지
       },
       body: Buffer.from(buffer).toString('base64'),
       isBase64Encoded: true,
     };
-  } catch (error) {
-    console.error('[Proxy Exception]:', error);
-    return { statusCode: 500, body: error.message };
+  } catch (e) {
+    console.error('[Proxy] Exception:', e);
+    return { statusCode: 500, body: e.message };
   }
 };

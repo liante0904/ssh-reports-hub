@@ -1,21 +1,23 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useReport } from '../context/ReportContext';
 import CompanySelect from './CompanySelect';
 import './FloatingMenu.css';
 
-function FloatingMenu({ 
-  isOpen, 
-  toggleMenu, 
-  toggleSearch, 
-  theme, 
-  toggleTheme, 
-  isFloatingNavVisible,
-  selectedCompany,
-  onCompanyChange
-}) {
+function FloatingMenu({ isFloatingNavVisible }) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { 
+    isMenuOpen: isOpen, 
+    toggleMenu, 
+    toggleSearch, 
+    theme, 
+    toggleTheme,
+    handleSearch: onCompanyChange,
+    searchQuery
+  } = useReport();
 
-  // 메뉴가 열렸을 때 외부 클릭으로 닫기
+  const selectedCompany = searchQuery.category === 'company' ? searchQuery.query : '';
+
   const handleOverlayClick = () => {
     if (isOpen) {
       toggleMenu();
@@ -29,21 +31,16 @@ function FloatingMenu({
   const handleSelectChange = (e) => {
     const selectedValue = e.target.value;
     
-    // Header.jsx의 handleCompanyChange 로직과 동일하게 구현
     if (selectedValue) {
       setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
-      if (typeof onCompanyChange === 'function') {
-        onCompanyChange({ query: selectedValue, category: 'company' });
-      }
+      onCompanyChange({ query: selectedValue, category: 'company' });
     } else {
       setSearchParams({}, { replace: true });
-      if (typeof onCompanyChange === 'function') {
-        onCompanyChange({ query: '', category: 'company' });
-      }
+      onCompanyChange({ query: '', category: 'company' });
     }
     
     navigate({ pathname: '/' });
-    toggleMenu(); // 메뉴 닫기
+    toggleMenu();
   };
 
   return (
@@ -65,7 +62,6 @@ function FloatingMenu({
         </nav>
       )}
 
-      {/* 메뉴가 열려 있을 때만 외부 레이어 보이게 */}
       {isOpen && (
         <div
           className="floating-menu-overlay"
@@ -82,32 +78,19 @@ function FloatingMenu({
           <div
             className={`floating-menu ${isOpen ? 'open' : ''}`}
             id="floatingMenu"
-            onClick={(e) => e.stopPropagation()} // 내부 클릭 시 닫힘 방지
-            style={{ zIndex: 10 }} // 메뉴가 오버레이 위에 보이도록
+            onClick={(e) => e.stopPropagation()}
+            style={{ zIndex: 10 }}
           >
             <div className="floating-menu-content">
-              <a className="menu-item" href="/">
+              <div className="menu-item" onClick={() => { navigate('/'); toggleMenu(); }}>
                 <span className="icon">🏠</span> 홈
-              </a>
-              <a className="menu-item" href="/global">
-                <span className="icon">🌍</span> 글로벌
-              </a>
-              <a className="menu-item" href="/industry">
-                <span className="icon">🏭</span> 산업
-              </a>
-              
-              {/* 추후 작업을 위해 증권사 필터 주석 처리
-              <div className="menu-divider"></div>
-              
-              <div className="menu-item company-filter-item">
-                <span className="icon">🏦</span>
-                <CompanySelect 
-                  value={selectedCompany} 
-                  onChange={handleSelectChange}
-                  className="floating-company-select"
-                />
               </div>
-              */}
+              <div className="menu-item" onClick={() => { navigate('/global'); toggleMenu(); }}>
+                <span className="icon">🌍</span> 글로벌
+              </div>
+              <div className="menu-item" onClick={() => { navigate('/industry'); toggleMenu(); }}>
+                <span className="icon">🏭</span> 산업
+              </div>
             </div>
           </div>
         </div>

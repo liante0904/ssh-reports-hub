@@ -6,9 +6,10 @@
   display: flex;
   justify-content: space-around;
   background-color: #007aff;
-  padding: 10px 0;
-  padding-bottom: calc(10px + env(safe-area-inset-bottom));
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+  padding-top: 10px;
+  /* 홈 바가 있는 기기 대응: 최소 12px 확보, 시스템 값이 있으면 합산 */
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 12px));
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease-in-out;
   transform: translateY(0);
   z-index: 100;
@@ -27,6 +28,7 @@
   color: white;
   font-size: 16px;
   cursor: pointer;
+  padding-bottom: 0px; /* 버튼 하단 여백 제거 */
 }
 
 .nav-button span:first-child {
@@ -35,4 +37,12 @@
 
 .nav-button:hover {
   opacity: 0.8;
+}
+
+/* PWA 독립 실행 모드일 때 */
+@media (display-mode: standalone) {
+  .bottom-nav {
+    /* 홈바 영역 확보를 위해 env가 0인 경우라도 최소 4px만 유지 */
+    padding-bottom: env(safe-area-inset-bottom, 4px);
+  }
 }
