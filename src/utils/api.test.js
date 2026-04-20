@@ -4,15 +4,15 @@ import { normalizeApiBaseUrl } from './api.js';
 
 test('normalizeApiBaseUrl removes trailing slashes', () => {
   assert.equal(
-    normalizeApiBaseUrl('https://ssh-oci.duckdns.org///'),
-    'https://ssh-oci.duckdns.org'
+    normalizeApiBaseUrl('https://api.example.com///'),
+    'https://api.example.com'
   );
 });
 
 test('normalizeApiBaseUrl upgrades non-local http origins to https', () => {
   assert.equal(
-    normalizeApiBaseUrl('http://ssh-oci.duckdns.org'),
-    'https://ssh-oci.duckdns.org'
+    normalizeApiBaseUrl('http://api.example.com'),
+    'https://api.example.com'
   );
 });
 
@@ -25,8 +25,11 @@ test('normalizeApiBaseUrl preserves localhost http origins', () => {
 
 test('normalizeApiBaseUrl falls back to the default API URL on invalid input', () => {
   assert.equal(
-    normalizeApiBaseUrl('not a url'),
-    'https://ssh-oci.duckdns.org'
+    normalizeApiBaseUrl('not a url', 'http://localhost:8000'),
+    'http://localhost:8000'
   );
 });
 
+test('normalizeApiBaseUrl returns an empty fallback when no URL is configured', () => {
+  assert.equal(normalizeApiBaseUrl('', ''), '');
+});

@@ -1,12 +1,13 @@
 export const handler = async (event) => {
   const { id } = event.queryStringParameters;
-  const BASE_URL = process.env.VITE_API_BASE_URL || 'https://ssh-reports-hub-fastapi.netlify.app';
-  const SITE_URL = 'https://ssh-oci.netlify.app';
+  const BASE_URL = process.env.API_BASE_URL || process.env.VITE_API_BASE_URL;
+  const SITE_URL = (process.env.SITE_URL || process.env.URL || `https://${event.headers.host}`).replace(/\/+$/, '');
 
   if (!id) return { statusCode: 400, body: 'ID missing' };
+  if (!BASE_URL) return { statusCode: 500, body: 'API_BASE_URL missing' };
 
   try {
-    const cleanBaseUrl = BASE_URL.replace(/\/$/, '');
+    const cleanBaseUrl = BASE_URL.replace(/\/+$/, '');
     const response = await fetch(`${cleanBaseUrl}/reports/?report_id=${id}`);
     const data = await response.json();
     

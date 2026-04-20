@@ -32,6 +32,7 @@ function ShareMenu({ isOpen, onClose, reportData, position }) {
   if (!isOpen || !reportData) return null;
 
   const { title, firm, shareUrl, writer } = reportData;
+  const shareImageUrl = `${window.location.origin}/og-image.png`;
 
   const handleCopyLink = async () => {
     try {
@@ -53,7 +54,7 @@ function ShareMenu({ isOpen, onClose, reportData, position }) {
         content: {
           title: `[${firm}] ${title}`,
           description: writer ? `작성자: ${writer}` : '증권사 레포트 리스트',
-          imageUrl: 'https://ssh-oci.netlify.app/og-image.png',
+          imageUrl: shareImageUrl,
           link: {
             mobileWebUrl: shareUrl,
             webUrl: shareUrl,

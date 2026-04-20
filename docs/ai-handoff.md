@@ -22,6 +22,9 @@ It displays reports collected by the `ssh-reports-scraper` backend pipeline and 
 - `src/utils/api.js`
   - API base URL normalization.
   - Has lightweight Node built-in tests in `src/utils/api.test.js`.
+  - Production requires `VITE_API_BASE_URL`; local dev falls back to `http://localhost:8000`.
+- `.env.example`
+  - Documents the frontend and Netlify function environment variables.
 - `src/hooks/useReportFetch.js`
   - Currently owns report URL building, fetch, pagination, response normalization, and merge behavior.
   - Next refactor target: extract a pure report URL builder.
@@ -46,4 +49,3 @@ It displays reports collected by the `ssh-reports-scraper` backend pipeline and 
 - Run `npm run test:api` after touching `src/utils/api.js`.
 - Run `npm run lint` and `npm run build` when dependencies are installed.
 - Avoid full dependency installs when local disk space is low.
-

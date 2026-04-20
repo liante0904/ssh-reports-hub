@@ -32,9 +32,11 @@ coverage
 *.sln
 *.sw?
 *.env.*
+!.env.example
 
 # Local Netlify folder
 .netlify
 .env
+!.env.example
 secrets.json
 **/secrets.json

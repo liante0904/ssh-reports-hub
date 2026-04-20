@@ -1,6 +1,8 @@
-const DEFAULT_API_BASE_URL = 'https://ssh-oci.duckdns.org';
+const LOCAL_API_BASE_URL = 'http://localhost:8000';
 
-export function normalizeApiBaseUrl(rawBaseUrl = DEFAULT_API_BASE_URL) {
+export function normalizeApiBaseUrl(rawBaseUrl, fallbackBaseUrl = '') {
+  if (!rawBaseUrl) return fallbackBaseUrl;
+
   const trimmedBaseUrl = rawBaseUrl.trim().replace(/\/+$/, '');
 
   try {
@@ -13,10 +15,18 @@ export function normalizeApiBaseUrl(rawBaseUrl = DEFAULT_API_BASE_URL) {
 
     return url.toString().replace(/\/+$/, '');
   } catch {
-    return DEFAULT_API_BASE_URL;
+    return fallbackBaseUrl;
   }
 }
 
 export function getApiBaseUrl() {
-  return normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL);
+  const env = import.meta.env || {};
+  const fallbackBaseUrl = env.DEV ? LOCAL_API_BASE_URL : '';
+  const baseUrl = normalizeApiBaseUrl(env.VITE_API_BASE_URL, fallbackBaseUrl);
+
+  if (!baseUrl) {
+    throw new Error('VITE_API_BASE_URL is required for production builds.');
+  }
+
+  return baseUrl;
 }

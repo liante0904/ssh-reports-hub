@@ -77,6 +77,11 @@
 - 2026-04-20: `src/utils/api.js` 정규화 테스트 추가.
   - Node 내장 테스트 러너를 사용해 추가 의존성 없이 검증.
   - trailing slash, http→https 보정, localhost 예외, invalid URL fallback 검증.
+- 2026-04-20: 운영 도메인 하드코딩 제거.
+  - 프론트 API는 `VITE_API_BASE_URL` 환경변수를 사용합니다.
+  - 정적 OG 메타는 `VITE_SITE_URL` 환경변수를 사용합니다.
+  - Netlify function은 `API_BASE_URL` 또는 `VITE_API_BASE_URL`, 사이트 URL은 `SITE_URL` 또는 Netlify `URL`을 사용합니다.
+  - 필요한 변수 예시는 `.env.example`에 기록했습니다.
 
 ## 포트폴리오 README에 넣을 후보 문장
 

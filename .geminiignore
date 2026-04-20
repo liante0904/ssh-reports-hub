@@ -14,6 +14,7 @@ dist-ssr/
 # Secrets and generated env
 .env
 .env.*
+!.env.example
 *.local
 secrets.json
 **/secrets.json
@@ -35,4 +36,3 @@ coverage/
 .idea/
 .vscode/*
 !.vscode/extensions.json
-
