@@ -23,7 +23,7 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
 
   const buildApiUrl = useCallback(() => {
     const params = new URLSearchParams();
-    const apiUrl = `${BASE_URL.replace(/\/$/, '')}/reports`;
+    const apiUrl = `${BASE_URL.replace(/\/$/, '')}/reports/`;
 
     if (pathname.includes('global')) {
       params.append('mkt_tp', 'global');

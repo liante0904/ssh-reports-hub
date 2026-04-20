@@ -7,7 +7,7 @@ export const handler = async (event) => {
 
   try {
     const cleanBaseUrl = BASE_URL.replace(/\/$/, '');
-    const response = await fetch(`${cleanBaseUrl}/reports?report_id=${id}`);
+    const response = await fetch(`${cleanBaseUrl}/reports/?report_id=${id}`);
     const data = await response.json();
     
     const items = Array.isArray(data) ? data : (data.items || []);
