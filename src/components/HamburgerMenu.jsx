@@ -23,7 +23,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
   const [lastDeleted, setLastDeleted] = useState(null);
 
   const getApiConfig = () => {
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://ssh-oci.duckdns.org';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://ssh-oci.duckdns.org';
     const cleanBaseUrl = baseUrl.replace(/\/$/, '');
     const token = localStorage.getItem('auth_token');
     return { cleanBaseUrl, token };

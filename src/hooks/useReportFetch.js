@@ -10,8 +10,7 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
   const isLoadingRef = useRef(false);
   const hasMoreRef = useRef(true);
 
-  const BASE_URL = import.meta.env.VITE_ORACLE_REST_API;
-  const TABLE_NAME = import.meta.env.VITE_TABLE_NAME;
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://ssh-oci.duckdns.org';
 
   // Sync refs with state
   useEffect(() => {
@@ -24,56 +23,68 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
 
   const buildApiUrl = useCallback(() => {
     const params = new URLSearchParams();
-    let apiUrl = `${BASE_URL}/${TABLE_NAME}`;
+    const apiUrl = `${BASE_URL.replace(/\/$/, '')}/reports`;
 
     if (pathname.includes('global')) {
-      apiUrl += '/search/';
       params.append('mkt_tp', 'global');
     } else if (pathname.includes('industry')) {
-      apiUrl += '/industry';
-    } else {
-      apiUrl += '/search/';
+      params.append('mkt_tp', 'industry');
     }
 
-    params.append('offset', offset);
+    params.append('offset', offset.toString());
+    params.append('limit', '20');
 
     if (sortBy === 'company') {
       params.append('sort', 'company');
     }
 
-    if (searchQuery.query && searchQuery.category) {
-      params.append(searchQuery.category, searchQuery.query);
+    if (searchQuery.query) {
+      params.append('q', searchQuery.query);
     }
 
     return `${apiUrl}?${params.toString()}`;
-  }, [offset, searchQuery, pathname, BASE_URL, TABLE_NAME, sortBy]);
+  }, [offset, searchQuery, pathname, BASE_URL, sortBy]);
 
   const mergeReports = useCallback((prev, newItems) => {
     const updated = { ...prev };
 
+    if (!Array.isArray(newItems)) {
+      console.warn('❌ newItems is not an array:', newItems);
+      return updated;
+    }
+
     for (const item of newItems) {
-      let rawDate = item.reg_dt ? item.reg_dt.trim() : 'Unknown';
-      let date = rawDate;
-      
-      if (rawDate.length === 8 && /^\d+$/.test(rawDate)) {
-        date = `${rawDate.substring(0, 4)}-${rawDate.substring(4, 6)}-${rawDate.substring(6, 8)}`;
+      // API 응답 필드 (소문자/대문자 혼용 대응)
+      const report_id = item.report_id || item.REPORT_ID;
+      const firm_nm = item.FIRM_NM || item.firm_nm || 'Unknown';
+      const reg_dt = item.REG_DT || item.reg_dt || 'Unknown';
+      const article_title = item.ARTICLE_TITLE || item.article_title;
+      const writer = item.WRITER || item.writer;
+      const telegram_url = item.TELEGRAM_URL || item.telegram_url;
+      const pdf_url = item.PDF_URL || item.pdf_url;
+      const attach_url = item.ATTACH_URL || item.attach_url;
+      const gemini_summary = item.GEMINI_SUMMARY || item.gemini_summary;
+
+      if (!report_id) continue;
+
+      let date = reg_dt.toString().trim();
+      if (date.length === 8 && /^\d+$/.test(date)) {
+        date = `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
       } else {
-        const match = rawDate.match(/^(\d{4}-\d{2}-\d{2})/);
+        const match = date.match(/^(\d{4}-\d{2}-\d{2})/);
         if (match) date = match[1];
       }
       
-      const firm = item.firm_nm ? item.firm_nm.trim() : 'Unknown';
+      const firm = firm_nm.trim();
       const report = {
-        id: item.report_id,
-        title: item.article_title,
-        writer: item.writer,
-        link: item.telegram_url || item.download_url || item.attach_url,
-        gemini_summary: item.gemini_summary,
+        id: report_id,
+        title: article_title,
+        writer: writer,
+        link: telegram_url || pdf_url || attach_url,
+        gemini_summary: gemini_summary,
         firm: firm 
       };
 
-      // sortBy === 'time'일 때는 배열로 저장하여 서버 순차 정렬 유지
-      // sortBy === 'company'일 때는 기존처럼 증권사별 객체로 저장 (리팩토링 대상이나 일단 호환성 유지)
       if (sortBy === 'time') {
         if (!updated[date] || !Array.isArray(updated[date])) updated[date] = [];
         const exists = updated[date].some((r) => r.id === report.id);
@@ -103,10 +114,17 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
     isLoadingRef.current = true;
 
     try {
-      const res = await fetch(buildApiUrl(), { signal: controller.signal });
-      if (!res.ok) throw new Error('API 요청 실패');
+      const apiUrl = buildApiUrl();
+      const res = await fetch(apiUrl, { signal: controller.signal });
+      if (!res.ok) throw new Error(`API 요청 실패: ${res.status}`);
 
-      const { items, hasMore: apiHasMore } = await res.json();
+      const data = await res.json();
+      
+      // FastAPI는 보통 배열을 직접 반환하거나 { items: [] } 형태
+      const items = Array.isArray(data) ? data : (data.items || []);
+      
+      // hasMore 판단: 배열 길이가 0이면 더 이상 없음
+      const apiHasMore = items.length > 0;
 
       setReports((prev) => mergeReports(isInitial ? {} : prev, items));
       setOffset((prev) => (isInitial ? items.length : prev + items.length));

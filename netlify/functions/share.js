@@ -1,26 +1,31 @@
 export const handler = async (event) => {
   const { id } = event.queryStringParameters;
-  const BASE_URL = process.env.VITE_ORACLE_REST_API;
-  const TABLE_NAME = process.env.VITE_TABLE_NAME;
+  const BASE_URL = process.env.VITE_API_BASE_URL || 'https://ssh-reports-hub-fastapi.netlify.app';
   const SITE_URL = 'https://ssh-oci.netlify.app';
 
   if (!id) return { statusCode: 400, body: 'ID missing' };
 
   try {
-    const response = await fetch(`${BASE_URL}/${TABLE_NAME}/search/?report_id=${id}`);
+    const cleanBaseUrl = BASE_URL.replace(/\/$/, '');
+    const response = await fetch(`${cleanBaseUrl}/reports?report_id=${id}`);
     const data = await response.json();
-    const report = data.items?.[0];
+    
+    const items = Array.isArray(data) ? data : (data.items || []);
+    const report = items[0];
 
     if (!report) return { statusCode: 404, body: 'Report not found' };
 
-    // 1. 진짜 원본 URL 추출 (key 또는 article_url이 가장 정확함)
-    const candidates = [report.key, report.article_url, report.telegram_url, report.download_url, report.attach_url];
+    // 1. 진짜 원본 URL 추출 (PDF_URL, TELEGRAM_URL 등)
+    const candidates = [
+      report.PDF_URL, report.TELEGRAM_URL, report.ATTACH_URL, report.article_url,
+      report.pdf_url, report.telegram_url, report.attach_url, report.download_url, report.key
+    ];
     const pdfUrl = candidates.find(u => u && u.startsWith('http') && !u.includes('netlify.app'));
 
     if (!pdfUrl) return { statusCode: 404, body: 'Original PDF link not found' };
 
-    const title = report.article_title || '증권사 리포트';
-    const company = report.firm_nm || '증권사';
+    const title = report.ARTICLE_TITLE || report.article_title || '증권사 리포트';
+    const company = report.FIRM_NM || report.firm_nm || '증권사';
     
     // 2. 리다이렉트 경로 결정
     let finalUrl = pdfUrl;
