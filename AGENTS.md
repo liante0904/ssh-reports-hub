@@ -1,6 +1,6 @@
 # Agent Notes
 
-Before making broad changes, read `docs/ai-handoff.md`.
+Before making broad changes, read `docs/ai-handoff.md` and `docs/portfolio-roadmap.md`.
 
 Keep changes small and prefer this order:
 
@@ -12,4 +12,3 @@ Keep changes small and prefer this order:
 6. Hamburger menu/auth/keyword hook split.
 
 Do not commit secrets, generated env files, local AI state, build output, or dependency directories.
-

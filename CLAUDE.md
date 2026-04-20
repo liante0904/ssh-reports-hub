@@ -1,6 +1,6 @@
 # Claude Notes
 
-Read `docs/ai-handoff.md` first.
+Read `docs/ai-handoff.md` first, then `docs/portfolio-roadmap.md`.
 
 The near-term work should stay incremental:
 
@@ -12,4 +12,3 @@ The near-term work should stay incremental:
 6. Split `HamburgerMenu` only after API behavior is covered.
 
 Do not commit secrets, generated env files, local AI state, build output, or dependency directories.
-

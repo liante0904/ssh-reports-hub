@@ -1,7 +1,6 @@
 const DEFAULT_API_BASE_URL = 'https://ssh-oci.duckdns.org';
 
-export function getApiBaseUrl() {
-  const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+export function normalizeApiBaseUrl(rawBaseUrl = DEFAULT_API_BASE_URL) {
   const trimmedBaseUrl = rawBaseUrl.trim().replace(/\/+$/, '');
 
   try {
@@ -18,3 +17,6 @@ export function getApiBaseUrl() {
   }
 }
 
+export function getApiBaseUrl() {
+  return normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL);
+}
