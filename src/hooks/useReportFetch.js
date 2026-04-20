@@ -101,14 +101,12 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
   }, [sortBy]);
 
   const fetchReports = useCallback(async (isInitial = false) => {
-    // 초기화 페칭이 아니고 이미 로딩 중이거나 더 이상 데이터가 없으면 중단
-    if (!isInitial && (isLoadingRef.current || !hasMoreRef.current)) return;
+    if (!hasMoreRef.current && !isInitial) return;
+    if (isLoadingRef.current && !isInitial) return;
 
-    // 초기화 페칭 시 이전 요청이 있으면 취소
     if (isInitial && abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    
     const controller = new AbortController();
     if (isInitial) abortControllerRef.current = controller;
 
@@ -121,7 +119,11 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
       if (!res.ok) throw new Error(`API 요청 실패: ${res.status}`);
 
       const data = await res.json();
+      
+      // FastAPI는 보통 배열을 직접 반환하거나 { items: [] } 형태
       const items = Array.isArray(data) ? data : (data.items || []);
+      
+      // hasMore 판단: 배열 길이가 0이면 더 이상 없음
       const apiHasMore = items.length > 0;
 
       setReports((prev) => mergeReports(isInitial ? {} : prev, items));
@@ -133,7 +135,6 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
       if (err.name === 'AbortError') return;
       console.error('❌ Error fetching reports:', err);
     } finally {
-      // 현재 컨트롤러가 여전히 활성 컨트롤러일 때만 로딩 종료
       if (!isInitial || abortControllerRef.current === controller) {
         setIsLoading(false);
         isLoadingRef.current = false;
@@ -141,22 +142,18 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
     }
   }, [buildApiUrl, mergeReports]);
 
-  // 검색 조건, 정렬, 경로 변경 시 상태 초기화 및 즉시 첫 페이지 로드
   useEffect(() => {
     setReports({});
     setOffset(0);
     setHasMore(true);
     hasMoreRef.current = true;
-    
-    // 리셋 후 즉시 페칭 시작
-    fetchReports(true);
+  }, [searchQuery, pathname, sortBy]);
 
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, [searchQuery, pathname, sortBy, fetchReports]);
+  useEffect(() => {
+    if (offset === 0) {
+      fetchReports(true);
+    }
+  }, [offset, fetchReports]);
 
   return {
     reports,
