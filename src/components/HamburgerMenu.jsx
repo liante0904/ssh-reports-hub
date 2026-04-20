@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import CompanySelect from './CompanySelect';
 import TelegramAuth from './menu/TelegramAuth';
 import KeywordOverlay from './menu/KeywordOverlay';
+import { getApiBaseUrl } from '../utils/api';
 import './HamburgerMenu.css';
 
 function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChange, handleHeaderClick }) {
@@ -23,10 +24,8 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
   const [lastDeleted, setLastDeleted] = useState(null);
 
   const getApiConfig = () => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://ssh-oci.duckdns.org';
-    const cleanBaseUrl = baseUrl.replace(/\/$/, '');
     const token = localStorage.getItem('auth_token');
-    return { cleanBaseUrl, token };
+    return { cleanBaseUrl: getApiBaseUrl(), token };
   };
 
   const fetchKeywords = async () => {

@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { getApiBaseUrl } from '../utils/api';
 
 export function useReportFetch(searchQuery, pathname, sortBy) {
   const [reports, setReports] = useState({});
@@ -10,7 +11,7 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
   const isLoadingRef = useRef(false);
   const hasMoreRef = useRef(true);
 
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://ssh-oci.duckdns.org';
+  const BASE_URL = getApiBaseUrl();
 
   // Sync refs with state
   useEffect(() => {
@@ -23,7 +24,7 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
 
   const buildApiUrl = useCallback(() => {
     const params = new URLSearchParams();
-    const apiUrl = `${BASE_URL.replace(/\/$/, '')}/reports/`;
+    const apiUrl = `${BASE_URL}/reports/`;
 
     if (pathname.includes('global')) {
       params.append('mkt_tp', 'global');
