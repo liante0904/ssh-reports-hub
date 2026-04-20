@@ -9,6 +9,10 @@ import './HamburgerMenu.css';
 function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChange, handleHeaderClick }) {
   const [telegramUser, setTelegramUser] = useState(() => {
     const saved = localStorage.getItem('telegram_user');
+    const token = localStorage.getItem('auth_token');
+
+    if (!token) return null;
+
     try {
       return saved ? JSON.parse(saved) : null;
     } catch (e) {
@@ -30,7 +34,10 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
 
   const fetchKeywords = async () => {
     const { cleanBaseUrl, token } = getApiConfig();
-    if (!token) return;
+    if (!token) {
+      handleLogout();
+      return;
+    }
 
     setIsLoadingKeywords(true);
     try {
@@ -56,7 +63,11 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
 
   const syncKeywords = async (updatedKeywords) => {
     const { cleanBaseUrl, token } = getApiConfig();
-    if (!token) return;
+    if (!token) {
+      handleLogout();
+      alert('텔레그램 인증이 만료되었습니다. 다시 로그인해 주세요.');
+      return;
+    }
 
     try {
       const response = await fetch(`${cleanBaseUrl}/keywords/sync`, {
@@ -73,6 +84,9 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
         setKeywords(data.filter(k => k.is_active));
       } else if (response.status === 401) {
         handleLogout();
+        alert('텔레그램 인증이 만료되었습니다. 다시 로그인해 주세요.');
+      } else {
+        throw new Error(`키워드 동기화 실패: ${response.status}`);
       }
     } catch (error) {
       console.error('❌ 키워드 동기화 실패:', error);

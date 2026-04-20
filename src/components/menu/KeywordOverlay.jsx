@@ -33,7 +33,7 @@ function KeywordOverlay({
             placeholder="키워드 입력" 
             value={newKeyword}
             onChange={(e) => setNewKeyword(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleAddKeyword()}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddKeyword()}
           />
           <button className="keyword-add-btn" onClick={handleAddKeyword}>추가</button>
         </div>
