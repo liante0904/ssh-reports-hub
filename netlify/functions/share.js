@@ -23,9 +23,29 @@ export const handler = async (event) => {
 
     // 1. 진짜 원본 URL 추출 (key 또는 article_url이 가장 정확함)
     const candidates = [report.key, report.article_url, report.telegram_url, report.download_url, report.attach_url];
-    const pdfUrl = candidates.find(u => u && u.startsWith('http') && !u.includes('netlify.app'));
+    let pdfUrl = candidates.find(u => u && u.startsWith('http') && !u.includes('netlify.app'));
 
     if (!pdfUrl) return { statusCode: 404, body: 'Original PDF link not found' };
+
+    const pdfHost = (() => {
+      try {
+        return new URL(pdfUrl).hostname;
+      } catch {
+        return '';
+      }
+    })();
+
+    // DB증권은 상세 JSON 안에 실제 게이트 토큰이 들어있는 경우가 많아서 한 번 더 해석한다.
+    if (/(db-fi\.com|dbsec\.co\.kr)$/i.test(pdfHost) && /\.json(\?|$)/i.test(pdfUrl)) {
+      const jsonRes = await fetch(pdfUrl);
+      if (jsonRes.ok) {
+        const jsonData = await jsonRes.json();
+        const token = jsonData?.data?.url || jsonData?.url;
+        if (token) {
+          pdfUrl = `https://whub.dbsec.co.kr/pv/gate?q=${token}`;
+        }
+      }
+    }
 
     const title = report.article_title || '증권사 리포트';
     const company = report.firm_nm || '증권사';

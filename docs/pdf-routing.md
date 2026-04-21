@@ -14,6 +14,7 @@
 
 - DB Securities URLs such as `whub.dbsec.co.kr/pv/gate` are excluded from `pdf.js`.
 - Those URLs use the vendor flow because they are StreamDocs gate/viewer pages, not raw PDF files.
+- DB Securities JSON links like `m.db-fi.com/appData/descRsh/*.json` are resolved server-side and converted to the `pv/gate?q=...` entrypoint before redirecting.
 
 ## Proxy notes
 
