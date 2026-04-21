@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { CONFIG } from '../constants/config';
 import { formatDate } from '../utils/date';
+import { request } from '../utils/api';
 
 export function useReportFetch(searchQuery, pathname, sortBy) {
   const [reports, setReports] = useState({});
@@ -96,19 +97,17 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
     isLoadingRef.current = true;
 
     try {
-      const res = await fetch(buildApiUrl(), { signal: controller.signal });
-      if (!res.ok) throw new Error('API 요청 실패');
-
-      const { items, hasMore: apiHasMore } = await res.json();
-
-      setReports((prev) => mergeReports(isInitial ? {} : prev, items));
-      setOffset((prev) => (isInitial ? items.length : prev + items.length));
-      
-      setHasMore(apiHasMore);
-      hasMoreRef.current = apiHasMore;
+      const data = await request(buildApiUrl(), { signal: controller.signal });
+      if (data) {
+        const { items, hasMore: apiHasMore } = data;
+        setReports((prev) => mergeReports(isInitial ? {} : prev, items));
+        setOffset((prev) => (isInitial ? items.length : prev + items.length));
+        setHasMore(apiHasMore);
+        hasMoreRef.current = apiHasMore;
+      }
     } catch (err) {
       if (err.name === 'AbortError') return;
-      console.error('❌ Error fetching reports:', err);
+      // 다른 에러는 request에서 이미 처리됨
     } finally {
       if (!isInitial || abortControllerRef.current === controller) {
         setIsLoading(false);

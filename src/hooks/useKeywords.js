@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useReport } from '../context/ReportContext';
 import { CONFIG } from '../constants/config';
+import { request } from '../utils/api';
 
 export const useKeywords = (telegramUser) => {
   const { logout } = useReport();
@@ -10,60 +11,28 @@ export const useKeywords = (telegramUser) => {
   const [isKeywordOverlayOpen, setIsKeywordOverlayOpen] = useState(false);
   const [lastDeleted, setLastDeleted] = useState(null);
 
-  const getApiConfig = useCallback(() => {
-    const cleanBaseUrl = CONFIG.API.BASE_URL;
-    const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
-    return { cleanBaseUrl, token };
-  }, []);
-
   const fetchKeywords = useCallback(async () => {
-    const { cleanBaseUrl, token } = getApiConfig();
-    if (!token) return;
-
+    if (!telegramUser) return;
     setIsLoadingKeywords(true);
     try {
-      const response = await fetch(`${cleanBaseUrl}/keywords`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (response.status === 401) {
-        logout();
-        return;
-      }
-
-      if (response.ok) {
-        const data = await response.json();
-        setKeywords(data.filter(k => k.is_active));
-      }
+      const data = await request(`${CONFIG.API.BASE_URL}/keywords`, {}, logout);
+      if (data) setKeywords(data.filter(k => k.is_active));
     } catch (error) {
-      console.error('❌ 키워드 조회 실패:', error);
+      // 에러는 request 내부에서 이미 로깅됨
     } finally {
       setIsLoadingKeywords(false);
     }
-  }, [getApiConfig, logout]);
+  }, [logout, telegramUser]);
 
   const syncKeywords = async (updatedKeywords) => {
-    const { cleanBaseUrl, token } = getApiConfig();
-    if (!token) return;
-
     try {
-      const response = await fetch(`${cleanBaseUrl}/keywords/sync`, {
+      const data = await request(`${CONFIG.API.BASE_URL}/keywords/sync`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
-        },
         body: JSON.stringify({ keywords: updatedKeywords })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setKeywords(data.filter(k => k.is_active));
-      } else if (response.status === 401) {
-        logout();
-      }
+      }, logout);
+      if (data) setKeywords(data.filter(k => k.is_active));
     } catch (error) {
-      console.error('❌ 키워드 동기화 실패:', error);
+      // 에러 로깅됨
     }
   };
 

@@ -7,6 +7,7 @@ import AdminSection from './menu/AdminSection';
 import { useKeywords } from '../hooks/useKeywords';
 import { useReport } from '../context/ReportContext';
 import { CONFIG } from '../constants/config';
+import { request } from '../utils/api';
 import './HamburgerMenu.css';
 
 function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChange, handleHeaderClick }) {
@@ -52,14 +53,12 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
           setIsAuthenticating(true);
           try {
             const baseUrl = CONFIG.API.BASE_URL;
-            const response = await fetch(`${baseUrl}/auth/telegram`, {
+            const result = await request(`${baseUrl}/auth/telegram`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(user),
             });
 
-            if (response.ok) {
-              const result = await response.json();
+            if (result) {
               if (result.access_token) {
                 localStorage.setItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN, result.access_token);
               }
@@ -68,7 +67,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               localStorage.setItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER, JSON.stringify(userData));
             }
           } catch (error) {
-            console.error('로그인 에러:', error);
+            // 로깅됨
           } finally {
             setIsAuthenticating(false);
           }
