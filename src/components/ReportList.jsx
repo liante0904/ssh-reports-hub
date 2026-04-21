@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import ShareMenu from './ShareMenu';
-import ReportItem from './report/ReportItem';
+import ReportGroup from './report/ReportGroup';
 import { useReportFetch } from '../hooks/useReportFetch';
 import { useReport } from '../context/ReportContext';
+import { CONFIG } from '../constants/config';
 import './ReportList.css';
 
 function ReportList({ onWriterClick }) {
@@ -41,6 +42,7 @@ function ReportList({ onWriterClick }) {
     setSummaryToggles({});
   }, [location.pathname, searchQuery, sortBy]);
 
+  // 모든 날짜 그룹이 닫혀있고 다음 데이터가 있다면 자동으로 더 불러오기
   useEffect(() => {
     const reportDates = Object.keys(reports);
     if (reportDates.length === 0 && !isLoading) return;
@@ -124,74 +126,27 @@ function ReportList({ onWriterClick }) {
             hasMore={isFavoritesPage ? false : hasMore}
             scrollThreshold={0.6}
           >
-            {filteredSortedDates.map((date, index) => {
-              const itemsAtDate = reports[date];
-              
-              // 시간순(배열) 또는 회사별(객체) 처리
-              return (
-                <div className="date-group" key={date}>
-                  <div className="date-header">
-                    <div className={`date-title ${!dateToggles[date] ? 'expanded' : ''}`} onClick={() => toggleDate(date)}>
-                      {date}
-                    </div>
-                    {index === 0 && isRecent && !isSearchActive && (
-                      <div className="sort-options">
-                        <button className={`sort-btn ${sortBy === 'time' ? 'active' : ''}`} onClick={() => setSortBy('time')}>시간순</button>
-                        <button className={`sort-btn ${sortBy === 'company' ? 'active' : ''}`} onClick={() => setSortBy('company')}>회사별</button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className={`company-group-wrapper ${dateToggles[date] ? 'collapsed' : ''}`}>
-                    {sortBy === 'time' || isFavoritesPage || Array.isArray(itemsAtDate) ? (
-                      /* 평탄화 리스트 (시간순, 즐겨찾기, 또는 데이터가 아직 배열인 경우) */
-                      <div className="report-wrapper">
-                        {(Array.isArray(itemsAtDate) ? itemsAtDate : Object.values(itemsAtDate).flat())
-                          .filter(r => !isFavoritesPage || favorites[r.id])
-                          .map(report => (
-                            <ReportItem 
-                              key={report.id}
-                              report={report}
-                              isFavorite={!!favorites[report.id]}
-                              isSummaryExpanded={summaryToggles[report.id]}
-                              onToggleFavorite={toggleFavorite}
-                              onToggleSummary={toggleSummary}
-                              onOpenShareMenu={handleOpenShareMenu}
-                              showFirmTag={true}
-                              onWriterClick={onWriterClick}
-                            />
-                          ))
-                        }
-                      </div>
-                    ) : (
-                      /* 증권사별 그룹화 리스트 (회사별 모드 + 데이터가 객체인 경우) */
-                      Object.entries(itemsAtDate).map(([firm, firmReports]) => (
-                        <div className="company-group" key={firm}>
-                          <div className={`company-title ${!firmToggles[date]?.[firm] ? 'expanded' : ''}`} onClick={() => toggleFirm(date, firm)}>
-                            {firm}
-                          </div>
-                          <div className={`report-wrapper ${firmToggles[date]?.[firm] ? 'collapsed' : ''}`}>
-                            {Array.isArray(firmReports) ? firmReports.map(report => (
-                              <ReportItem 
-                                key={report.id}
-                                report={report}
-                                isFavorite={!!favorites[report.id]}
-                                isSummaryExpanded={summaryToggles[report.id]}
-                                onToggleFavorite={toggleFavorite}
-                                onToggleSummary={toggleSummary}
-                                onOpenShareMenu={handleOpenShareMenu}
-                                showFirmTag={false}
-                                onWriterClick={onWriterClick}
-                              />
-                            )) : null}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {filteredSortedDates.map((date, index) => (
+              <ReportGroup 
+                key={date}
+                date={date}
+                items={reports[date]}
+                isCollapsed={!!dateToggles[date]}
+                onToggleDate={toggleDate}
+                sortBy={sortBy}
+                isFavoritesPage={isFavoritesPage}
+                favorites={favorites}
+                firmToggles={firmToggles}
+                onToggleFirm={toggleFirm}
+                summaryToggles={summaryToggles}
+                onToggleSummary={toggleSummary}
+                onToggleFavorite={toggleFavorite}
+                onOpenShareMenu={handleOpenShareMenu}
+                onWriterClick={onWriterClick}
+                showSortOptions={index === 0 && isRecent && !isSearchActive}
+                setSortBy={setSortBy}
+              />
+            ))}
           </InfiniteScroll>
         )}
         {isLoading && hasMore && <div className="loading-overlay">로딩 중...</div>}
