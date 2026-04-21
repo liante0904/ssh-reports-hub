@@ -10,8 +10,11 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
   const isLoadingRef = useRef(false);
   const hasMoreRef = useRef(true);
 
-  const BASE_URL = import.meta.env.VITE_ORACLE_REST_API;
-  const TABLE_NAME = import.meta.env.VITE_TABLE_NAME;
+  // 환경변수에서 가져오되, 기본값은 FastAPI 호환 경로로 설정
+  // VITE_ORACLE_REST_API: "https://ssh-oci.duckdns.org/ords/admin" 또는 "https://...oraclecloudapps.com/ords/admin"
+  // VITE_TABLE_NAME: "data_main_daily_send"
+  const BASE_URL = import.meta.env.VITE_ORACLE_REST_API || 'https://ssh-oci.duckdns.org/ords/admin';
+  const TABLE_NAME = import.meta.env.VITE_TABLE_NAME || 'data_main_daily_send';
 
   // Sync refs with state
   useEffect(() => {
@@ -24,7 +27,11 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
 
   const buildApiUrl = useCallback(() => {
     const params = new URLSearchParams();
-    let apiUrl = `${BASE_URL}/${TABLE_NAME}`;
+    
+    // Ensure no double slashes when joining BASE_URL and TABLE_NAME
+    const baseUrl = BASE_URL.replace(/\/$/, '');
+    const tableName = TABLE_NAME.replace(/^\//, '').replace(/\/$/, '');
+    let apiUrl = `${baseUrl}/${tableName}`;
 
     if (pathname.includes('global')) {
       apiUrl += '/search/';
@@ -32,6 +39,7 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
     } else if (pathname.includes('industry')) {
       apiUrl += '/industry';
     } else {
+      // Recent reports (default) use search endpoint to support filtering
       apiUrl += '/search/';
     }
 

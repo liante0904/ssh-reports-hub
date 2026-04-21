@@ -1,13 +1,17 @@
 export const handler = async (event) => {
   const { id } = event.queryStringParameters;
-  const BASE_URL = process.env.VITE_ORACLE_REST_API;
-  const TABLE_NAME = process.env.VITE_TABLE_NAME;
+  const BASE_URL = process.env.VITE_ORACLE_REST_API || 'https://ssh-oci.duckdns.org/ords/admin';
+  const TABLE_NAME = process.env.VITE_TABLE_NAME || 'data_main_daily_send';
   const SITE_URL = 'https://ssh-oci.netlify.app';
 
   if (!id) return { statusCode: 400, body: 'ID missing' };
 
   try {
-    const response = await fetch(`${BASE_URL}/${TABLE_NAME}/search/?report_id=${id}`);
+    const baseUrl = BASE_URL.replace(/\/$/, '');
+    const tableName = TABLE_NAME.replace(/^\//, '').replace(/\/$/, '');
+    const apiUrl = `${baseUrl}/${tableName}/search/?report_id=${id}`;
+    
+    const response = await fetch(apiUrl);
     const data = await response.json();
     const report = data.items?.[0];
 
