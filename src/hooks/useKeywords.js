@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useReport } from '../context/ReportContext';
 
-export const useKeywords = (telegramUser, handleLogout) => {
+export const useKeywords = (telegramUser) => {
+  const { logout } = useReport();
   const [keywords, setKeywords] = useState([]);
   const [newKeyword, setNewKeyword] = useState('');
   const [isLoadingKeywords, setIsLoadingKeywords] = useState(false);
@@ -25,7 +27,7 @@ export const useKeywords = (telegramUser, handleLogout) => {
       });
 
       if (response.status === 401) {
-        handleLogout();
+        logout();
         return;
       }
 
@@ -38,7 +40,7 @@ export const useKeywords = (telegramUser, handleLogout) => {
     } finally {
       setIsLoadingKeywords(false);
     }
-  }, [getApiConfig, handleLogout]);
+  }, [getApiConfig, logout]);
 
   const syncKeywords = async (updatedKeywords) => {
     const { cleanBaseUrl, token } = getApiConfig();
@@ -58,7 +60,7 @@ export const useKeywords = (telegramUser, handleLogout) => {
         const data = await response.json();
         setKeywords(data.filter(k => k.is_active));
       } else if (response.status === 401) {
-        handleLogout();
+        logout();
       }
     } catch (error) {
       console.error('❌ 키워드 동기화 실패:', error);

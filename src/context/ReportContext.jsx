@@ -54,6 +54,12 @@ export function ReportProvider({ children }) {
   const toggleMenu = () => setIsMenuOpen(prev => !prev);
   const toggleMenuTop = () => setIsTopMenuOpen(prev => !prev);
 
+  const logout = () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('telegram_user');
+    window.location.reload(); // 가장 확실한 초기화
+  };
+
   const value = {
     searchQuery,
     setSearchQuery,
@@ -74,7 +80,8 @@ export function ReportProvider({ children }) {
     firm_names,
     theme,
     setTheme,
-    toggleTheme
+    toggleTheme,
+    logout
   };
 
   return (

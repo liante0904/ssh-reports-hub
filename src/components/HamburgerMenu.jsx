@@ -5,9 +5,11 @@ import TelegramAuth from './menu/TelegramAuth';
 import KeywordOverlay from './menu/KeywordOverlay';
 import AdminSection from './menu/AdminSection';
 import { useKeywords } from '../hooks/useKeywords';
+import { useReport } from '../context/ReportContext';
 import './HamburgerMenu.css';
 
 function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChange, handleHeaderClick }) {
+  const { logout } = useReport();
   const [telegramUser, setTelegramUser] = useState(() => {
     const saved = localStorage.getItem('telegram_user');
     try {
@@ -18,13 +20,6 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
   });
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
-
-  const handleLogout = useCallback(() => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('telegram_user');
-    setTelegramUser(null);
-    setIsPolling(false);
-  }, []);
 
   const {
     keywords,
@@ -38,7 +33,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     handleDeleteAllKeywords,
     handleUndoDelete,
     toggleKeywordOverlay
-  } = useKeywords(telegramUser, handleLogout);
+  } = useKeywords(telegramUser);
 
   const getApiConfig = () => {
     const baseUrl = import.meta.env.VITE_API_URL || 'https://ssh-oci.duckdns.org';
@@ -118,7 +113,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               isAuthenticating={isAuthenticating}
               loginWithTelegram={loginWithTelegram}
               loginWithTelegramApp={loginWithTelegramApp}
-              handleLogout={handleLogout}
+              handleLogout={logout}
               toggleKeywordOverlay={toggleKeywordOverlay}
             />
 
