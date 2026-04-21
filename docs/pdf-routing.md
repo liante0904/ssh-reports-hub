@@ -1,0 +1,21 @@
+# PDF Routing
+
+## Current behavior
+
+- Report links now always go through `/share?id=...`.
+- `share` resolves the original PDF URL, then applies platform-specific routing.
+
+## Platform rules
+
+- iOS: use the proxy PDF URL directly.
+- Non-iOS: open the proxy PDF through `pdf.js`.
+
+## Special cases
+
+- DB Securities URLs such as `whub.dbsec.co.kr/pv/gate` are excluded from `pdf.js`.
+- Those URLs use the vendor flow because they are StreamDocs gate/viewer pages, not raw PDF files.
+
+## Proxy notes
+
+- The PDF proxy sends the file inline with CORS headers so `pdf.js` can fetch it.
+- If a report source requires a referer or cookie bootstrap, the proxy can prime that first.

@@ -14,11 +14,7 @@ const ReportItem = ({
 }) => {
   const { id, title, writer, link, gemini_summary, firm } = report;
   
-  const isDsSec = link && link.includes('ds-sec.co.kr');
-  const fileName = `[${firm}] ${title}.pdf`;
-  const finalLink = isDsSec 
-    ? `${window.location.origin}/share-proxy/report.pdf?url=${encodeURIComponent(link)}&filename=${encodeURIComponent(fileName)}`
-    : link;
+  const finalLink = `${window.location.origin}/share?id=${id}`;
   
   const hasSummary = gemini_summary && gemini_summary.trim() !== "" && gemini_summary.trim() !== " ";
 

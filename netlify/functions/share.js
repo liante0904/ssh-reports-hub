@@ -3,6 +3,10 @@ export const handler = async (event) => {
   const BASE_URL = process.env.VITE_ORACLE_REST_API || 'https://ssh-oci.duckdns.org/ords/admin';
   const TABLE_NAME = process.env.VITE_TABLE_NAME || 'data_main_daily_send';
   const SITE_URL = 'https://ssh-oci.netlify.app';
+  const requestHost = event.headers?.host || 'ssh-oci.netlify.app';
+  const requestOrigin = event.headers?.origin || `https://${requestHost}`;
+  const userAgent = event.headers?.['user-agent'] || event.headers?.['User-Agent'] || '';
+  const isIos = /iPad|iPhone|iPod/i.test(userAgent);
 
   if (!id) return { statusCode: 400, body: 'ID missing' };
 
@@ -28,11 +32,20 @@ export const handler = async (event) => {
     
     // 2. 리다이렉트 경로 결정
     let finalUrl = pdfUrl;
-    if (pdfUrl.includes('ds-sec.co.kr')) {
+    const isDbsecGate = /whub\.dbsec\.co\.kr\/pv\/(gate|viewer)/i.test(pdfUrl) || /streamdocs/i.test(pdfUrl);
+
+    if (isDbsecGate) {
+      // DB증권은 PDF 원본이 아니라 StreamDocs 게이트/뷰어를 통해 열어야 한다.
+      // pdf.js로 넘기면 HTML을 PDF로 해석하려고 해서 깨진다.
+      finalUrl = pdfUrl;
+    } else if (pdfUrl.startsWith('http')) {
       const fileName = `[${company}] ${title}.pdf`;
       const boardUrl = report.article_url || pdfUrl.replace('download.php', 'board.php');
-      // 가장 확실한 함수 경로 사용
-      finalUrl = `/.netlify/functions/proxy?url=${encodeURIComponent(pdfUrl)}&filename=${encodeURIComponent(fileName)}&referer=${encodeURIComponent(boardUrl)}`;
+      const proxyUrl = `${requestOrigin}/.netlify/functions/proxy?url=${encodeURIComponent(pdfUrl)}&filename=${encodeURIComponent(fileName)}${boardUrl ? `&referer=${encodeURIComponent(boardUrl)}` : ''}`;
+      // iOS는 브라우저 기본 PDF 뷰어를 우선 사용하고, 그 외는 pdf.js로 통일한다.
+      finalUrl = isIos
+        ? proxyUrl
+        : `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(proxyUrl)}`;
     }
 
     return {
@@ -43,6 +56,7 @@ export const handler = async (event) => {
         <meta property="og:title" content="[${company}] ${title}" />
         <meta property="og:description" content="클릭하여 리포트를 확인하세요." />
         <meta property="og:image" content="${SITE_URL}/og-image.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <script>window.location.replace("${finalUrl}");</script>
       </head><body>이동 중...</body></html>`,
     };

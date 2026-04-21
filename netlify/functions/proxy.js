@@ -24,16 +24,18 @@ export const handler = async (event) => {
       'Connection': 'keep-alive',
     };
 
-    console.log(`[Proxy] 1. 방문 및 쿠키 획득 시도...`);
-    const boardRes = await fetch(boardUrl, { headers: baseHeaders, redirect: 'follow' });
-    
-    // AWS Lambda(Netlify) 환경 호환을 위한 완벽한 쿠키 파싱 로직
     let cookies = '';
-    if (boardRes.headers.getSetCookie) {
-      cookies = boardRes.headers.getSetCookie().map(c => c.split(';')[0]).join('; ');
-    } else {
-      const fallbackCookie = boardRes.headers.get('set-cookie');
-      cookies = fallbackCookie ? fallbackCookie.split(',').map(c => c.split(';')[0]).join('; ') : '';
+    if (referer) {
+      console.log(`[Proxy] 1. 방문 및 쿠키 획득 시도...`);
+      const boardRes = await fetch(boardUrl, { headers: baseHeaders, redirect: 'follow' });
+
+      // AWS Lambda(Netlify) 환경 호환을 위한 완벽한 쿠키 파싱 로직
+      if (boardRes.headers.getSetCookie) {
+        cookies = boardRes.headers.getSetCookie().map(c => c.split(';')[0]).join('; ');
+      } else {
+        const fallbackCookie = boardRes.headers.get('set-cookie');
+        cookies = fallbackCookie ? fallbackCookie.split(',').map(c => c.split(';')[0]).join('; ') : '';
+      }
     }
 
     console.log(`[Proxy] 2. 다운로드 시도... (Cookies: ${cookies ? 'YES' : 'NO'})`);
@@ -63,6 +65,10 @@ export const handler = async (event) => {
         'Content-Disposition': `inline; filename="${encodeURIComponent(filename || 'report.pdf')}"`,
         'X-Content-Type-Options': 'nosniff',
         'Cache-Control': 'no-store', // 브라우저 캐싱 방지
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+        'Access-Control-Expose-Headers': 'Accept-Ranges, Content-Disposition, Content-Length, Content-Range, Content-Type',
+        'Vary': 'Origin',
       },
       body: Buffer.from(buffer).toString('base64'),
       isBase64Encoded: true,
