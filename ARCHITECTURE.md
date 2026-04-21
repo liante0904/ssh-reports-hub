@@ -50,6 +50,13 @@ SQLite (telegram.db)는 롤백/최근 동기화 소스로 유지
 ### ADR-001 ~ ADR-007 (Backend/Infra)
 *(생략: 유저 제공 내용과 동일)*
 
+### ADR-005: Oracle ATP 제거 및 PostgREST 전환
+
+- **상태:** 완료 (2026-04-21)
+- **배경:** Oracle ATP 및 ORDS의 복잡성을 제거하고, PostgreSQL 직결 API(PostgREST/FastAPI)로 단일화하여 유지보수성 향상.
+- **결정:** PostgREST 배포 및 프론트엔드 엔드포인트 전면 교체.
+- **효과:** 인프라 단순화 및 쿼리 성능 개선.
+
 ### ADR-008: 프론트엔드 컴포넌트 리팩토링 및 인증 로직 안정화
 
 - **상태:** 완료 (2026-04-21)
@@ -71,6 +78,5 @@ SQLite (telegram.db)는 롤백/최근 동기화 소스로 유지
 ## 작업 우선순위
 
 - [x] **ADR-004** 최근 2일 SQLite→PostgreSQL 동기화 및 재전환 완료 (2026-04-21)
+- [x] **ADR-005** PostgREST 배포 + 프론트엔드 엔드포인트 교체 및 Oracle ATP 제거 완료
 - [x] **ADR-008** 프론트엔드 햄버거 메뉴 리팩토링 및 관리자 링크(pgAdmin, Grafana) 추가
-- [ ] **ADR-005** PostgREST 배포 + 프론트엔드 엔드포인트 교체
-- [ ] **ADR-005** Oracle ATP 제거
