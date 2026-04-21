@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import CompanySelect from './CompanySelect';
 import TelegramAuth from './menu/TelegramAuth';
@@ -19,12 +19,12 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('telegram_user');
     setTelegramUser(null);
     setIsPolling(false);
-  };
+  }, []);
 
   const {
     keywords,
