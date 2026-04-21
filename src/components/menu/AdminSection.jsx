@@ -1,7 +1,8 @@
 import React from 'react';
+import { CONFIG } from '../../constants/config';
 
 function AdminSection() {
-  const vpnAddr = import.meta.env.VITE_VPN_ADDR;
+  const vpnAddr = CONFIG.VPN.ADDR;
   
   if (!vpnAddr) return null;
 
@@ -21,7 +22,7 @@ function AdminSection() {
           <a
             key={link.name}
             className="menu-item admin-link"
-            href={`https://${vpnAddr}${link.path}`}
+            href={CONFIG.VPN.getAdminUrl(link.path)}
             target="_blank"
             rel="noopener noreferrer"
           >

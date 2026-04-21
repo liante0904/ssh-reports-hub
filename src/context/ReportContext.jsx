@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { CONFIG } from '../constants/config';
 
 const ReportContext = createContext();
 
@@ -29,14 +30,14 @@ export function ReportProvider({ children }) {
 
   // Theme state
   const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
+    const savedTheme = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME);
     const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     return savedTheme || (userPrefersDark ? 'dark' : 'light');
   });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
+    localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, theme);
   }, [theme]);
 
   const toggleTheme = () => {
@@ -55,8 +56,8 @@ export function ReportProvider({ children }) {
   const toggleMenuTop = () => setIsTopMenuOpen(prev => !prev);
 
   const logout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('telegram_user');
+    localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
     window.location.reload(); // 가장 확실한 초기화
   };
 

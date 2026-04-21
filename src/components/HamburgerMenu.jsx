@@ -6,12 +6,13 @@ import KeywordOverlay from './menu/KeywordOverlay';
 import AdminSection from './menu/AdminSection';
 import { useKeywords } from '../hooks/useKeywords';
 import { useReport } from '../context/ReportContext';
+import { CONFIG } from '../constants/config';
 import './HamburgerMenu.css';
 
 function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChange, handleHeaderClick }) {
   const { logout } = useReport();
   const [telegramUser, setTelegramUser] = useState(() => {
-    const saved = localStorage.getItem('telegram_user');
+    const saved = localStorage.getItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
     try {
       return saved ? JSON.parse(saved) : null;
     } catch (e) {
@@ -35,19 +36,13 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     toggleKeywordOverlay
   } = useKeywords(telegramUser);
 
-  const getApiConfig = () => {
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://ssh-oci.duckdns.org';
-    const cleanBaseUrl = baseUrl.replace(/\/$/, '');
-    return { cleanBaseUrl };
-  };
-
   const loginWithTelegram = () => {
     if (!window.Telegram || !window.Telegram.Login) {
       alert('텔레그램 스크립트가 로딩 중입니다. 잠시 후 다시 시도해주세요.');
       return;
     }
 
-    const botId = import.meta.env.VITE_TELEGRAM_BOT_ID || '1372612160';
+    const botId = CONFIG.TELEGRAM.BOT_ID;
     if (!botId) return;
 
     window.Telegram.Login.auth(
@@ -56,8 +51,8 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
         if (user) {
           setIsAuthenticating(true);
           try {
-            const { cleanBaseUrl } = getApiConfig();
-            const response = await fetch(`${cleanBaseUrl}/auth/telegram`, {
+            const baseUrl = CONFIG.API.BASE_URL;
+            const response = await fetch(`${baseUrl}/auth/telegram`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(user),
@@ -66,11 +61,11 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
             if (response.ok) {
               const result = await response.json();
               if (result.access_token) {
-                localStorage.setItem('auth_token', result.access_token);
+                localStorage.setItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN, result.access_token);
               }
               const userData = { ...user, ...result.user };
               setTelegramUser(userData);
-              localStorage.setItem('telegram_user', JSON.stringify(userData));
+              localStorage.setItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER, JSON.stringify(userData));
             }
           } catch (error) {
             console.error('로그인 에러:', error);
@@ -83,9 +78,8 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
   };
 
   const loginWithTelegramApp = () => {
-    const botName = import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot';
-    const startParam = telegramUser ? `?start=${telegramUser.id}` : '';
-    window.open(`https://t.me/${botName}${startParam}`, '_blank');
+    const startParam = telegramUser ? telegramUser.id : '';
+    window.open(CONFIG.TELEGRAM.getAuthUrl(startParam), '_blank');
   };
 
   const handleSelectChange = (e) => {

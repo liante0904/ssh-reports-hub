@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useReport } from '../context/ReportContext';
+import { CONFIG } from '../constants/config';
 
 export const useKeywords = (telegramUser) => {
   const { logout } = useReport();
@@ -10,9 +11,8 @@ export const useKeywords = (telegramUser) => {
   const [lastDeleted, setLastDeleted] = useState(null);
 
   const getApiConfig = useCallback(() => {
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://ssh-oci.duckdns.org';
-    const cleanBaseUrl = baseUrl.replace(/\/$/, '');
-    const token = localStorage.getItem('auth_token');
+    const cleanBaseUrl = CONFIG.API.BASE_URL;
+    const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     return { cleanBaseUrl, token };
   }, []);
 
