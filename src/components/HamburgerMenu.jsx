@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import CompanySelect from './CompanySelect';
 import TelegramAuth from './menu/TelegramAuth';
 import KeywordOverlay from './menu/KeywordOverlay';
+import AdminSection from './menu/AdminSection';
 import './HamburgerMenu.css';
 
 function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChange, handleHeaderClick }) {
@@ -218,14 +219,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               toggleKeywordOverlay={toggleKeywordOverlay}
             />
 
-            <div className="admin-section">
-              <div className="menu-title admin-title">관리자 전용</div>
-              <div className="admin-links-grid">
-                <a className="menu-item admin-link" href={`https://${import.meta.env.VITE_VPN_ADDR}/code`} target="_blank" rel="noopener noreferrer"><span className="icon">💻</span> VSCode</a>
-                <a className="menu-item admin-link" href={`https://${import.meta.env.VITE_VPN_ADDR}/explorer/`} target="_blank" rel="noopener noreferrer"><span className="icon">📂</span> Explorer</a>
-                <a className="menu-item admin-link" href={`https://${import.meta.env.VITE_VPN_ADDR}/portainer/`} target="_blank" rel="noopener noreferrer"><span className="icon">🐳</span> Docker</a>
-              </div>
-            </div>
+            <AdminSection />
           </div>
         </div>
       )}
