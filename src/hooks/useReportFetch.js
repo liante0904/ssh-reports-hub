@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { CONFIG } from '../constants/config';
+import { formatDate } from '../utils/date';
 
 export function useReportFetch(searchQuery, pathname, sortBy) {
   const [reports, setReports] = useState({});
@@ -53,16 +54,7 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
     const updated = { ...prev };
 
     for (const item of newItems) {
-      let rawDate = item.reg_dt ? item.reg_dt.trim() : 'Unknown';
-      let date = rawDate;
-      
-      if (rawDate.length === 8 && /^\d+$/.test(rawDate)) {
-        date = `${rawDate.substring(0, 4)}-${rawDate.substring(4, 6)}-${rawDate.substring(6, 8)}`;
-      } else {
-        const match = rawDate.match(/^(\d{4}-\d{2}-\d{2})/);
-        if (match) date = match[1];
-      }
-      
+      const date = formatDate(item.reg_dt);
       const firm = item.firm_nm ? item.firm_nm.trim() : 'Unknown';
       const report = {
         id: item.report_id,
