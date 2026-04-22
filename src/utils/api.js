@@ -9,17 +9,21 @@ import { CONFIG } from '../constants/config';
  */
 export async function request(url, options = {}, logout) {
   const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  const method = (options.method || 'GET').toUpperCase();
   
-  const defaultHeaders = {
-    'Content-Type': 'application/json',
-  };
+  const defaultHeaders = {};
 
   if (token) {
     defaultHeaders['Authorization'] = `Bearer ${token}`;
   }
 
+  if (options.body && method !== 'GET' && method !== 'HEAD') {
+    defaultHeaders['Content-Type'] = 'application/json';
+  }
+
   const mergedOptions = {
     ...options,
+    method,
     headers: {
       ...defaultHeaders,
       ...options.headers,
