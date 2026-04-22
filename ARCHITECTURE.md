@@ -123,13 +123,15 @@ SQLite (telegram.db)는 롤백/최근 동기화 소스로 유지
   - `pendingSearch`, `searchQuery`, `isSearchOpen` 같이 의미가 가까운 상태를 더 명시적으로 분리.
 - [ ] 증권사 식별자 정리
   - 인덱스/표시명/DB값을 분리해서 `company` 숫자 인덱스 의존을 줄이기.
-- [ ] `ShareMenu` 입력 데이터 단순화
-  - 메뉴가 받는 `reportData` shape를 고정해서 조립 로직 제거.
+- [x] `ShareMenu` 입력 데이터 단순화
+  - 메뉴가 받는 `reportData` shape를 `src/utils/shareMenuData.js`로 고정.
 - [ ] 링크 결정 로직 추가 분리
   - `article_url` / `download_url` / `pdf_url` 선택 규칙을 UI 밖의 헬퍼로 완전히 이동.
 - [ ] FastAPI 단일화 및 옛 API 명칭 정리
   - `VITE_ORACLE_REST_API` 같은 과거 명칭을 정리하고, 문서/환경변수/설정에서 FastAPI 중심 이름으로 맞추기.
-  - `ssh-oci.duckdns.org`를 단일 리포트 API 기준점으로 유지.
+  - 내부 코드 기준은 `REPORT_API_URL`로 고정하고, 구 이름은 호환용 fallback만 남기기.
+  - `ssh-oci.duckdns.org/ords/admin`를 단일 리포트 API 기준점으로 유지.
+  - Netlify 배포 시 `VITE_REPORT_API_URL=https://ssh-oci.duckdns.org/ords/admin`을 우선 설정하고, `VITE_API_URL=https://ssh-oci.duckdns.org`는 공용 base로만 유지.
 
 ---
 
@@ -145,6 +147,8 @@ SQLite (telegram.db)는 롤백/최근 동기화 소스로 유지
   - API -> UI 변환을 `src/utils/reportNormalizer.js`로 이동.
 - 2026-04-22: 공유 URL 생성 공용화
   - `ReportList.jsx`와 `ReportItem.jsx`의 `/share?id=...` 문자열 조립을 `src/utils/reportLinks.js`로 통합.
+- 2026-04-22: 공유 메뉴 데이터 조립 분리
+  - `ReportList.jsx`의 공유 메뉴 입력 객체 조립을 `src/utils/shareMenuData.js`로 이동.
 
 ## 프로젝트 변천사
 
