@@ -25,8 +25,17 @@ export const handler = async (event) => {
 
     if (!report) return { statusCode: 404, body: 'Report not found' };
 
-    // 1. 진짜 원본 URL 추출 (key 또는 article_url이 가장 정확함)
-    const candidates = [report.key, report.article_url, report.telegram_url, report.download_url, report.attach_url];
+    // 1. 원본 PDF URL 추출
+    // MyAsset/유안타처럼 article_url은 상세 뷰어 페이지이고,
+    // pdf_url/download_url/attach_url/telegram_url이 실제 PDF 원본인 경우가 많다.
+    const candidates = [
+      report.pdf_url,
+      report.download_url,
+      report.attach_url,
+      report.telegram_url,
+      report.key,
+      report.article_url,
+    ];
     let pdfUrl = candidates.find(u => u && u.startsWith('http') && !u.includes('netlify.app'));
 
     if (!pdfUrl) return { statusCode: 404, body: 'Original PDF link not found' };
