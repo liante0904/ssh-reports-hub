@@ -5,7 +5,7 @@ import ShareMenu from './ShareMenu';
 import ReportGroup from './report/ReportGroup';
 import { useReportFetch } from '../hooks/useReportFetch';
 import { useReport } from '../context/ReportContext';
-import { getShareUrl } from '../utils/reportLinks';
+import { buildShareMenuData } from '../utils/shareMenuData';
 import './ReportList.css';
 
 function ReportList({ onWriterClick }) {
@@ -76,18 +76,12 @@ function ReportList({ onWriterClick }) {
 
   const handleOpenShareMenu = (e, report) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const shareUrl = getShareUrl(report.id);
     
     setMenuPosition({ 
       top: rect.bottom, 
       left: rect.left + rect.width / 2 
     });
-    setSelectedReport({ 
-      title: report.title, 
-      firm: report.firm, 
-      shareUrl, 
-      writer: report.writer 
-    });
+    setSelectedReport(buildShareMenuData(report));
     setIsShareOpen(true);
   };
 

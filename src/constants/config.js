@@ -3,11 +3,11 @@
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://ssh-oci.duckdns.org';
-const REPORT_API_BASE_URL =
+const REPORT_API_URL =
   import.meta.env.VITE_REPORT_API_URL ||
   import.meta.env.VITE_API_URL ||
   import.meta.env.VITE_ORACLE_REST_API ||
-  'https://ssh-oci.duckdns.org';
+  'https://ssh-oci.duckdns.org/ords/admin';
 const VPN_ADDR = import.meta.env.VITE_VPN_ADDR;
 const TELEGRAM_BOT_ID = import.meta.env.VITE_TELEGRAM_BOT_ID || '1372612160';
 const TELEGRAM_BOT_NAME = import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot';
@@ -17,7 +17,7 @@ export const CONFIG = {
   // API 관련
   API: {
     BASE_URL: API_BASE_URL.replace(/\/$/, ''),
-    REPORT_FETCH: REPORT_API_BASE_URL.replace(/\/$/, ''),
+    REPORT_API_URL: REPORT_API_URL.replace(/\/$/, ''),
     TABLE_NAME: TABLE_NAME.replace(/^\//, '').replace(/\/$/, ''),
   },
   

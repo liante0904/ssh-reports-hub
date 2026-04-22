@@ -25,7 +25,7 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
   const buildApiUrl = useCallback(() => {
     const params = new URLSearchParams();
     
-    const baseUrl = CONFIG.API.REPORT_FETCH;
+    const baseUrl = CONFIG.API.REPORT_API_URL;
     const tableName = CONFIG.API.TABLE_NAME;
     let apiUrl = `${baseUrl}/${tableName}`;
 
