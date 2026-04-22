@@ -109,6 +109,40 @@ SQLite (telegram.db)는 롤백/최근 동기화 소스로 유지
 
 ---
 
+## 프론트 정리 백로그
+
+> 목적: React 레이어에서 의미가 겹치는 이름, URL 결정 로직, API shape를 한 곳으로 모아 LLM과 사람이 같은 방식으로 읽도록 만드는 것.
+
+- [x] 리포트 공유 URL 생성 공용화
+  - `src/utils/reportLinks.js`로 `/share?id=...` 생성 로직을 통합.
+- [x] 리포트 API 응답 정규화
+  - `src/utils/reportNormalizer.js`로 API -> UI 모델 변환을 한 곳에 고정.
+- [ ] `shareUrl` / `openUrl` / `sourceUrl` 명칭 분리
+  - 상세 페이지 URL, 원본 PDF URL, 공유 URL을 구분해서 혼동 제거.
+- [ ] `ReportList`의 상태명 정리
+  - `pendingSearch`, `searchQuery`, `isSearchOpen` 같이 의미가 가까운 상태를 더 명시적으로 분리.
+- [ ] 증권사 식별자 정리
+  - 인덱스/표시명/DB값을 분리해서 `company` 숫자 인덱스 의존을 줄이기.
+- [ ] `ShareMenu` 입력 데이터 단순화
+  - 메뉴가 받는 `reportData` shape를 고정해서 조립 로직 제거.
+- [ ] 링크 결정 로직 추가 분리
+  - `article_url` / `download_url` / `pdf_url` 선택 규칙을 UI 밖의 헬퍼로 완전히 이동.
+
+---
+
+## 최근 변경 이력
+
+- 2026-04-22: 유안타/MyAsset 레포트 라우팅 정리
+  - `article_url`이 상세 뷰어 페이지인 케이스를 확인하고, 원본 PDF 우선 순위를 `pdf_url -> download_url -> attach_url -> telegram_url`로 수정.
+  - proxy 실패 시 raw URL fallback 유지.
+- 2026-04-22: `pdf.js` 경유 실패 시 raw URL fallback 추가
+  - proxy 사전 점검 결과가 HTML/에러이면 `pdf.js`로 보내지 않고 원본 URL로 직접 이동.
+  - proxy 에러 메시지의 DS 고정 문구 제거.
+- 2026-04-22: `useReportFetch` 리포트 정규화 분리
+  - API -> UI 변환을 `src/utils/reportNormalizer.js`로 이동.
+- 2026-04-22: 공유 URL 생성 공용화
+  - `ReportList.jsx`와 `ReportItem.jsx`의 `/share?id=...` 문자열 조립을 `src/utils/reportLinks.js`로 통합.
+
 ## 프로젝트 변천사
 
 *(생략: 유저 제공 내용과 동일)*
