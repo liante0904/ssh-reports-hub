@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { CONFIG } from '../constants/config';
-import { formatDate } from '../utils/date';
 import { request } from '../utils/api';
+import { normalizeReportItem } from '../utils/reportNormalizer';
 
 export function useReportFetch(searchQuery, pathname, sortBy) {
   const [reports, setReports] = useState({});
@@ -55,16 +55,8 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
     const updated = { ...prev };
 
     for (const item of newItems) {
-      const date = formatDate(item.reg_dt);
-      const firm = item.firm_nm ? item.firm_nm.trim() : 'Unknown';
-      const report = {
-        id: item.report_id,
-        title: item.article_title,
-        writer: item.writer,
-        link: item.telegram_url || item.download_url || item.attach_url,
-        gemini_summary: item.gemini_summary,
-        firm: firm 
-      };
+      const report = normalizeReportItem(item);
+      const { date, firm } = report;
 
       // sortBy === 'time'일 때는 배열로 저장하여 서버 순차 정렬 유지
       // sortBy === 'company'일 때는 기존처럼 증권사별 객체로 저장 (리팩토링 대상이나 일단 호환성 유지)
