@@ -4,6 +4,14 @@ export const handler = async (event) => {
 
   const targetUrl = decodeURIComponent(url);
   const boardUrl = referer ? decodeURIComponent(referer) : targetUrl.replace('download.php', 'board.php');
+  const isHead = event.httpMethod === 'HEAD';
+  const targetHost = (() => {
+    try {
+      return new URL(targetUrl).hostname;
+    } catch {
+      return '';
+    }
+  })();
 
   try {
     // curl 명령어를 100% 완벽하게 모사한 헤더 세트 (보안 우회)
@@ -40,9 +48,35 @@ export const handler = async (event) => {
 
     console.log(`[Proxy] 2. 다운로드 시도... (Cookies: ${cookies ? 'YES' : 'NO'})`);
     const dlHeaders = { ...baseHeaders, 'Referer': boardUrl, 'Cookie': cookies };
-    const res = await fetch(targetUrl, { headers: dlHeaders, redirect: 'follow' });
+    const res = await fetch(targetUrl, { headers: dlHeaders, redirect: 'follow', method: isHead ? 'HEAD' : 'GET' });
 
     const contentType = res.headers.get('content-type') || '';
+    if (isHead) {
+      console.log(`[Proxy] HEAD 응답 Content-Type: ${contentType}`);
+      if (contentType.includes('text/html')) {
+        return {
+          statusCode: 502,
+          headers: { 'Content-Type': 'text/html; charset=utf-8' },
+          body: `<h3>${targetHost || 'PDF 소스'} 응답이 PDF가 아닙니다</h3>`,
+        };
+      }
+
+      return {
+        statusCode: 200,
+        headers: {
+          'Content-Type': contentType || 'application/pdf',
+          'Content-Disposition': `inline; filename="${encodeURIComponent(filename || 'report.pdf')}"`,
+          'X-Content-Type-Options': 'nosniff',
+          'Cache-Control': 'no-store',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+          'Access-Control-Expose-Headers': 'Accept-Ranges, Content-Disposition, Content-Length, Content-Range, Content-Type',
+          'Vary': 'Origin',
+        },
+        body: '',
+      };
+    }
+
     const buffer = await res.arrayBuffer();
 
     console.log(`[Proxy] 응답 Content-Type: ${contentType}, Size: ${buffer.byteLength} bytes`);
@@ -50,11 +84,13 @@ export const handler = async (event) => {
     // DS 서버 차단 시 HTML이 반환됨
     if (contentType.includes('text/html') || buffer.byteLength < 5000) {
       const htmlText = Buffer.from(buffer).toString('utf-8');
-      console.error(`[Proxy] 에러 응답 내용 일부: ${htmlText.substring(0, 300)}`);
+      console.error(
+        `[Proxy] 에러 응답 내용 일부 (${targetHost || 'unknown host'}): ${htmlText.substring(0, 300)}`
+      );
       return { 
         statusCode: 502, 
         headers: { 'Content-Type': 'text/html; charset=utf-8' },
-        body: `<h3>DS투자증권 차단 또는 세션 만료</h3><pre>${htmlText.substring(0, 500)}</pre>` 
+        body: `<h3>${targetHost || 'PDF 소스'} 응답이 PDF가 아닙니다</h3><pre>${htmlText.substring(0, 500)}</pre>` 
       };
     }
 

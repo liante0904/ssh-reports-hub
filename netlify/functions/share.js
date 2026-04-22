@@ -62,10 +62,28 @@ export const handler = async (event) => {
       const fileName = `[${company}] ${title}.pdf`;
       const boardUrl = report.article_url || pdfUrl.replace('download.php', 'board.php');
       const proxyUrl = `${requestOrigin}/.netlify/functions/proxy?url=${encodeURIComponent(pdfUrl)}&filename=${encodeURIComponent(fileName)}${boardUrl ? `&referer=${encodeURIComponent(boardUrl)}` : ''}`;
-      // iOS는 브라우저 기본 PDF 뷰어를 우선 사용하고, 그 외는 pdf.js로 통일한다.
-      finalUrl = isIos
-        ? proxyUrl
-        : `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(proxyUrl)}`;
+      let proxyLooksGood = false;
+
+      try {
+        const proxyCheck = await fetch(proxyUrl, { method: 'HEAD' });
+        const proxyContentType = proxyCheck.headers.get('content-type') || '';
+        proxyLooksGood = proxyCheck.ok && !proxyContentType.includes('text/html');
+      } catch {
+        proxyLooksGood = false;
+      }
+
+      if (!proxyLooksGood) {
+        // proxy가 HTML/에러를 내면 pdf.js까지 타지 말고 원본 URL로 바로 보낸다.
+        finalUrl = pdfUrl;
+      } else {
+        const viewerBase = 'https://mozilla.github.io/pdf.js/web/viewer.html';
+        const viewerParams = `file=${encodeURIComponent(proxyUrl)}`;
+        const viewerHash = 'pagemode=none&zoom=page-width';
+        // iOS는 브라우저 기본 PDF 뷰어를 우선 사용하고, 그 외는 pdf.js로 통일한다.
+        finalUrl = isIos
+          ? proxyUrl
+          : `${viewerBase}?${viewerParams}#${viewerHash}`;
+      }
     }
 
     return {

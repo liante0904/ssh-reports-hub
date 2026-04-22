@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { getShareUrl } from '../../utils/reportLinks';
 
 const ReportItem = ({ 
   report, 
@@ -12,9 +13,9 @@ const ReportItem = ({
   showFirmTag,
   onWriterClick
 }) => {
-  const { id, title, writer, link, gemini_summary, firm } = report;
+  const { id, title, writer, gemini_summary, firm } = report;
   
-  const finalLink = `${window.location.origin}/share?id=${id}`;
+  const finalLink = getShareUrl(id);
   
   const hasSummary = gemini_summary && gemini_summary.trim() !== "" && gemini_summary.trim() !== " ";
 
