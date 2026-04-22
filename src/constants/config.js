@@ -7,7 +7,7 @@ const REPORT_API_BASE_URL =
   import.meta.env.VITE_REPORT_API_URL ||
   import.meta.env.VITE_API_URL ||
   import.meta.env.VITE_ORACLE_REST_API ||
-  'https://ssh-oci.duckdns.org/ords/admin';
+  'https://ssh-oci.duckdns.org';
 const VPN_ADDR = import.meta.env.VITE_VPN_ADDR;
 const TELEGRAM_BOT_ID = import.meta.env.VITE_TELEGRAM_BOT_ID || '1372612160';
 const TELEGRAM_BOT_NAME = import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot';
