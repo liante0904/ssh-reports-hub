@@ -1,6 +1,10 @@
 export const handler = async (event) => {
   const { id } = event.queryStringParameters;
-  const BASE_URL = process.env.VITE_ORACLE_REST_API || 'https://ssh-oci.duckdns.org/ords/admin';
+  const BASE_URL =
+    process.env.VITE_REPORT_API_URL ||
+    process.env.VITE_API_URL ||
+    process.env.VITE_ORACLE_REST_API ||
+    'https://ssh-oci.duckdns.org/ords/admin';
   const TABLE_NAME = process.env.VITE_TABLE_NAME || 'data_main_daily_send';
   const SITE_URL = 'https://ssh-oci.netlify.app';
   const requestHost = event.headers?.host || 'ssh-oci.netlify.app';
