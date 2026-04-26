@@ -138,7 +138,7 @@ SQLite (telegram.db)는 롤백/최근 동기화 소스로 유지
 ## 최근 변경 이력
 
 - 2026-04-22: 유안타/MyAsset 레포트 라우팅 정리
-  - `article_url`이 상세 뷰어 페이지인 케이스를 확인하고, 원본 PDF 우선 순위를 `pdf_url -> download_url -> attach_url -> telegram_url`로 수정.
+  - `article_url`이 상세 뷰어 페이지인 케이스를 확인하고, 원본 PDF 우선 순위를 `pdf_url -> download_url -> telegram_url`로 수정.
   - proxy 실패 시 raw URL fallback 유지.
 - 2026-04-22: `pdf.js` 경유 실패 시 raw URL fallback 추가
   - proxy 사전 점검 결과가 HTML/에러이면 `pdf.js`로 보내지 않고 원본 URL로 직접 이동.

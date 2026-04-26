@@ -7,7 +7,7 @@ export function normalizeReportItem(item) {
     id: item.report_id,
     title: item.article_title,
     writer: item.writer,
-    link: item.telegram_url || item.download_url || item.attach_url,
+    link: item.telegram_url || item.download_url,
     gemini_summary: item.gemini_summary,
     firm,
     date: formatDate(item.reg_dt),

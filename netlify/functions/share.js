@@ -27,11 +27,10 @@ export const handler = async (event) => {
 
     // 1. 원본 PDF URL 추출
     // MyAsset/유안타처럼 article_url은 상세 뷰어 페이지이고,
-    // pdf_url/download_url/attach_url/telegram_url이 실제 PDF 원본인 경우가 많다.
+    // pdf_url/download_url/telegram_url이 실제 PDF 원본인 경우가 많다.
     const candidates = [
       report.pdf_url,
       report.download_url,
-      report.attach_url,
       report.telegram_url,
       report.key,
       report.article_url,
