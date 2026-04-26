@@ -9,7 +9,6 @@ function SearchOverlay() {
     isSearchOpen, 
     toggleSearch, 
     handleSearch: onSearch, 
-    searchQuery,
     pendingSearch,
     setPendingSearch
   } = useReport();
@@ -48,7 +47,7 @@ function SearchOverlay() {
         }
       }
     }
-  }, [isSearchOpen, searchParams, pendingSearch, setPendingSearch]);
+  }, [isSearchOpen, searchParams, pendingSearch, setPendingSearch, onSearch, setSearchParams]);
 
   const showToast = useCallback((message) => {
     setToast({ visible: true, message });

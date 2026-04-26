@@ -20,8 +20,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     isMenuOpen, 
     toggleMenu, 
     handleSearch,
-    setSortBy,
-    firm_names
+    setSortBy
   } = useReport();
 
   useEffect(() => {
@@ -82,7 +81,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
   const handleCompanyChange = (e) => {
     const selectedValue = e.target.value;
-    const company = selectedValue ? firm_names[selectedValue] : '';
 
     setQuery(selectedValue);
     setIsSearchActive(true);

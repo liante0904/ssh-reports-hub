@@ -21,9 +21,16 @@ export async function request(url, options = {}, logout) {
     defaultHeaders['Content-Type'] = 'application/json';
   }
 
+  // 타임아웃 처리 (기본 10초)
+  const timeoutSignal = AbortSignal.timeout(options.timeout || 10000);
+  const signal = options.signal 
+    ? AbortSignal.any([options.signal, timeoutSignal])
+    : timeoutSignal;
+
   const mergedOptions = {
     ...options,
     method,
+    signal,
     headers: {
       ...defaultHeaders,
       ...options.headers,

@@ -17,7 +17,7 @@ export const useKeywords = (telegramUser) => {
     try {
       const data = await request(`${CONFIG.API.BASE_URL}/keywords`, {}, logout);
       if (data) setKeywords(data.filter(k => k.is_active));
-    } catch (error) {
+    } catch {
       // 에러는 request 내부에서 이미 로깅됨
     } finally {
       setIsLoadingKeywords(false);
@@ -31,7 +31,7 @@ export const useKeywords = (telegramUser) => {
         body: JSON.stringify({ keywords: updatedKeywords })
       }, logout);
       if (data) setKeywords(data.filter(k => k.is_active));
-    } catch (error) {
+    } catch {
       // 에러 로깅됨
     }
   };

@@ -1,22 +1,16 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useReport } from '../context/ReportContext';
-import CompanySelect from './CompanySelect';
 import './FloatingMenu.css';
 
 function FloatingMenu({ isFloatingNavVisible }) {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { 
     isMenuOpen: isOpen, 
     toggleMenu, 
     toggleSearch, 
     theme, 
-    toggleTheme,
-    handleSearch: onCompanyChange,
-    searchQuery
+    toggleTheme
   } = useReport();
-
-  const selectedCompany = searchQuery.category === 'company' ? searchQuery.query : '';
 
   const handleOverlayClick = () => {
     if (isOpen) {
@@ -26,21 +20,6 @@ function FloatingMenu({ isFloatingNavVisible }) {
 
   const handleRefresh = () => {
     window.location.reload();
-  };
-
-  const handleSelectChange = (e) => {
-    const selectedValue = e.target.value;
-    
-    if (selectedValue) {
-      setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
-      onCompanyChange({ query: selectedValue, category: 'company' });
-    } else {
-      setSearchParams({}, { replace: true });
-      onCompanyChange({ query: '', category: 'company' });
-    }
-    
-    navigate({ pathname: '/' });
-    toggleMenu();
   };
 
   return (

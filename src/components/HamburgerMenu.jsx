@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import CompanySelect from './CompanySelect';
 import TelegramAuth from './menu/TelegramAuth';
@@ -16,12 +16,11 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     const saved = localStorage.getItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
     try {
       return saved ? JSON.parse(saved) : null;
-    } catch (e) {
+    } catch {
       return null;
     }
   });
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [isPolling, setIsPolling] = useState(false);
 
   const {
     keywords,
@@ -66,7 +65,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               setTelegramUser(userData);
               localStorage.setItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER, JSON.stringify(userData));
             }
-          } catch (error) {
+          } catch {
             // 로깅됨
           } finally {
             setIsAuthenticating(false);

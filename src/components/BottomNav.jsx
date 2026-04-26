@@ -3,7 +3,7 @@ import { useReport } from '../context/ReportContext';
 import './BottomNav.css';
 
 function BottomNav({ isNavVisible, toggleFloatingNav, onHomeClick }) {
-  const { toggleSearch, isSearchOpen, setSearchQuery } = useReport();
+  const { toggleSearch } = useReport();
   const navigate = useNavigate();
 
   const handleSearchClick = () => {

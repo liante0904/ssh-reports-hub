@@ -26,7 +26,7 @@ function ReportList({ onWriterClick }) {
     const saved = localStorage.getItem('report_favorites');
     try {
       return saved ? JSON.parse(saved) : {};
-    } catch (e) {
+    } catch {
       return {};
     }
   });

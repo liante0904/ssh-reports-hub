@@ -10,7 +10,6 @@ import './index.css';
 
 function AppContent() {
   const { 
-    isSearchOpen, 
     setIsSearchOpen,
     isMenuOpen, 
     setIsMenuOpen,
@@ -51,8 +50,10 @@ function AppContent() {
         id="main-content"
         className="main-content" 
         onClick={() => {
-          if (isMenuOpen) setIsMenuOpen(false);
-          if (isTopMenuOpen) setIsTopMenuOpen(false);
+          if (isMenuOpen || isTopMenuOpen) {
+            if (isMenuOpen) setIsMenuOpen(false);
+            if (isTopMenuOpen) setIsTopMenuOpen(false);
+          }
         }}
       >
         <Routes>

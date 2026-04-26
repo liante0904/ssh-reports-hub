@@ -13,15 +13,6 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
   const isLoadingRef = useRef(false);
   const hasMoreRef = useRef(true);
 
-  // Sync refs with state
-  useEffect(() => {
-    isLoadingRef.current = isLoading;
-  }, [isLoading]);
-
-  useEffect(() => {
-    hasMoreRef.current = hasMore;
-  }, [hasMore]);
-
   const buildApiUrl = useCallback(() => {
     const params = new URLSearchParams();
     
