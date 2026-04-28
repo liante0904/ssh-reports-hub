@@ -67,8 +67,6 @@ export const handler = async (event) => {
     const isDbsecGate = /whub\.dbsec\.co\.kr\/pv\/(gate|viewer)/i.test(pdfUrl) || /streamdocs/i.test(pdfUrl);
 
     if (isDbsecGate) {
-      // DB증권은 PDF 원본이 아니라 StreamDocs 게이트/뷰어를 통해 열어야 한다.
-      // pdf.js로 넘기면 HTML을 PDF로 해석하려고 해서 깨진다.
       finalUrl = pdfUrl;
     } else if (pdfUrl.startsWith('http')) {
       const fileName = `[${company}] ${title}.pdf`;
@@ -85,19 +83,34 @@ export const handler = async (event) => {
       }
 
       if (!proxyLooksGood) {
-        // proxy가 HTML/에러를 내면 pdf.js까지 타지 말고 원본 URL로 바로 보낸다.
         finalUrl = pdfUrl;
       } else {
-        const viewerBase = 'https://mozilla.github.io/pdf.js/web/viewer.html';
+        const viewerBase = `${requestOrigin}/lib/pdfjs/web/viewer.html`;
         const viewerParams = `file=${encodeURIComponent(proxyUrl)}`;
         const viewerHash = 'pagemode=none&zoom=page-width';
-        // iOS는 브라우저 기본 PDF 뷰어를 우선 사용하고, 그 외는 pdf.js로 통일한다.
+        // iOS는 브라우저 기본 PDF 뷰어를 사용하고, 그 외는 셀프 호스팅된 pdf.js를 사용한다.
         finalUrl = isIos
           ? proxyUrl
           : `${viewerBase}?${viewerParams}#${viewerHash}`;
       }
     }
 
+    // 3. 봇(카카오톡, 텔레그램 등) 여부 확인하여 분기 처리
+    const isBot = /kakaotalk|telegram|facebook|twitter|slack|bot|crawler|spider/i.test(userAgent);
+
+    if (!isBot) {
+      // 일반 사용자는 302 리다이렉트로 즉시 이동 (성능 최적화)
+      return {
+        statusCode: 302,
+        headers: {
+          'Location': finalUrl,
+          'Cache-Control': 'no-cache',
+        },
+        body: '',
+      };
+    }
+
+    // 봇인 경우에만 OG 태그가 포함된 HTML 반환
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'text/html; charset=utf-8' },

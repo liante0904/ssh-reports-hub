@@ -100,7 +100,7 @@ export const handler = async (event) => {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="${encodeURIComponent(filename || 'report.pdf')}"`,
         'X-Content-Type-Options': 'nosniff',
-        'Cache-Control': 'no-store', // 브라우저 캐싱 방지
+        'Cache-Control': 'public, max-age=3600', // 1시간 캐싱 허용
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
         'Access-Control-Expose-Headers': 'Accept-Ranges, Content-Disposition, Content-Length, Content-Range, Content-Type',
