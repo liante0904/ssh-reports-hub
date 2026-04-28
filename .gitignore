@@ -30,3 +30,4 @@ dist-ssr
 .netlify
 .env
 .codex
+public/lib/pdfjs
