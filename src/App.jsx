@@ -6,6 +6,7 @@ import BottomNav from './components/BottomNav';
 import FloatingMenu from './components/FloatingMenu';
 import { ReportProvider, useReport } from './context/ReportContext';
 import { useAppLayout } from './hooks/useAppLayout';
+import PDFViewerModal from './components/report/PDFViewerModal';
 import './index.css';
 
 function AppContent() {
@@ -17,6 +18,8 @@ function AppContent() {
     setIsTopMenuOpen,
     setSearchQuery,
     setPendingSearch,
+    viewerReport,
+    setViewerReport,
   } = useReport();
 
   const {
@@ -72,6 +75,14 @@ function AppContent() {
       <FloatingMenu
         isFloatingNavVisible={isFloatingNavVisible}
       />
+      
+      {/* 인앱 뷰어 모달 */}
+      {viewerReport && (
+        <PDFViewerModal 
+          report={viewerReport} 
+          onClose={() => setViewerReport(null)} 
+        />
+      )}
     </>
   );
 }

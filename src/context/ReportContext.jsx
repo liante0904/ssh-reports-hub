@@ -20,6 +20,7 @@ export function ReportProvider({ children }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTopMenuOpen, setIsTopMenuOpen] = useState(false);
   const [sortBy, setSortBy] = useState('time'); // 'time' or 'company'
+  const [viewerReport, setViewerReport] = useState(null); // 인앱 뷰어용 리포트 객체
 
   // Theme state
   const [theme, setTheme] = useState(() => {
@@ -71,6 +72,8 @@ export function ReportProvider({ children }) {
     toggleMenuTop,
     sortBy,
     setSortBy,
+    viewerReport,
+    setViewerReport,
     firm_names: FIRM_NAMES, // 기존 이름 유지하여 하위 컴포넌트 에러 방지
     theme,
     setTheme,
