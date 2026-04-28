@@ -13,7 +13,7 @@ const ReportItem = ({
   showFirmTag,
   onWriterClick
 }) => {
-  const { id, title, writer, gemini_summary, firm } = report;
+  const { id, title, writer, gemini_summary, firm, link } = report;
   
   const finalLink = getDirectUrl(report);
   
