@@ -1,5 +1,24 @@
+const FETCH_TIMEOUT_MS = 8000;
+
+async function fetchWithTimeout(url, options = {}, ms = FETCH_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function isDsReport(report, pdfUrl = '') {
+  const firm = report?.firm_nm || report?.firm || '';
+  const firmId = report?.firm_id ?? report?.firmId;
+  const firmOrder = report?.sec_firm_order ?? report?.secFirmOrder;
+  return String(firmOrder) === '11' || String(firmId) === '11' || firm.includes('DS') || firm.includes('디에스') || /(^|\.)ds-sec\.co\.kr/i.test(pdfUrl);
+}
+
 export const handler = async (event) => {
-  const { id, warmup } = event.queryStringParameters;
+  const { id, warmup } = event.queryStringParameters || {};
 
   // 워밍업 요청 대응
   if (warmup) {
@@ -25,7 +44,7 @@ export const handler = async (event) => {
     const tableName = TABLE_NAME.replace(/^\//, '').replace(/\/$/, '');
     const apiUrl = `${baseUrl}/${tableName}/search/?report_id=${id}`;
     
-    const response = await fetch(apiUrl);
+    const response = await fetchWithTimeout(apiUrl);
     const data = await response.json();
     const report = data.items?.[0];
 
@@ -57,7 +76,7 @@ export const handler = async (event) => {
     if (/(db-fi\.com|dbsec\.co\.kr)$/i.test(pdfHost)) {
       if (/\.json(\?|$)/i.test(pdfUrl)) {
         try {
-          const jsonRes = await fetch(pdfUrl);
+          const jsonRes = await fetchWithTimeout(pdfUrl);
           if (jsonRes.ok) {
             const jsonData = await jsonRes.json();
             const token = jsonData?.data?.url || jsonData?.url;
@@ -73,6 +92,7 @@ export const handler = async (event) => {
 
     const title = report.article_title || '증권사 리포트';
     const company = report.firm_nm || '증권사';
+    const isDs = isDsReport(report, pdfUrl);
     
     // 2. 리다이렉트 경로 결정
     let finalUrl = pdfUrl;
@@ -84,15 +104,18 @@ export const handler = async (event) => {
     } else if (pdfUrl.startsWith('http')) {
       const fileName = `[${company}] ${title}.pdf`;
       const boardUrl = report.article_url || pdfUrl.replace('download.php', 'board.php');
-      const proxyUrl = `${requestOrigin}/.netlify/functions/proxy?url=${encodeURIComponent(pdfUrl)}&filename=${encodeURIComponent(fileName)}${boardUrl ? `&referer=${encodeURIComponent(boardUrl)}` : ''}`;
-      let proxyLooksGood = false;
+      const proxyFunction = isDs ? 'proxy-ds' : 'proxy';
+      const proxyUrl = `${requestOrigin}/.netlify/functions/${proxyFunction}?url=${encodeURIComponent(pdfUrl)}&filename=${encodeURIComponent(fileName)}${boardUrl ? `&referer=${encodeURIComponent(boardUrl)}` : ''}`;
+      let proxyLooksGood = isDs;
 
-      try {
-        const proxyCheck = await fetch(proxyUrl, { method: 'HEAD' });
-        const proxyContentType = proxyCheck.headers.get('content-type') || '';
-        proxyLooksGood = proxyCheck.ok && !proxyContentType.includes('text/html');
-      } catch {
-        proxyLooksGood = false;
+      if (!isDs) {
+        try {
+          const proxyCheck = await fetchWithTimeout(proxyUrl, { method: 'HEAD' }, 3000);
+          const proxyContentType = proxyCheck.headers.get('content-type') || '';
+          proxyLooksGood = proxyCheck.ok && !proxyContentType.includes('text/html');
+        } catch {
+          proxyLooksGood = false;
+        }
       }
 
       if (!proxyLooksGood) {
@@ -101,8 +124,8 @@ export const handler = async (event) => {
         const viewerBase = `${requestOrigin}/lib/pdfjs/web/viewer.html`;
         const viewerParams = `file=${encodeURIComponent(proxyUrl)}`;
         const viewerHash = 'pagemode=none&zoom=page-width';
-        // iOS는 브라우저 기본 PDF 뷰어를 사용하고, 그 외는 셀프 호스팅된 pdf.js를 사용한다.
-        finalUrl = isIos
+        // iOS와 DS는 브라우저 기본 PDF 뷰어를 사용하고, 그 외는 셀프 호스팅된 pdf.js를 사용한다.
+        finalUrl = isIos || isDs
           ? proxyUrl
           : `${viewerBase}?${viewerParams}#${viewerHash}`;
       }

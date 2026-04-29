@@ -1,24 +1,30 @@
 .pdf-viewer-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  height: var(--pdf-viewer-height, 100dvh);
   background-color: rgba(0, 0, 0, 0.85);
   z-index: 2000;
   display: flex;
   flex-direction: column;
   animation: slideUp 0.3s ease-out;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .pdf-viewer-header {
-  height: 50px;
+  min-height: calc(50px + env(safe-area-inset-top, 0px));
   background-color: #1a1a1a;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 15px;
+  padding: env(safe-area-inset-top, 0px) 12px 0;
   color: white;
+  box-sizing: border-box;
+  flex: 0 0 auto;
 }
 
 .pdf-viewer-title {
@@ -34,22 +40,42 @@
   background: none;
   border: none;
   color: white;
-  font-size: 28px;
   cursor: pointer;
-  padding: 5px;
-  line-height: 1;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  line-height: 0;
+  flex: 0 0 44px;
+  border-radius: 6px;
+}
+
+.pdf-viewer-close svg {
+  display: block;
+  fill: currentColor;
+}
+
+.pdf-viewer-close:active {
+  background-color: rgba(255, 255, 255, 0.14);
 }
 
 .pdf-viewer-body {
   flex: 1;
+  min-height: 0;
   background-color: #525659;
   position: relative;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .pdf-viewer-iframe {
+  display: block;
   width: 100%;
   height: 100%;
   border: none;
+  background-color: #525659;
 }
 
 @keyframes slideUp {
@@ -60,6 +86,20 @@
 /* 모바일 대응 */
 @media (max-width: 768px) {
   .pdf-viewer-header {
-    height: 44px;
+    min-height: calc(48px + env(safe-area-inset-top, 0px));
+    padding: env(safe-area-inset-top, 0px) 8px 0 12px;
+  }
+
+  .pdf-viewer-title {
+    max-width: calc(100vw - 72px);
+    font-size: 13px;
+  }
+
+  .pdf-viewer-body {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pdf-viewer-iframe {
+    min-width: 0;
   }
 }

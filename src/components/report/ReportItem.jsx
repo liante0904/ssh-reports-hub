@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { getDirectUrl } from '../../utils/reportLinks';
+import { getDirectUrl, prefetchPdf } from '../../utils/reportLinks';
 import { useReport } from '../../context/ReportContext';
 
 const ReportItem = ({ 
@@ -36,6 +36,8 @@ const ReportItem = ({
     
     fetch(proxyUrl, { method: 'HEAD', mode: 'no-cors' }).catch(() => {});
     fetch(shareUrl, { method: 'HEAD', mode: 'no-cors' }).catch(() => {});
+
+    prefetchPdf(report, origin);
   };
   
   const hasSummary = gemini_summary && gemini_summary.trim() !== "" && gemini_summary.trim() !== " ";

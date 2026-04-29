@@ -5,6 +5,7 @@ import ShareMenu from './ShareMenu';
 import ReportGroup from './report/ReportGroup';
 import { useReportFetch } from '../hooks/useReportFetch';
 import { useReport } from '../context/ReportContext';
+import { isDsReport, prefetchPdf } from '../utils/reportLinks';
 import { buildShareMenuData } from '../utils/shareMenuData';
 import './ReportList.css';
 
@@ -102,6 +103,38 @@ function ReportList({ onWriterClick }) {
         );
       })
     : sortedDates;
+
+  useEffect(() => {
+    if (isLoading || filteredSortedDates.length === 0) return;
+
+    const topReports = filteredSortedDates
+      .slice(0, 2)
+      .flatMap((date) => {
+        if (dateToggles[date]) return [];
+        const items = reports[date];
+        const list = Array.isArray(items) ? items : Object.values(items).flat();
+        return list.filter((report) => !isFavoritesPage || favorites[report.id]);
+      })
+      .filter(isDsReport)
+      .slice(0, 3);
+
+    if (topReports.length === 0) return;
+
+    const runPrefetch = () => {
+      const origin = window.location.origin;
+      topReports.forEach((report, index) => {
+        window.setTimeout(() => prefetchPdf(report, origin), index * 700);
+      });
+    };
+
+    if (window.requestIdleCallback) {
+      const idleId = window.requestIdleCallback(runPrefetch, { timeout: 2500 });
+      return () => window.cancelIdleCallback?.(idleId);
+    }
+
+    const timeoutId = window.setTimeout(runPrefetch, 1200);
+    return () => window.clearTimeout(timeoutId);
+  }, [dateToggles, favorites, filteredSortedDates, isFavoritesPage, isLoading, reports]);
 
   return (
     <div className="report-list-wrapper">
