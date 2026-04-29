@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "netlify": "netlify dev",
+    "netlify:legacy": "netlify dev --envFiles .env.legacy",
     "setup-pdfjs": "mkdir -p public/lib/pdfjs && curl -L https://github.com/mozilla/pdf.js/releases/download/v5.7.284/pdfjs-5.7.284-dist.zip -o pdfjs.zip && unzip -o pdfjs.zip -d public/lib/pdfjs && rm pdfjs.zip",
     "build": "npm run setup-pdfjs && vite build",
     "lint": "eslint .",

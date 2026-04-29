@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import SearchOverlay from './components/SearchOverlay';
@@ -30,6 +31,30 @@ function AppContent() {
   } = useAppLayout();
 
   const location = useLocation();
+
+  // 글로벌 워밍업: 앱 시작 시 서버(Lambda) 미리 깨우기
+  useEffect(() => {
+    const warmUp = async () => {
+      const origin = window.location.origin;
+      const targets = [
+        `${origin}/.netlify/functions/proxy?warmup=true`,
+        `${origin}/.netlify/functions/share?warmup=true`
+      ];
+      
+      // 사용자 몰래 백그라운드에서 신호만 보냄
+      targets.forEach(url => {
+        fetch(url, { method: 'HEAD', mode: 'no-cors' }).catch(() => {});
+      });
+      console.log('[App] Global warm-up signal sent to serverless functions');
+    };
+    
+    // 브라우저 로딩이 완전히 끝난 뒤 여유 있을 때 실행
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(warmUp);
+    } else {
+      setTimeout(warmUp, 2000);
+    }
+  }, []);
 
   const handleWriterSearch = (writer) => {
     setPendingSearch({ query: writer, category: 'writer' });

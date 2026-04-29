@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { getShareUrl, getDirectUrl } from '../../utils/reportLinks';
+import { getDirectUrl } from '../../utils/reportLinks';
 import { useReport } from '../../context/ReportContext';
 
 const ReportItem = ({ 
@@ -14,10 +14,29 @@ const ReportItem = ({
   showFirmTag,
   onWriterClick
 }) => {
-  const { id, title, writer, gemini_summary, firm, link } = report;
+  const { id, title, writer, gemini_summary, firm, pdf_url } = report;
   const { setViewerReport } = useReport();
   
   const finalLink = getDirectUrl(report);
+
+  const handleViewerClick = () => {
+    if (firm === '현대차증권' && pdf_url) {
+      setViewerReport({ ...report, link: pdf_url });
+    } else {
+      setViewerReport(report);
+    }
+  };
+
+  // 프리패치 로직: 서버 미리 깨우기 (Cold Start 방지)
+  const handlePrefetch = () => {
+    const origin = window.location.origin;
+    // 람다만 깨우면 되므로 복잡한 인자 생략
+    const proxyUrl = `${origin}/.netlify/functions/proxy?warmup=true`;
+    const shareUrl = `${origin}/.netlify/functions/share?warmup=true`;
+    
+    fetch(proxyUrl, { method: 'HEAD', mode: 'no-cors' }).catch(() => {});
+    fetch(shareUrl, { method: 'HEAD', mode: 'no-cors' }).catch(() => {});
+  };
   
   const hasSummary = gemini_summary && gemini_summary.trim() !== "" && gemini_summary.trim() !== " ";
 
@@ -55,6 +74,17 @@ const ReportItem = ({
                 </button>
               )}
               <button 
+                className="viewer-button" 
+                onClick={handleViewerClick}
+                onMouseEnter={handlePrefetch}
+                onTouchStart={handlePrefetch}
+                title="인앱 뷰어로 즉시 보기"
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>
+              </button>
+              <button 
                 className={`favorite-button ${isFavorite ? 'active' : ''}`}
                 onClick={() => onToggleFavorite(id)}
                 title={isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"}
@@ -64,15 +94,6 @@ const ReportItem = ({
                     ? "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
                     : "M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"}
                   />
-                </svg>
-              </button>
-              <button 
-                className="viewer-button" 
-                onClick={() => setViewerReport(report)}
-                title="인앱 뷰어로 즉시 보기"
-              >
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                 </svg>
               </button>
               <button 

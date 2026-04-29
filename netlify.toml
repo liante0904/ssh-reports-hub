@@ -2,6 +2,12 @@
   command = "npm install vite && npm run build"
   publish = "dist"
 
+[dev]
+  command = "npm run dev"
+  port = 8888
+  targetPort = 5173
+  publish = "dist"
+
 # 캐싱 설정: 정적 에셋은 장기간 캐싱 (Immutable)
 [[headers]]
   for = "/assets/*"

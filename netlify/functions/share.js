@@ -1,11 +1,17 @@
 export const handler = async (event) => {
-  const { id } = event.queryStringParameters;
+  const { id, warmup } = event.queryStringParameters;
+
+  // 워밍업 요청 대응
+  if (warmup) {
+    return { statusCode: 200, body: 'Warmed up' };
+  }
+
   const REPORT_API_URL =
     process.env.VITE_REPORT_API_URL ||
     process.env.VITE_API_URL ||
     process.env.VITE_ORACLE_REST_API ||
-    'https://ssh-oci.duckdns.org/ords/admin';
-  const TABLE_NAME = process.env.VITE_TABLE_NAME || 'data_main_daily_send';
+    'https://ssh-oci.duckdns.org/pub';
+  const TABLE_NAME = process.env.VITE_TABLE_NAME || 'api';
   const SITE_URL = 'https://ssh-oci.netlify.app';
   const requestHost = event.headers?.host || 'ssh-oci.netlify.app';
   const requestOrigin = event.headers?.origin || `https://${requestHost}`;
@@ -48,13 +54,19 @@ export const handler = async (event) => {
     })();
 
     // DB증권은 상세 JSON 안에 실제 게이트 토큰이 들어있는 경우가 많아서 한 번 더 해석한다.
-    if (/(db-fi\.com|dbsec\.co\.kr)$/i.test(pdfHost) && /\.json(\?|$)/i.test(pdfUrl)) {
-      const jsonRes = await fetch(pdfUrl);
-      if (jsonRes.ok) {
-        const jsonData = await jsonRes.json();
-        const token = jsonData?.data?.url || jsonData?.url;
-        if (token) {
-          pdfUrl = `https://whub.dbsec.co.kr/pv/gate?q=${token}`;
+    if (/(db-fi\.com|dbsec\.co\.kr)$/i.test(pdfHost)) {
+      if (/\.json(\?|$)/i.test(pdfUrl)) {
+        try {
+          const jsonRes = await fetch(pdfUrl);
+          if (jsonRes.ok) {
+            const jsonData = await jsonRes.json();
+            const token = jsonData?.data?.url || jsonData?.url;
+            if (token) {
+              pdfUrl = `https://whub.dbsec.co.kr/pv/gate?q=${token}`;
+            }
+          }
+        } catch (e) {
+          console.error('[Share] DB JSON Fetch Error:', e);
         }
       }
     }
@@ -64,9 +76,10 @@ export const handler = async (event) => {
     
     // 2. 리다이렉트 경로 결정
     let finalUrl = pdfUrl;
-    const isDbsecGate = /whub\.dbsec\.co\.kr\/pv\/(gate|viewer)/i.test(pdfUrl) || /streamdocs/i.test(pdfUrl);
+    const isDbsecGate = /whub\.dbsec\.co\.kr\/pv\/(gate|viewer)/i.test(pdfUrl) || /streamdocs/i.test(pdfUrl) || /(db-fi\.com|dbsec\.co\.kr)/i.test(pdfHost);
 
     if (isDbsecGate) {
+      // DB증권 게이트웨이는 자체가 뷰어(HTML)이므로 즉시 리다이렉트
       finalUrl = pdfUrl;
     } else if (pdfUrl.startsWith('http')) {
       const fileName = `[${company}] ${title}.pdf`;
