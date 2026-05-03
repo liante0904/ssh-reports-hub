@@ -1,8 +1,8 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { useReport } from '../context/useReport';
 import { useGridOverlay } from '../hooks/useGridOverlay';
 import { hasGridSelection } from '../utils/gridSelect';
+import { FIRM_OPTIONS, getFirmNameByOrder } from '../constants/firms';
 import './CompanySelect.css';
 
 // 증권사별 테마 색상 (선택 사항 - 시각적 구분용)
@@ -13,18 +13,16 @@ const firm_colors = {
 };
 
 function CompanySelect({ value, onChange, className = '' }) {
-  const { firm_names } = useReport();
   const { isOpen, searchTerm, setSearchTerm, toggleOverlay, closeOverlay } = useGridOverlay();
 
-  const selectedName = hasGridSelection(value) ? firm_names[value] : "증권사 필터";
+  const selectedName = hasGridSelection(value) ? (getFirmNameByOrder(value) || "증권사 필터") : "증권사 필터";
 
   const handleSelect = (idx) => {
     onChange({ target: { value: idx.toString() } });
     closeOverlay();
   };
 
-  const filteredFirms = firm_names
-    .map((name, idx) => ({ name, idx }))
+  const filteredFirms = FIRM_OPTIONS
     .filter(item => item.name.includes(searchTerm));
 
   const overlay = (
@@ -58,15 +56,15 @@ function CompanySelect({ value, onChange, className = '' }) {
             <div className="checker-name">전체보기</div>
           </div>
 
-          {filteredFirms.map(({ name, idx }) => {
+          {filteredFirms.map(({ name, order }) => {
             const initial = name.substring(0, 1);
             const themeColor = firm_colors[name] || '#666';
 
             return (
               <div
-                key={idx}
-                className={`checker-item ${value.toString() === idx.toString() ? 'active' : ''}`}
-                onClick={() => handleSelect(idx)}
+                key={order}
+                className={`checker-item ${value.toString() === order.toString() ? 'active' : ''}`}
+                onClick={() => handleSelect(order)}
               >
                 <div className="checker-icon" style={{ backgroundColor: themeColor + '15', color: themeColor }}>
                   {initial}

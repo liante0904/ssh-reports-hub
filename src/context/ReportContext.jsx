@@ -16,7 +16,7 @@ export function ReportProvider({ children }) {
   const [sortBy, setSortBy] = useState('time');
   const [viewerReport, setViewerReport] = useState(null);
   // 회사 코드는 DB/필터 매핑과 1:1로 맞아야 하므로 고정 순서를 유지한다.
-  const [companyNames] = useState(FIRM_NAMES);
+  const companyNames = FIRM_NAMES;
   const [boards, setBoards] = useState([]);
   const [isLoadingBoards, setIsLoadingBoards] = useState(false);
 
