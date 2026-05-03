@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import HamburgerMenu from './HamburgerMenu';
 import CompanySelect from './CompanySelect';
 import BoardSelect from './BoardSelect';
@@ -11,6 +11,7 @@ import './Header.css';
 const Header = forwardRef(({ isNavVisible }, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const {
     toggleSearch, 
@@ -39,6 +40,8 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     boards,
     handleSearch,
     navigate,
+    searchParams,
+    setSearchParams,
     setSortBy,
     toggleSearch,
   });
