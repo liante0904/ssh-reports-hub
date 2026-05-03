@@ -2,6 +2,8 @@
 
 > 이 문서는 프로젝트의 현재 구조, 설계 결정 배경, 진행 중인 리팩토링 방향을 기록합니다.
 > 작업 시작 전 이 문서를 먼저 읽고, 작업 완료 후 변경 내용을 반영해 주세요.
+>
+> Workspace boundary: this repository is public-only. Do not connect it to any `private` or `pvt` workspace, container, volume, or network unless the user explicitly asks for that exact action. See [NOTICE.md](./NOTICE.md).
 
 ---
 

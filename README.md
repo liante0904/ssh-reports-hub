@@ -2,6 +2,10 @@
 
 React를 사용하여 구축된 주식 리포트 조회용 웹 애플리케이션입니다.
 
+## Workspace Boundary
+
+This repository is public-only. See [NOTICE.md](./NOTICE.md) for the required boundary rules.
+
 ## ✨ 주요 기능
 
 - **키워드 알림**: 텔레그램 로그인을 통해 관심 키워드에 대한 실시간 알림을 설정할 수 있습니다.
