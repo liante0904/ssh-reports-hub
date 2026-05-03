@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CONFIG } from '../constants/config';
 import { FIRM_NAMES } from '../constants/firms';
 import { request } from '../utils/api';
+import { normalizeSearchSelection } from '../utils/searchSelection';
 import ReportContext from './reportContext';
 
 export function ReportProvider({ children }) {
@@ -48,9 +49,10 @@ export function ReportProvider({ children }) {
   };
 
   const handleSearch = useCallback(({ query, category, board = null }) => {
+    const nextSearch = normalizeSearchSelection({ query, category, board });
     setActiveSearch(prev => {
-      if (prev.query === query && prev.category === category && prev.board === board) return prev;
-      return { query, category, board };
+      if (prev.query === nextSearch.query && prev.category === nextSearch.category && prev.board === nextSearch.board) return prev;
+      return nextSearch;
     });
   }, []);
 

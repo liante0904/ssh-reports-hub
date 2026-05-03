@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useReport } from '../context/useReport';
 import { resolveSearchOverlayState } from '../utils/searchOverlay';
+import { createCompanySearch, createClearedSearch } from '../utils/searchSelection';
 import './SearchOverlay.css';
 import CompanySelect from './CompanySelect';
 
@@ -30,7 +31,7 @@ function SearchOverlay() {
     setCategory(nextCategory);
 
     if (shouldSearch) {
-      onSearch({ query: nextQuery, category: nextCategory, board: null });
+      onSearch(nextCategory === 'company' ? createCompanySearch(nextQuery) : { query: nextQuery, category: nextCategory, board: null });
       setSearchParams({ q: nextQuery, category: nextCategory });
     }
 
@@ -60,7 +61,9 @@ function SearchOverlay() {
     }
 
     setSearchParams({ q: trimmedQuery, category });
-    onSearch({ query: trimmedQuery, category, board: null });
+    onSearch(category === 'company'
+      ? createCompanySearch(trimmedQuery)
+      : { query: trimmedQuery, category, board: null });
   }, [query, category, onSearch, setSearchParams, showToast]);
 
   const handleKeyDown = useCallback(
@@ -78,8 +81,11 @@ function SearchOverlay() {
       setCategory(newCategory);
       setQuery('');
       setSearchParams({}, { replace: true });
+      if (newCategory === 'company') {
+        onSearch(createClearedSearch());
+      }
     },
-    [setSearchParams]
+    [onSearch, setSearchParams]
   );
 
   const handleCompanyChange = useCallback(
@@ -88,9 +94,10 @@ function SearchOverlay() {
       setQuery(selectedValue);
       if (selectedValue) {
         setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
-        onSearch({ query: selectedValue, category: 'company', board: null });
+        onSearch(createCompanySearch(selectedValue));
       } else {
         setSearchParams({}, { replace: true });
+        onSearch(createClearedSearch());
       }
     },
     [onSearch, setSearchParams]

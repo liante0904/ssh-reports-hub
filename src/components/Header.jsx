@@ -5,6 +5,7 @@ import CompanySelect from './CompanySelect';
 import BoardSelect from './BoardSelect';
 import { useReport } from '../context/useReport';
 import { HEADER_PATHS, resetHeaderSearch } from '../utils/headerNavigation';
+import { createClearedSearch, createCompanySearch, toggleBoardSearch } from '../utils/searchSelection';
 import './Header.css';
 
 const Header = forwardRef(({ isNavVisible }, ref) => {
@@ -72,18 +73,27 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
     if (selectedValue) {
       setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
-      handleSearch({ query: selectedValue, category: 'company', board: null });
+      handleSearch(createCompanySearch(selectedValue));
     } else {
       setSearchParams({}, { replace: true });
-      handleSearch({ query: '', category: 'company', board: null });
+      handleSearch(createClearedSearch());
     }
 
     navigate({ pathname: '/' });
   };
 
   const handleBoardClick = (boardOrder) => {
-    const newBoard = activeSearch.board === boardOrder ? null : boardOrder;
-    handleSearch({ ...activeSearch, board: newBoard });
+    const nextSearch = toggleBoardSearch(activeSearch, boardOrder);
+    handleSearch(nextSearch);
+
+    if (nextSearch.board !== null) {
+      setSearchParams(
+        { q: nextSearch.query, category: 'company', board: nextSearch.board.toString() },
+        { replace: true }
+      );
+    } else {
+      setSearchParams({ q: nextSearch.query, category: 'company' }, { replace: true });
+    }
   };
 
   const handleBoardChange = (e) => {
@@ -94,19 +104,25 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   useEffect(() => {
     const urlQuery = searchParams.get('q') || '';
     const urlCategory = searchParams.get('category') || '';
+    const urlBoard = searchParams.get('board');
     if (urlCategory === 'company') {
       setQuery(urlQuery);
       setIsSearchActive(true);
+      handleSearch({
+        query: urlQuery,
+        category: 'company',
+        board: urlBoard ? Number(urlBoard) : null,
+      });
     } else {
       setQuery('');
     }
-  }, [searchParams]);
+  }, [handleSearch, searchParams]);
 
   const handleTitleClick = () => {
     if (isTopMenuOpen) toggleMenuTop();
     if (isMenuOpen) toggleMenu();
     setIsSearchActive(false);
-    handleSearch({ query: '', category: '', board: null });
+    handleSearch(createClearedSearch());
     setQuery('');
     setSearchParams({}, { replace: true });
     setSortBy('time');
