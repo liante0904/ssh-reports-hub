@@ -4,7 +4,6 @@ import HamburgerMenu from './HamburgerMenu';
 import CompanySelect from './CompanySelect';
 import BoardSelect from './BoardSelect';
 import { useReport } from '../context/useReport';
-import { useMediaQuery } from '../hooks/useMediaQuery';
 import { HEADER_PATHS, resetHeaderSearch } from '../utils/headerNavigation';
 import './Header.css';
 
@@ -14,7 +13,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [query, setQuery] = useState(searchParams.get('q') || '');
-  const isMobile = useMediaQuery('(max-width: 1023px)');
 
   const {
     toggleSearch, 
@@ -123,21 +121,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
             🏠 ssh-reports-hub
           </div>
           <div className="header-actions">
-            <div className="company-select-wrapper">
-              <CompanySelect
-                value={query}
-                onChange={handleCompanyChange}
-                className="company-select"
-              />
-              {showBoardSelect && (
-                <BoardSelect
-                  value={activeSearch.board}
-                  boards={boards}
-                  onChange={handleBoardChange}
-                  className="board-select"
-                />
-              )}
-            </div>
             <div className="hamburger-menu" onClick={toggleMenuTop}>
               <div></div>
               <div></div>
@@ -177,6 +160,21 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
           >
             ★
           </button>
+          <div className="company-select-wrapper header-nav-filters">
+            <CompanySelect
+              value={query}
+              onChange={handleCompanyChange}
+              className="company-select"
+            />
+            {showBoardSelect && (
+              <BoardSelect
+                value={activeSearch.board}
+                boards={boards}
+                onChange={handleBoardChange}
+                className="board-select"
+              />
+            )}
+          </div>
         </div>
       </header>
 
