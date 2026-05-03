@@ -5,7 +5,13 @@ import CompanySelect from './CompanySelect';
 import BoardSelect from './BoardSelect';
 import { useReport } from '../context/useReport';
 import { HEADER_PATHS, resetHeaderSearch } from '../utils/headerNavigation';
-import { createClearedSearch, createCompanySearch, toggleBoardSearch } from '../utils/searchSelection';
+import {
+  buildSearchParams,
+  createClearedSearch,
+  createCompanySearch,
+  parseSearchParams,
+  toggleBoardSearch,
+} from '../utils/searchSelection';
 import './Header.css';
 
 const Header = forwardRef(({ isNavVisible }, ref) => {
@@ -36,6 +42,10 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const selectedCompanyOrder = activeSearch.category === 'company'
     ? (activeSearch.companyOrder ?? activeSearch.query ?? query)
     : query;
+
+  const syncSearchParams = (nextSearch) => {
+    setSearchParams(buildSearchParams(nextSearch), { replace: true });
+  };
 
   const handleButtonClick = (buttonName) => {
     if (isTopMenuOpen) toggleMenuTop();
@@ -75,8 +85,9 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     setSortBy('time');
 
     if (selectedValue) {
-      setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
-      handleSearch(createCompanySearch(selectedValue));
+      const nextSearch = createCompanySearch(selectedValue);
+      syncSearchParams(nextSearch);
+      handleSearch(nextSearch);
     } else {
       setSearchParams({}, { replace: true });
       handleSearch(createClearedSearch());
@@ -88,22 +99,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const handleBoardClick = (boardOrder) => {
     const nextSearch = toggleBoardSearch(activeSearch, boardOrder);
     handleSearch(nextSearch);
-
-    if (nextSearch.board !== null) {
-      setSearchParams(
-        {
-          q: nextSearch.companyOrder ?? nextSearch.query,
-          category: 'company',
-          board: nextSearch.board.toString()
-        },
-        { replace: true }
-      );
-    } else {
-      setSearchParams(
-        { q: nextSearch.companyOrder ?? nextSearch.query, category: 'company' },
-        { replace: true }
-      );
-    }
+    syncSearchParams(nextSearch);
   };
 
   const handleBoardChange = (e) => {
@@ -112,18 +108,11 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   };
 
   useEffect(() => {
-    const urlQuery = searchParams.get('q') || '';
-    const urlCategory = searchParams.get('category') || '';
-    const urlBoard = searchParams.get('board');
-    if (urlCategory === 'company') {
-      setQuery(urlQuery);
+    const urlSearch = parseSearchParams(searchParams);
+    if (urlSearch.category === 'company') {
+      setQuery(urlSearch.companyOrder ?? urlSearch.query);
       setIsSearchActive(true);
-      handleSearch({
-        query: urlQuery,
-        category: 'company',
-        board: urlBoard ? Number(urlBoard) : null,
-        companyOrder: urlQuery || null,
-      });
+      handleSearch(urlSearch);
     } else {
       setQuery('');
     }

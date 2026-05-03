@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useReport } from '../context/useReport';
 import { resolveSearchOverlayState } from '../utils/searchOverlay';
-import { createCompanySearch, createClearedSearch } from '../utils/searchSelection';
+import { buildSearchParams, createCompanySearch, createClearedSearch } from '../utils/searchSelection';
 import './SearchOverlay.css';
 import CompanySelect from './CompanySelect';
 
@@ -37,7 +37,7 @@ function SearchOverlay() {
           ? createCompanySearch(companyOrder ?? nextQuery)
           : { query: nextQuery, category: nextCategory, board: null, companyOrder: null }
       );
-      setSearchParams({ q: nextQuery, category: nextCategory });
+      setSearchParams(buildSearchParams({ query: nextQuery, category: nextCategory }));
     }
 
     if (shouldClearPending) {
@@ -65,7 +65,7 @@ function SearchOverlay() {
       return;
     }
 
-    setSearchParams({ q: trimmedQuery, category });
+    setSearchParams(buildSearchParams({ query: trimmedQuery, category }));
     onSearch(category === 'company'
       ? createCompanySearch(trimmedQuery)
       : { query: trimmedQuery, category, board: null, companyOrder: null });
@@ -98,8 +98,9 @@ function SearchOverlay() {
       const selectedValue = e.target.value;
       setQuery(selectedValue);
       if (selectedValue) {
-        setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
-        onSearch(createCompanySearch(selectedValue));
+        const nextSearch = createCompanySearch(selectedValue);
+        setSearchParams(buildSearchParams(nextSearch), { replace: true });
+        onSearch(nextSearch);
       } else {
         setSearchParams({}, { replace: true });
         onSearch(createClearedSearch());
