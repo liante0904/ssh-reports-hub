@@ -1,26 +1,16 @@
-import React, { useState, useEffect, forwardRef } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import React, { forwardRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import HamburgerMenu from './HamburgerMenu';
 import CompanySelect from './CompanySelect';
 import BoardSelect from './BoardSelect';
 import { useReport } from '../context/useReport';
-import { HEADER_PATHS, resetHeaderSearch } from '../utils/headerNavigation';
-import {
-  buildSearchParams,
-  createClearedSearch,
-  createCompanySearch,
-  getSelectedCompanyOrder,
-  parseSearchParams,
-  toggleBoardSearch,
-} from '../utils/searchSelection';
+import { HEADER_PATHS } from '../utils/headerNavigation';
+import { useHeaderSearchState } from '../hooks/useHeaderSearchState';
 import './Header.css';
 
 const Header = forwardRef(({ isNavVisible }, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [isSearchActive, setIsSearchActive] = useState(false);
-  const [query, setQuery] = useState(searchParams.get('q') || '');
 
   const {
     toggleSearch, 
@@ -31,33 +21,40 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     handleSearch,
     setSortBy,
     boards,
-    activeSearch
+    activeSearch,
   } = useReport();
+
+  const {
+    clearSearchState,
+    handleBoardChange,
+    handleCompanyChange,
+    handleSearchButtonClick,
+    handleTitleClick,
+    isSearchActive,
+    query,
+    selectedCompanyOrder,
+    showBoardSelect,
+  } = useHeaderSearchState({
+    activeSearch,
+    boards,
+    handleSearch,
+    navigate,
+    setSortBy,
+    toggleSearch,
+  });
 
   const isRecent = location.pathname === '/';
   const isGlobal = location.pathname.includes('global');
   const isIndustry = location.pathname.includes('industry');
   const isFavorites = location.pathname.includes('favorites');
   const isCompany = location.pathname.startsWith('/company');
-  const showBoardSelect = activeSearch.category === 'company' && boards.length > 0;
-  const selectedCompanyOrder = getSelectedCompanyOrder(activeSearch, query);
-
-  const syncSearchParams = (nextSearch) => {
-    setSearchParams(buildSearchParams(nextSearch), { replace: true });
-  };
 
   const handleButtonClick = (buttonName) => {
     if (isTopMenuOpen) toggleMenuTop();
     if (isMenuOpen) toggleMenu();
     
     if (buttonName !== 'search') {
-      resetHeaderSearch({
-        setIsSearchActive,
-        handleSearch,
-        setQuery,
-        setSearchParams,
-        setSortBy,
-      });
+      clearSearchState({ navigateHome: false });
     }
 
     if (buttonName === 'recent') {
@@ -70,62 +67,8 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     }
 
     if (buttonName === 'search') {
-      setIsSearchActive(true);
-      setQuery('');
-      toggleSearch();
+      handleSearchButtonClick();
     }
-  };
-
-  const handleCompanyChange = (e) => {
-    const selectedValue = e.target.value;
-
-    setQuery(selectedValue);
-    setIsSearchActive(true);
-    setSortBy('time');
-
-    if (selectedValue) {
-      const nextSearch = createCompanySearch(selectedValue);
-      syncSearchParams(nextSearch);
-      handleSearch(nextSearch);
-    } else {
-      setSearchParams({}, { replace: true });
-      handleSearch(createClearedSearch());
-    }
-
-    navigate({ pathname: '/' });
-  };
-
-  const handleBoardClick = (boardOrder) => {
-    const nextSearch = toggleBoardSearch(activeSearch, boardOrder);
-    handleSearch(nextSearch);
-    syncSearchParams(nextSearch);
-  };
-
-  const handleBoardChange = (e) => {
-    const selectedValue = e.target.value;
-    handleBoardClick(selectedValue === '' ? null : Number(selectedValue));
-  };
-
-  useEffect(() => {
-    const urlSearch = parseSearchParams(searchParams);
-    if (urlSearch.category === 'company') {
-      setQuery(urlSearch.companyOrder ?? urlSearch.query);
-      setIsSearchActive(true);
-      handleSearch(urlSearch);
-    } else {
-      setQuery('');
-    }
-  }, [handleSearch, searchParams]);
-
-  const handleTitleClick = () => {
-    if (isTopMenuOpen) toggleMenuTop();
-    if (isMenuOpen) toggleMenu();
-    setIsSearchActive(false);
-    handleSearch(createClearedSearch());
-    setQuery('');
-    setSearchParams({}, { replace: true });
-    setSortBy('time');
-    navigate({ pathname: '/' });
   };
 
   return (
