@@ -63,7 +63,7 @@ function AppContent() {
   };
 
   const handleHomeClick = () => {
-    setSearchQuery({ query: '', category: '' });
+    setSearchQuery({ query: '', category: '', board: null });
     if (isTopMenuOpen) setIsTopMenuOpen(false);
     if (isMenuOpen) setIsMenuOpen(false);
   };

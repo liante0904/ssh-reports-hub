@@ -116,6 +116,36 @@ header.nav-hidden {
   display: none;
 }
 
+/* 헤더의 증권사 선택 스타일 */
+.nav-button.company-select {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 1.1em;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 30px;
+  width: auto;
+  height: 32px;
+  box-sizing: border-box;
+  line-height: 1;
+}
+
+.nav-button.company-select:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.nav-button.company-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
 /* 데스크탑 화면 */
 @media (min-width: 1024px) {
   header {
@@ -144,6 +174,14 @@ header.nav-hidden {
     height: 4px;
   }
 
+  .company-select-wrapper {
+    display: block;
+  }
+
+  .company-select-wrapper .nav-button.company-select {
+    display: flex;
+  }
+
   .header-filter-row {
     display: flex;
     align-items: center;
@@ -156,32 +194,38 @@ header.nav-hidden {
   }
 
   .header-board-select .grid-trigger-btn {
-    height: 32px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    background-color: rgba(255, 255, 255, 0.16);
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
-    font-size: 0.95em;
-    box-shadow: none;
-    max-width: 240px;
+    font-size: 1.1em;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill=\"white\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 30px;
+    width: auto;
+    height: 32px;
+    box-sizing: border-box;
+    line-height: 1;
   }
 
   .header-board-select .grid-trigger-btn:hover {
-    background-color: rgba(255, 255, 255, 0.24);
+    background-color: rgba(255, 255, 255, 0.2);
   }
 
   .header-board-select .grid-trigger-btn.selected {
-    background-color: white;
-    border-color: white;
-    color: #007aff;
-    font-weight: 700;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
+    font-weight: bold;
   }
 
-  .header-board-select .grid-trigger-btn span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .header-board-select .grid-trigger-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
   }
 }
 
@@ -205,8 +249,12 @@ header.nav-hidden {
     margin-right: 5px;
   }
 
-  .company-select-wrapper {
-    display: block;
+  .header-top .company-select-wrapper .nav-button.company-select {
+    width: auto;
+    max-width: 90px;
+    font-size: 0.9em;
+    padding: 4px 8px;
+    height: 28px;
   }
 
   .header-board-row {
@@ -215,19 +263,45 @@ header.nav-hidden {
     justify-content: center;
   }
 
-  .header-board-select {
+  .header-board-select-mobile {
     width: 100%;
     max-width: calc(100% - 16px);
   }
 
-  .header-board-select .grid-trigger-btn {
+  .header-board-select-mobile .grid-trigger-btn {
     width: 100%;
-    justify-content: space-between;
-    padding: 6px 12px;
-    height: 32px;
-    border-radius: 16px;
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
     font-size: 0.9em;
-    max-width: none;
+    padding: 4px 8px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill=\"white\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 30px;
+    height: 28px;
+    box-sizing: border-box;
+    line-height: 1;
+    justify-content: space-between;
+  }
+
+  .header-board-select-mobile .grid-trigger-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .header-board-select-mobile .grid-trigger-btn.selected {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
+    font-weight: bold;
+  }
+
+  .header-board-select-mobile .grid-trigger-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
   }
 
   .hamburger-menu {
@@ -256,34 +330,4 @@ header.nav-hidden {
     padding: 4px 8px;
     height: 28px;
   }
-
-  .nav-button.company-select {
-    background-color: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    font-size: 0.9em;
-    padding: 4px 8px;
-    border-radius: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 30px;
-    width: auto;
-    height: 28px;
-    box-sizing: border-box;
-    line-height: 1;
-  }
-
-  .nav-button.company-select:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-
-  .nav-button.company-select:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
-  }
-
 }

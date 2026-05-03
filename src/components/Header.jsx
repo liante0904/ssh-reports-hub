@@ -14,7 +14,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1023);
 
-  const { 
+  const {
     toggleSearch, 
     isTopMenuOpen, 
     toggleMenuTop, 
