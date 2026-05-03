@@ -157,12 +157,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
         {!isMobile && (
           <div className="header-filter-row">
-            <CompanySelect
-              value={query}
-              onChange={handleCompanyChange}
-              className="header-company-select"
-            />
-
             {boards.length > 0 && isRecent && activeSearch.category === 'company' && (
               <BoardSelect
                 value={activeSearch.board}
@@ -216,6 +210,15 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
           >
             ★
           </button>
+          {!isMobile && (
+            <div className="company-select-wrapper">
+              <CompanySelect
+                value={query}
+                onChange={handleCompanyChange}
+                className="nav-button company-select"
+              />
+            </div>
+          )}
         </div>
       </header>
 

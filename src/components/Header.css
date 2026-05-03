@@ -151,39 +151,6 @@ header.nav-hidden {
     padding: 6px 12px 2px;
   }
 
-  .header-company-select {
-    flex: 0 0 auto;
-  }
-
-  .header-company-select .grid-trigger-btn {
-    height: 32px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    background-color: rgba(255, 255, 255, 0.16);
-    color: white;
-    font-size: 0.95em;
-    box-shadow: none;
-    max-width: 220px;
-  }
-
-  .header-company-select .grid-trigger-btn:hover {
-    background-color: rgba(255, 255, 255, 0.24);
-  }
-
-  .header-company-select .grid-trigger-btn.selected {
-    background-color: white;
-    border-color: white;
-    color: #007aff;
-    font-weight: 700;
-  }
-
-  .header-company-select .grid-trigger-btn span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   .header-board-select {
     flex: 0 0 auto;
   }
@@ -238,13 +205,8 @@ header.nav-hidden {
     margin-right: 5px;
   }
 
-  .header-top .company-select-wrapper .grid-trigger-btn {
-    width: auto;
-    max-width: 120px;
-    font-size: 0.9em;
-    padding: 4px 8px;
-    height: 28px;
-    border-radius: 16px;
+  .company-select-wrapper {
+    display: block;
   }
 
   .header-board-row {
@@ -293,6 +255,35 @@ header.nav-hidden {
     font-size: 0.9em;
     padding: 4px 8px;
     height: 28px;
+  }
+
+  .nav-button.company-select {
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 0.9em;
+    padding: 4px 8px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 30px;
+    width: auto;
+    height: 28px;
+    box-sizing: border-box;
+    line-height: 1;
+  }
+
+  .nav-button.company-select:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .nav-button.company-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
   }
 
 }
