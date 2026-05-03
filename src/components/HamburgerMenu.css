@@ -214,6 +214,24 @@
   transform: translateY(-1px);
 }
 
+.telegram-dev-login-btn {
+  background-color: #10b981;
+  color: white;
+}
+
+.telegram-dev-login-btn:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
+.telegram-dev-desc {
+  margin: 0;
+  font-size: 0.8em;
+  line-height: 1.4;
+  color: #047857;
+  text-align: center;
+}
+
 .telegram-app-login-btn {
   background-color: #ffffff;
   color: #0088cc;

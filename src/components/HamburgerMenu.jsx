@@ -8,6 +8,7 @@ import { useKeywords } from '../hooks/useKeywords';
 import { useReport } from '../context/useReport';
 import { CONFIG } from '../constants/config';
 import { request } from '../utils/api';
+import { createDevTelegramUser, persistTelegramUser } from '../utils/devAuth';
 import './HamburgerMenu.css';
 
 function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChange, handleHeaderClick }) {
@@ -75,6 +76,12 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     );
   };
 
+  const loginWithDevBypass = () => {
+    const devUser = createDevTelegramUser();
+    setTelegramUser(devUser);
+    persistTelegramUser(devUser);
+  };
+
   const loginWithTelegramApp = () => {
     const startParam = telegramUser ? telegramUser.id : '';
     window.open(CONFIG.TELEGRAM.getAuthUrl(startParam), '_blank');
@@ -100,11 +107,12 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
             </div>
 
             <div className="menu-title">알림 & 즐겨찾기</div>
-            <TelegramAuth 
+            <TelegramAuth
               telegramUser={telegramUser}
               isAuthenticating={isAuthenticating}
               loginWithTelegram={loginWithTelegram}
               loginWithTelegramApp={loginWithTelegramApp}
+              loginWithDevBypass={loginWithDevBypass}
               handleLogout={logout}
               toggleKeywordOverlay={toggleKeywordOverlay}
             />
@@ -114,7 +122,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
         </div>
       )}
       {isKeywordOverlayOpen && createPortal(
-        <KeywordOverlay 
+        <KeywordOverlay
           newKeyword={newKeyword}
           setNewKeyword={setNewKeyword}
           handleAddKeyword={handleAddKeyword}
@@ -125,7 +133,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
           isLoadingKeywords={isLoadingKeywords}
           lastDeleted={lastDeleted}
           toggleKeywordOverlay={toggleKeywordOverlay}
-        />, 
+        />,
         document.body
       )}
     </>

@@ -1,12 +1,14 @@
 import React from 'react';
+import { DEV_AUTH_ENABLED } from '../../utils/devAuth';
 
-function TelegramAuth({ 
-  telegramUser, 
-  isAuthenticating, 
-  loginWithTelegram, 
-  loginWithTelegramApp, 
-  handleLogout, 
-  toggleKeywordOverlay 
+function TelegramAuth({
+  telegramUser,
+  isAuthenticating,
+  loginWithTelegram,
+  loginWithTelegramApp,
+  loginWithDevBypass,
+  handleLogout,
+  toggleKeywordOverlay
 }) {
   const botName = import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot';
 
@@ -15,14 +17,25 @@ function TelegramAuth({
       {!telegramUser ? (
         <div className="telegram-auth-box">
           <p className="telegram-desc">텔레그램 로그인</p>
-          <div className="telegram-btn-group">
-            <button className="telegram-custom-login-btn" onClick={loginWithTelegram} disabled={isAuthenticating}>
-              <span className="telegram-icon">✈️</span> {isAuthenticating ? '인증 중...' : '브라우저로 로그인'}
-            </button>
-            <button className="telegram-app-login-btn" onClick={loginWithTelegramApp}>
-              <span className="telegram-icon">📲</span> 앱으로 연결
-            </button>
-          </div>
+          {DEV_AUTH_ENABLED ? (
+            <>
+              <button className="telegram-dev-login-btn" onClick={loginWithDevBypass} disabled={isAuthenticating}>
+                <span className="telegram-icon">🧪</span> 개발용 우회 로그인
+              </button>
+              <p className="telegram-dev-desc">
+                개발 환경에서는 텔레그램 봇 위젯 대신 로컬 우회 로그인을 사용합니다.
+              </p>
+            </>
+          ) : (
+            <div className="telegram-btn-group">
+              <button className="telegram-custom-login-btn" onClick={loginWithTelegram} disabled={isAuthenticating}>
+                <span className="telegram-icon">✈️</span> {isAuthenticating ? '인증 중...' : '브라우저로 로그인'}
+              </button>
+              <button className="telegram-app-login-btn" onClick={loginWithTelegramApp}>
+                <span className="telegram-icon">📲</span> 앱으로 연결
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="telegram-user-card">
@@ -32,9 +45,9 @@ function TelegramAuth({
           </div>
 
           <div className="bot-connect-banner">
-            <a 
-              href={`https://t.me/${botName}?start=${telegramUser.id}`} 
-              target="_blank" 
+            <a
+              href={`https://t.me/${botName}?start=${telegramUser.id}`}
+              target="_blank"
               rel="noopener noreferrer"
               className="bot-connect-btn"
             >
