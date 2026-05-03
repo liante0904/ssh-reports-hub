@@ -67,3 +67,11 @@ export function parseSearchParams(searchParams) {
 
   return normalized;
 }
+
+export function getSelectedCompanyOrder(activeSearch, fallbackQuery = '') {
+  if (activeSearch?.category !== 'company') {
+    return fallbackQuery;
+  }
+
+  return activeSearch.companyOrder ?? activeSearch.query ?? fallbackQuery;
+}

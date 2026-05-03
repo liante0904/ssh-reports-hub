@@ -2,7 +2,12 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useReport } from '../context/useReport';
 import { resolveSearchOverlayState } from '../utils/searchOverlay';
-import { buildSearchParams, createCompanySearch, createClearedSearch } from '../utils/searchSelection';
+import {
+  buildSearchParams,
+  createCompanySearch,
+  createClearedSearch,
+  getSelectedCompanyOrder,
+} from '../utils/searchSelection';
 import './SearchOverlay.css';
 import CompanySelect from './CompanySelect';
 
@@ -19,7 +24,7 @@ function SearchOverlay() {
   const [toast, setToast] = useState({ visible: false, message: '' });
   const [searchParams, setSearchParams] = useSearchParams();
   const inputRef = useRef(null);
-  const selectedCompanyOrder = pendingSearch?.companyOrder ?? pendingSearch?.query ?? '';
+  const selectedCompanyOrder = getSelectedCompanyOrder(pendingSearch, '');
 
   // 오버레이 열릴 때 상태 복원 및 외부(pendingSearch) 동기화
   useEffect(() => {

@@ -9,6 +9,7 @@ import {
   buildSearchParams,
   createClearedSearch,
   createCompanySearch,
+  getSelectedCompanyOrder,
   parseSearchParams,
   toggleBoardSearch,
 } from '../utils/searchSelection';
@@ -39,9 +40,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const isFavorites = location.pathname.includes('favorites');
   const isCompany = location.pathname.startsWith('/company');
   const showBoardSelect = activeSearch.category === 'company' && boards.length > 0;
-  const selectedCompanyOrder = activeSearch.category === 'company'
-    ? (activeSearch.companyOrder ?? activeSearch.query ?? query)
-    : query;
+  const selectedCompanyOrder = getSelectedCompanyOrder(activeSearch, query);
 
   const syncSearchParams = (nextSearch) => {
     setSearchParams(buildSearchParams(nextSearch), { replace: true });

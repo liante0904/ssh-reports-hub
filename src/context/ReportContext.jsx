@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CONFIG } from '../constants/config';
 import { FIRM_NAMES } from '../constants/firms';
 import { request } from '../utils/api';
-import { normalizeSearchSelection } from '../utils/searchSelection';
+import { getSelectedCompanyOrder, normalizeSearchSelection } from '../utils/searchSelection';
 import ReportContext from './reportContext';
 
 export function ReportProvider({ children }) {
@@ -49,9 +49,7 @@ export function ReportProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    const companyIndex = activeSearch.category === 'company'
-      ? (activeSearch.companyOrder ?? activeSearch.query)
-      : null;
+    const companyIndex = getSelectedCompanyOrder(activeSearch, null);
     const controller = new AbortController();
 
     if (!companyIndex) {
