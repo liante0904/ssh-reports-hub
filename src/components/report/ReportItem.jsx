@@ -2,7 +2,7 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { getDirectUrl, prefetchPdf } from '../../utils/reportLinks';
-import { useReport } from '../../context/ReportContext';
+import { useReport } from '../../context/useReport';
 
 const ReportItem = ({ 
   report, 

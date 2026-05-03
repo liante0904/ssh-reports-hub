@@ -90,7 +90,7 @@ header.nav-hidden {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 32px; /* 모든 버튼 높이 통일 */
+  height: 32px;
 }
 
 .nav-button:hover {
@@ -104,41 +104,19 @@ header.nav-hidden {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* 헤더의 증권사 선택 스타일 */
-.nav-button.company-select {
-  background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  font-size: 1.1em;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  appearance: none;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 30px;
-  width: auto;
-  height: 32px; /* nav-button과 높이 맞춤 */
-  box-sizing: border-box;
-  line-height: 1; /* 텍스트 세로 정렬 */
-}
-
-.nav-button.company-select:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.nav-button.company-select:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
-}
-
 .company-select-wrapper {
-  display: none; /* Hidden by default, shown in mobile media query */
+  display: none;
 }
 
-/* 데스크탑 화면 (최소 너비 1024px 이상일 때) */
+.header-filter-row {
+  display: none;
+}
+
+.header-board-row {
+  display: none;
+}
+
+/* 데스크탑 화면 */
 @media (min-width: 1024px) {
   header {
     max-width: 100%;
@@ -166,67 +144,155 @@ header.nav-hidden {
     height: 4px;
   }
 
-  .company-select-wrapper {
-    display: block; /* Show on desktop */
+  .header-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px 2px;
   }
 
-  .company-select-wrapper .nav-button.company-select {
-    display: flex; /* Ensure it behaves like other nav buttons */
+  .header-company-select {
+    flex: 0 0 auto;
+  }
+
+  .header-company-select .grid-trigger-btn {
+    height: 32px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background-color: rgba(255, 255, 255, 0.16);
+    color: white;
+    font-size: 0.95em;
+    box-shadow: none;
+    max-width: 220px;
+  }
+
+  .header-company-select .grid-trigger-btn:hover {
+    background-color: rgba(255, 255, 255, 0.24);
+  }
+
+  .header-company-select .grid-trigger-btn.selected {
+    background-color: white;
+    border-color: white;
+    color: #007aff;
+    font-weight: 700;
+  }
+
+  .header-company-select .grid-trigger-btn span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .header-board-select {
+    flex: 0 0 auto;
+  }
+
+  .header-board-select .grid-trigger-btn {
+    height: 32px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background-color: rgba(255, 255, 255, 0.16);
+    color: white;
+    font-size: 0.95em;
+    box-shadow: none;
+    max-width: 240px;
+  }
+
+  .header-board-select .grid-trigger-btn:hover {
+    background-color: rgba(255, 255, 255, 0.24);
+  }
+
+  .header-board-select .grid-trigger-btn.selected {
+    background-color: white;
+    border-color: white;
+    color: #007aff;
+    font-weight: 700;
+  }
+
+  .header-board-select .grid-trigger-btn span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
-/* 모바일 화면 (최대 너비 1023px 이하일 때) */
+/* 모바일 화면 */
 @media (max-width: 1023px) {
   .header-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 8px; /* Reduced horizontal padding */
+    padding: 0 8px;
   }
 
   .header-top .title {
-    flex-grow: 1; /* Allow title to take available space */
-    font-size: 1em; /* Smaller font size for mobile title */
+    flex-grow: 1;
+    font-size: 1em;
   }
 
   .header-top .company-select-wrapper {
-    display: block; /* Show on mobile header-top */
-    flex-shrink: 1; /* Allow it to shrink */
-    margin-right: 5px; /* Reduced space before hamburger */
+    display: block;
+    flex-shrink: 1;
+    margin-right: 5px;
   }
 
-  .header-top .company-select-wrapper .nav-button.company-select {
-    width: auto; /* Allow width to adjust */
-    max-width: 90px; /* Further reduced max width for mobile header-top */
-    font-size: 0.9em; /* Smaller font size */
-    padding: 4px 8px; /* Smaller padding */
-    height: 28px; /* Smaller height */
+  .header-top .company-select-wrapper .grid-trigger-btn {
+    width: auto;
+    max-width: 120px;
+    font-size: 0.9em;
+    padding: 4px 8px;
+    height: 28px;
+    border-radius: 16px;
+  }
+
+  .header-board-row {
+    display: flex;
+    padding: 6px 8px 0;
+    justify-content: center;
+  }
+
+  .header-board-select {
+    width: 100%;
+    max-width: calc(100% - 16px);
+  }
+
+  .header-board-select .grid-trigger-btn {
+    width: 100%;
+    justify-content: space-between;
+    padding: 6px 12px;
+    height: 32px;
+    border-radius: 16px;
+    font-size: 0.9em;
+    max-width: none;
   }
 
   .hamburger-menu {
-    width: 30px; /* Smaller hamburger menu */
+    width: 30px;
     height: 20px;
     padding: 2px 0;
   }
 
   .hamburger-menu div {
-    width: 25px; /* Adjust bar width */
-    height: 2px; /* Adjust bar height */
+    width: 25px;
+    height: 2px;
   }
 
   .header-nav {
-    flex-wrap: nowrap; /* Ensure buttons stay on one line */
-    justify-content: space-around; /* Distribute space evenly */
-    gap: 5px; /* Smaller gap for mobile nav buttons */
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    gap: 5px;
     padding: 5px 10px;
-    overflow-x: auto; /* Enable horizontal scrolling if needed */
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
   .nav-button {
-    flex-shrink: 0; /* Prevent buttons from shrinking too much */
-    font-size: 0.9em; /* Smaller font size for nav buttons */
-    padding: 4px 8px; /* Smaller padding */
-    height: 28px; /* Smaller height */
+    flex-shrink: 0;
+    font-size: 0.9em;
+    padding: 4px 8px;
+    height: 28px;
   }
+
 }

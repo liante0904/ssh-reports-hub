@@ -5,7 +5,7 @@ import TelegramAuth from './menu/TelegramAuth';
 import KeywordOverlay from './menu/KeywordOverlay';
 import AdminSection from './menu/AdminSection';
 import { useKeywords } from '../hooks/useKeywords';
-import { useReport } from '../context/ReportContext';
+import { useReport } from '../context/useReport';
 import { CONFIG } from '../constants/config';
 import { request } from '../utils/api';
 import './HamburgerMenu.css';

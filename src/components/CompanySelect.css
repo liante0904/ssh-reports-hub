@@ -158,6 +158,13 @@
   word-break: keep-all;
 }
 
+.checker-count {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  opacity: 0.75;
+}
+
 .checker-item.active .checker-name {
   color: #00c73c;
   font-weight: 700;

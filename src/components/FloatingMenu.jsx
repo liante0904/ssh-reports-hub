@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useReport } from '../context/ReportContext';
+import { useReport } from '../context/useReport';
 import './FloatingMenu.css';
 
 function FloatingMenu({ isFloatingNavVisible }) {

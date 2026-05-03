@@ -19,6 +19,7 @@ export const CONFIG = {
     BASE_URL: API_BASE_URL.replace(/\/$/, ''),
     REPORT_API_URL: REPORT_API_URL.replace(/\/$/, ''),
     COMPANIES_URL: `${API_BASE_URL.replace(/\/$/, '')}/pub/api/companies`,
+    BOARDS_URL: `${API_BASE_URL.replace(/\/$/, '')}/pub/api/boards`,
     TABLE_NAME: TABLE_NAME.replace(/^\//, '').replace(/\/$/, ''),
   },
   

@@ -1,28 +1,25 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CONFIG } from '../constants/config';
 import { FIRM_NAMES } from '../constants/firms';
 import { request } from '../utils/api';
+import ReportContext from './reportContext';
 
-const ReportContext = createContext();
-
-export function useReport() {
-  const context = useContext(ReportContext);
-  if (!context) {
-    throw new Error('useReport must be used within a ReportProvider');
-  }
-  return context;
-}
-
-export function ReportProvider({ children }) {
-  // Search state
-  const [searchQuery, setSearchQuery] = useState({ query: '', category: '' });
-  const [pendingSearch, setPendingSearch] = useState({ query: '', category: '' }); // UI에 미리 채우기용
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+export const ReportProvider = ({ children }) => {
+  // 검색 관련 상태
+  const [activeSearch, setActiveSearch] = useState({ query: '', category: '', board: null }); // 현재 적용된 검색 조건
+  const [stagedSearch, setStagedSearch] = useState({ query: '', category: '', board: null }); // 검색창 입력용 임시 조건
+  const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
+  
+  // 메뉴 관련 상태
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const [isTopMenuOpen, setIsTopMenuOpen] = useState(false);
+  
+  // 정렬 및 데이터 상태
   const [sortBy, setSortBy] = useState('time'); // 'time' or 'company'
   const [viewerReport, setViewerReport] = useState(null); // 인앱 뷰어용 리포트 객체
-  const [firm_names, setFirmNames] = useState(FIRM_NAMES); // 초기값은 하드코딩된 값 사용
+  const [companyNames, setCompanyNames] = useState(FIRM_NAMES); // 동적 로드되는 증권사 목록
+  const [boards, setBoards] = useState([]); // 현재 선택된 증권사의 게시판 목록
+  const [isLoadingBoards, setIsLoadingBoards] = useState(false);
 
   // Theme state
   const [theme, setTheme] = useState(() => {
@@ -37,13 +34,11 @@ export function ReportProvider({ children }) {
       try {
         const data = await request(CONFIG.API.COMPANIES_URL);
         if (data && Array.isArray(data)) {
-          // name 필드만 추출하여 배열로 변환
           const names = data.map(item => item.name);
-          setFirmNames(names);
+          setCompanyNames(names);
         }
       } catch (error) {
         console.error('Failed to fetch companies:', error);
-        // 실패 시 FIRM_NAMES 초기값 유지
       }
     };
     fetchFirms();
@@ -58,46 +53,102 @@ export function ReportProvider({ children }) {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
-  const handleSearch = ({ query, category }) => {
-    setSearchQuery(prev => {
-      if (prev.query === query && prev.category === category) return prev;
-      return { query, category };
+  const handleSearch = useCallback(({ query, category, board = null }) => {
+    setActiveSearch(prev => {
+      if (prev.query === query && prev.category === category && prev.board === board) return prev;
+      return { query, category, board };
     });
-  };
+  }, []);
 
-  const toggleSearch = () => setIsSearchOpen(prev => !prev);
-  const toggleMenu = () => setIsMenuOpen(prev => !prev);
-  const toggleMenuTop = () => setIsTopMenuOpen(prev => !prev);
+  useEffect(() => {
+    const companyIndex = activeSearch.category === 'company' ? activeSearch.query : null;
+    const controller = new AbortController();
 
-  const logout = () => {
+    if (!companyIndex) {
+      setBoards([]);
+      setIsLoadingBoards(false);
+      return () => controller.abort();
+    }
+
+    let isActive = true;
+
+    const fetchBoards = async () => {
+      setIsLoadingBoards(true);
+      try {
+        const data = await request(`${CONFIG.API.BOARDS_URL}?company=${companyIndex}`, {
+          signal: controller.signal
+        });
+        if (!isActive) return;
+        setBoards(Array.isArray(data) ? data.filter(b => b.report_count > 0) : []);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Failed to fetch boards:', error);
+          if (isActive) setBoards([]);
+        }
+      } finally {
+        if (isActive) setIsLoadingBoards(false);
+      }
+    };
+
+    fetchBoards();
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [activeSearch.category, activeSearch.query]);
+
+  const toggleSearch = useCallback(() => setIsSearchOverlayOpen(prev => !prev), []);
+  const toggleMenu = useCallback(() => setIsSideMenuOpen(prev => !prev), []);
+  const toggleMenuTop = useCallback(() => setIsTopMenuOpen(prev => !prev), []);
+
+  const logout = useCallback(() => {
     localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
     window.location.reload(); // 가장 확실한 초기화
-  };
+  }, []);
 
   const value = {
-    searchQuery,
-    setSearchQuery,
-    pendingSearch,
-    setPendingSearch,
+    // 검색 관련
+    searchQuery: activeSearch,
+    setSearchQuery: setActiveSearch,
+    pendingSearch: stagedSearch,
+    setPendingSearch: setStagedSearch,
+    activeSearch,
+    stagedSearch,
     handleSearch,
-    isSearchOpen,
-    setIsSearchOpen,
+    isSearchOpen: isSearchOverlayOpen,
+    setIsSearchOpen: setIsSearchOverlayOpen,
+    isSearchOverlayOpen,
     toggleSearch,
-    isMenuOpen,
-    setIsMenuOpen,
+    
+    // 게시판 관련
+    boards,
+    setBoards,
+    isLoadingBoards,
+
+    // 메뉴 관련
+    isMenuOpen: isSideMenuOpen,
+    setIsMenuOpen: setIsSideMenuOpen,
+    isSideMenuOpen,
     toggleMenu,
     isTopMenuOpen,
     setIsTopMenuOpen,
     toggleMenuTop,
+
+    // 정렬 및 뷰어
     sortBy,
     setSortBy,
     viewerReport,
     setViewerReport,
-    firm_names, // 상태 값으로 변경
+
+    // 데이터
+    firm_names: companyNames,
+    companyNames,
+
+    // 공통
     theme,
     setTheme,
-
     toggleTheme,
     logout
   };
@@ -107,4 +158,4 @@ export function ReportProvider({ children }) {
       {children}
     </ReportContext.Provider>
   );
-}
+};

@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import ShareMenu from './ShareMenu';
 import ReportGroup from './report/ReportGroup';
 import { useReportFetch } from '../hooks/useReportFetch';
-import { useReport } from '../context/ReportContext';
+import { useReport } from '../context/useReport';
 import { isDsReport, prefetchPdf } from '../utils/reportLinks';
 import { buildShareMenuData } from '../utils/shareMenuData';
 import './ReportList.css';

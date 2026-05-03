@@ -1,8 +1,10 @@
 import { formatDate } from './date';
+import { getShareUrl } from './reportLinks';
 
 export function normalizeReportItem(item) {
   if (!item) return null;
   const firm = item.firm_nm ? item.firm_nm.trim() : 'Unknown';
+  const shareUrl = getShareUrl(item.report_id);
 
   return {
     id: item.report_id,
@@ -18,5 +20,8 @@ export function normalizeReportItem(item) {
     gemini_summary: item.gemini_summary,
     firm,
     date: formatDate(item.reg_dt),
+    // 명칭 명확화를 위한 추가 필드 (하위 호환성 유지)
+    shareUrl: shareUrl,
+    openUrl: shareUrl
   };
 }
