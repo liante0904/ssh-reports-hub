@@ -128,8 +128,8 @@ SQLite (telegram.db)는 롤백/최근 동기화 소스로 유지
 - [ ] 링크 결정 로직 추가 분리
   - `article_url` / `download_url` / `pdf_url` 선택 규칙을 UI 밖의 헬퍼로 완전히 이동.
 - [x] FastAPI 단일화 및 옛 API 명칭 정리
-  - `VITE_ORACLE_REST_API` 같은 과거 명칭을 정리하고, 문서/환경변수/설정에서 FastAPI 중심 이름으로 맞추기.
-  - 내부 코드 기준은 `REPORT_API_URL`로 고정하고, 구 이름은 호환용 fallback만 남기기.
+  - `VITE_ORACLE_REST_API` 같은 과거 명칭을 런타임에서 제거하고, 문서/환경변수/설정에서 FastAPI 중심 이름으로 맞추기.
+  - 내부 코드 기준은 `REPORT_API_URL`로 고정한다.
   - `ssh-oci.duckdns.org/pub/api`를 단일 리포트 API 기준점으로 사용.
   - `.env` 및 `.env.legacy` 파일을 통해 신규/기존 API 버전 전환 지원.
 
