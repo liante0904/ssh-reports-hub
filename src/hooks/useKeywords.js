@@ -17,7 +17,7 @@ export const useKeywords = (telegramUser) => {
 
   const fetchKeywords = useCallback(async () => {
     if (!telegramUser) return;
-    if (isDevBypassSession()) {
+    if (isDevBypassSession) {
       setKeywords([]);
       return;
     }
@@ -34,7 +34,7 @@ export const useKeywords = (telegramUser) => {
   }, [logout, telegramUser, isDevBypassSession]);
 
   const syncKeywords = async (updatedKeywords) => {
-    if (isDevBypassSession()) {
+    if (isDevBypassSession) {
       setKeywords(updatedKeywords.map((keyword) => ({ keyword, is_active: true })));
       return;
     }
