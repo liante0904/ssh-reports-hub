@@ -4,6 +4,8 @@ import HamburgerMenu from './HamburgerMenu';
 import CompanySelect from './CompanySelect';
 import BoardSelect from './BoardSelect';
 import { useReport } from '../context/useReport';
+import { useMediaQuery } from '../hooks/useMediaQuery';
+import { HEADER_PATHS, resetHeaderSearch } from '../utils/headerNavigation';
 import './Header.css';
 
 const Header = forwardRef(({ isNavVisible }, ref) => {
@@ -12,7 +14,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [query, setQuery] = useState(searchParams.get('q') || '');
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1023);
+  const isMobile = useMediaQuery('(max-width: 1023px)');
 
   const {
     toggleSearch, 
@@ -26,17 +28,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     activeSearch
   } = useReport();
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 1023);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
   const isRecent = location.pathname === '/';
   const isGlobal = location.pathname.includes('global');
   const isIndustry = location.pathname.includes('industry');
@@ -49,35 +40,26 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     if (isMenuOpen) toggleMenu();
     
     if (buttonName !== 'search') {
-      handleSearch({ query: '', category: '', board: null });
-      setIsSearchActive(false);
-    } else {
-      setIsSearchActive(true);
+      resetHeaderSearch({
+        setIsSearchActive,
+        handleSearch,
+        setQuery,
+        setSearchParams,
+        setSortBy,
+      });
     }
-    
+
     if (buttonName === 'recent') {
       setSortBy('time');
     }
 
-    if (buttonName !== 'search') {
-      setQuery('');
-      setSearchParams({}, { replace: true });
-    }
-
-    const PATH_MAP = {
-      recent: '/',
-      global: '/global',
-      industry: '/industry',
-      favorites: '/favorites',
-      search: '/'
-    };
-
-    const targetPath = PATH_MAP[buttonName];
+    const targetPath = HEADER_PATHS[buttonName];
     if (targetPath && buttonName !== 'search') {
       navigate({ pathname: targetPath });
     }
 
     if (buttonName === 'search') {
+      setIsSearchActive(true);
       setQuery('');
       toggleSearch();
     }

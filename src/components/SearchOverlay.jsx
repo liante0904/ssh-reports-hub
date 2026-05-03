@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useReport } from '../context/useReport';
+import { resolveSearchOverlayState } from '../utils/searchOverlay';
 import './SearchOverlay.css';
 import CompanySelect from './CompanySelect';
 
@@ -20,32 +21,21 @@ function SearchOverlay() {
 
   // 오버레이 열릴 때 상태 복원 및 외부(pendingSearch) 동기화
   useEffect(() => {
-    if (isSearchOpen) {
-      // 1. 외부에서 클릭(예: 작성자 클릭)을 통한 정보가 있으면 우선 사용
-      if (pendingSearch?.query) {
-        const { query: pQuery, category: pCategory } = pendingSearch;
-        setQuery(pQuery);
-        setCategory(pCategory || 'title');
-        
-        // 검색 자동 실행
-        onSearch({ query: pQuery, category: pCategory || 'title', board: null });
-        setSearchParams({ q: pQuery, category: pCategory || 'title' });
+    if (!isSearchOpen) return;
 
-        // 사용했으니 비워줌
-        setPendingSearch({ query: '', category: '' });
-      } 
-      // 2. 그 외 일반 오픈 시에는 URL 파라미터가 있을 때만 복원
-      else {
-        const urlQuery = searchParams.get('q') || '';
-        const urlCategory = searchParams.get('category') || 'title';
-        if (urlQuery) {
-          setQuery(urlQuery);
-          setCategory(urlCategory);
-        } else {
-          setQuery('');
-          setCategory('title');
-        }
-      }
+    const { query: nextQuery, category: nextCategory, shouldSearch, shouldClearPending } =
+      resolveSearchOverlayState({ pendingSearch, searchParams });
+
+    setQuery(nextQuery);
+    setCategory(nextCategory);
+
+    if (shouldSearch) {
+      onSearch({ query: nextQuery, category: nextCategory, board: null });
+      setSearchParams({ q: nextQuery, category: nextCategory });
+    }
+
+    if (shouldClearPending) {
+      setPendingSearch({ query: '', category: '' });
     }
   }, [isSearchOpen, searchParams, pendingSearch, setPendingSearch, onSearch, setSearchParams]);
 
@@ -99,7 +89,8 @@ function SearchOverlay() {
       if (selectedValue) {
         setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
         onSearch({ query: selectedValue, category: 'company', board: null });
-      } else {        setSearchParams({}, { replace: true });
+      } else {
+        setSearchParams({}, { replace: true });
       }
     },
     [onSearch, setSearchParams]

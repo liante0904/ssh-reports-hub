@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { createPortal } from 'react-dom';
 import { useReport } from '../context/useReport';
+import { useGridOverlay } from '../hooks/useGridOverlay';
+import { hasGridSelection } from '../utils/gridSelect';
 import './CompanySelect.css';
 
 // 증권사별 테마 색상 (선택 사항 - 시각적 구분용)
@@ -12,40 +14,25 @@ const firm_colors = {
 
 function CompanySelect({ value, onChange, className = '' }) {
   const { firm_names } = useReport();
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const { isOpen, searchTerm, setSearchTerm, toggleOverlay, closeOverlay } = useGridOverlay();
 
-  const selectedName = value !== "" ? firm_names[value] : "증권사 필터";
-
-  const toggleOverlay = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen) setSearchTerm('');
-  };
+  const selectedName = hasGridSelection(value) ? firm_names[value] : "증권사 필터";
 
   const handleSelect = (idx) => {
     onChange({ target: { value: idx.toString() } });
-    setIsOpen(false);
+    closeOverlay();
   };
 
   const filteredFirms = firm_names
     .map((name, idx) => ({ name, idx }))
     .filter(item => item.name.includes(searchTerm));
 
-  // ESC 키로 닫기
-  useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === 'Escape') setIsOpen(false);
-    };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, []);
-
   const overlay = (
     <div className="grid-overlay-portal">
       <div className="grid-overlay-header">
         <div className="grid-header-top">
           <h3>증권사 선택</h3>
-          <button className="grid-close-btn" onClick={() => setIsOpen(false)}>
+          <button className="grid-close-btn" onClick={closeOverlay}>
             <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
               <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
             </svg>
@@ -95,7 +82,7 @@ function CompanySelect({ value, onChange, className = '' }) {
 
   return (
     <div className={`company-grid-container ${className}`.trim()}>
-      <button className={`grid-trigger-btn ${value !== "" ? 'selected' : ''}`} onClick={toggleOverlay}>
+      <button className={`grid-trigger-btn ${hasGridSelection(value) ? 'selected' : ''}`} onClick={toggleOverlay}>
         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
           <path d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z"/>
         </svg>
