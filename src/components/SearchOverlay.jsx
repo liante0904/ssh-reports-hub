@@ -19,19 +19,24 @@ function SearchOverlay() {
   const [toast, setToast] = useState({ visible: false, message: '' });
   const [searchParams, setSearchParams] = useSearchParams();
   const inputRef = useRef(null);
+  const selectedCompanyOrder = pendingSearch?.companyOrder ?? pendingSearch?.query ?? '';
 
   // 오버레이 열릴 때 상태 복원 및 외부(pendingSearch) 동기화
   useEffect(() => {
     if (!isSearchOpen) return;
 
-    const { query: nextQuery, category: nextCategory, shouldSearch, shouldClearPending } =
+    const { query: nextQuery, category: nextCategory, companyOrder, shouldSearch, shouldClearPending } =
       resolveSearchOverlayState({ pendingSearch, searchParams });
 
     setQuery(nextQuery);
     setCategory(nextCategory);
 
     if (shouldSearch) {
-      onSearch(nextCategory === 'company' ? createCompanySearch(nextQuery) : { query: nextQuery, category: nextCategory, board: null });
+      onSearch(
+        nextCategory === 'company'
+          ? createCompanySearch(companyOrder ?? nextQuery)
+          : { query: nextQuery, category: nextCategory, board: null, companyOrder: null }
+      );
       setSearchParams({ q: nextQuery, category: nextCategory });
     }
 
@@ -63,7 +68,7 @@ function SearchOverlay() {
     setSearchParams({ q: trimmedQuery, category });
     onSearch(category === 'company'
       ? createCompanySearch(trimmedQuery)
-      : { query: trimmedQuery, category, board: null });
+      : { query: trimmedQuery, category, board: null, companyOrder: null });
   }, [query, category, onSearch, setSearchParams, showToast]);
 
   const handleKeyDown = useCallback(
@@ -123,7 +128,7 @@ function SearchOverlay() {
           </select>
 
           {category === 'company' ? (
-            <CompanySelect value={query} onChange={handleCompanyChange} className="company-select" />
+            <CompanySelect value={selectedCompanyOrder} onChange={handleCompanyChange} className="company-select" />
           ) : (
             <input
               type="text"

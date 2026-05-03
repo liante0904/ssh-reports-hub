@@ -33,6 +33,9 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const isFavorites = location.pathname.includes('favorites');
   const isCompany = location.pathname.startsWith('/company');
   const showBoardSelect = activeSearch.category === 'company' && boards.length > 0;
+  const selectedCompanyOrder = activeSearch.category === 'company'
+    ? (activeSearch.companyOrder ?? activeSearch.query ?? query)
+    : query;
 
   const handleButtonClick = (buttonName) => {
     if (isTopMenuOpen) toggleMenuTop();
@@ -88,11 +91,18 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
     if (nextSearch.board !== null) {
       setSearchParams(
-        { q: nextSearch.query, category: 'company', board: nextSearch.board.toString() },
+        {
+          q: nextSearch.companyOrder ?? nextSearch.query,
+          category: 'company',
+          board: nextSearch.board.toString()
+        },
         { replace: true }
       );
     } else {
-      setSearchParams({ q: nextSearch.query, category: 'company' }, { replace: true });
+      setSearchParams(
+        { q: nextSearch.companyOrder ?? nextSearch.query, category: 'company' },
+        { replace: true }
+      );
     }
   };
 
@@ -112,6 +122,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
         query: urlQuery,
         category: 'company',
         board: urlBoard ? Number(urlBoard) : null,
+        companyOrder: urlQuery || null,
       });
     } else {
       setQuery('');
@@ -178,7 +189,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
           </button>
           <div className="company-select-wrapper header-nav-filters">
             <CompanySelect
-              value={query}
+              value={selectedCompanyOrder}
               onChange={handleCompanyChange}
               className="company-select"
             />
@@ -197,7 +208,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
       <HamburgerMenu
         isOpen={isTopMenuOpen}
         toggleMenu={toggleMenuTop}
-        selectedCompany={query}
+        selectedCompany={selectedCompanyOrder}
         handleCompanyChange={handleCompanyChange}
         handleHeaderClick={handleButtonClick}
       />

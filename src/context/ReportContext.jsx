@@ -6,8 +6,8 @@ import { normalizeSearchSelection } from '../utils/searchSelection';
 import ReportContext from './reportContext';
 
 export function ReportProvider({ children }) {
-  const [activeSearch, setActiveSearch] = useState({ query: '', category: '', board: null });
-  const [stagedSearch, setStagedSearch] = useState({ query: '', category: '', board: null });
+  const [activeSearch, setActiveSearch] = useState({ query: '', category: '', board: null, companyOrder: null });
+  const [stagedSearch, setStagedSearch] = useState({ query: '', category: '', board: null, companyOrder: null });
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,16 +35,23 @@ export function ReportProvider({ children }) {
     setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
-  const handleSearch = useCallback(({ query, category, board = null }) => {
-    const nextSearch = normalizeSearchSelection({ query, category, board });
+  const handleSearch = useCallback(({ query, category, board = null, companyOrder = null }) => {
+    const nextSearch = normalizeSearchSelection({ query, category, board, companyOrder });
     setActiveSearch(prev => {
-      if (prev.query === nextSearch.query && prev.category === nextSearch.category && prev.board === nextSearch.board) return prev;
+      if (
+        prev.query === nextSearch.query &&
+        prev.category === nextSearch.category &&
+        prev.board === nextSearch.board &&
+        prev.companyOrder === nextSearch.companyOrder
+      ) return prev;
       return nextSearch;
     });
   }, []);
 
   useEffect(() => {
-    const companyIndex = activeSearch.category === 'company' ? activeSearch.query : null;
+    const companyIndex = activeSearch.category === 'company'
+      ? (activeSearch.companyOrder ?? activeSearch.query)
+      : null;
     const controller = new AbortController();
 
     if (!companyIndex) {
@@ -79,7 +86,7 @@ export function ReportProvider({ children }) {
       isActive = false;
       controller.abort();
     };
-  }, [activeSearch.category, activeSearch.query]);
+  }, [activeSearch.category, activeSearch.query, activeSearch.companyOrder]);
 
   const toggleSearch = useCallback(() => setIsSearchOverlayOpen(prev => !prev), []);
   const toggleMenu = useCallback(() => setIsMenuOpen(prev => !prev), []);

@@ -36,7 +36,10 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
     }
 
     if (searchQuery.query && searchQuery.category) {
-      params.append(searchQuery.category, searchQuery.query);
+      const searchValue = searchQuery.category === 'company'
+        ? (searchQuery.companyOrder ?? searchQuery.query)
+        : searchQuery.query;
+      params.append(searchQuery.category, searchValue);
     }
 
     if (searchQuery.board !== null && searchQuery.board !== undefined) {

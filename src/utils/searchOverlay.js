@@ -3,6 +3,7 @@ export function resolveSearchOverlayState({ pendingSearch, searchParams }) {
     return {
       query: pendingSearch.query,
       category: pendingSearch.category || 'title',
+      companyOrder: pendingSearch.companyOrder ?? null,
       shouldSearch: true,
       shouldClearPending: true,
     };
@@ -14,6 +15,7 @@ export function resolveSearchOverlayState({ pendingSearch, searchParams }) {
   return {
     query: urlQuery,
     category: urlQuery ? urlCategory : 'title',
+    companyOrder: urlCategory === 'company' ? urlQuery : null,
     shouldSearch: false,
     shouldClearPending: false,
   };
