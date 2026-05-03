@@ -103,7 +103,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
             <a className="menu-item" onClick={() => handleHeaderClick('industry')}><span className="icon">🏭</span> 산업 레포트</a>
 
             <div className="menu-item-select">
-              <CompanySelect value={selectedCompany} onChange={handleSelectChange} />
+              <CompanySelect value={selectedCompany} onChange={handleSelectChange} className="company-select" />
             </div>
 
             <div className="menu-title">알림 & 즐겨찾기</div>

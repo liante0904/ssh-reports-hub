@@ -104,46 +104,18 @@ header.nav-hidden {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .company-select-wrapper {
-  display: none;
-}
-
-.header-filter-row {
-  display: none;
-}
-
-.header-board-row {
-  display: none;
-}
-
-/* 헤더의 증권사 선택 스타일 */
-.nav-button.company-select {
-  background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  font-size: 1.1em;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  appearance: none;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 30px;
-  width: auto;
-  height: 32px;
-  box-sizing: border-box;
-  line-height: 1;
-}
-
-.nav-button.company-select:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.nav-button.company-select:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 /* 데스크탑 화면 */
@@ -158,7 +130,6 @@ header.nav-hidden {
   }
 
   .title {
-    margin: 0 120px;
     padding: 6px 0;
   }
 
@@ -166,7 +137,6 @@ header.nav-hidden {
     width: 40px;
     height: 28px;
     padding: 2px 0;
-    margin: 0 120px;
   }
 
   .hamburger-menu div {
@@ -174,58 +144,8 @@ header.nav-hidden {
     height: 4px;
   }
 
-  .company-select-wrapper {
-    display: block;
-  }
-
-  .company-select-wrapper .nav-button.company-select {
-    display: flex;
-  }
-
-  .header-filter-row {
-    display: flex;
-    align-items: center;
+  .header-actions {
     gap: 12px;
-    padding: 6px 12px 2px;
-  }
-
-  .header-board-select {
-    flex: 0 0 auto;
-  }
-
-  .header-board-select .grid-trigger-btn {
-    background-color: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    font-size: 1.1em;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg fill=\"white\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 30px;
-    width: auto;
-    height: 32px;
-    box-sizing: border-box;
-    line-height: 1;
-  }
-
-  .header-board-select .grid-trigger-btn:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-
-  .header-board-select .grid-trigger-btn.selected {
-    background-color: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.3);
-    font-weight: bold;
-  }
-
-  .header-board-select .grid-trigger-btn:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
   }
 }
 
@@ -243,65 +163,16 @@ header.nav-hidden {
     font-size: 1em;
   }
 
-  .header-top .company-select-wrapper {
-    display: block;
-    flex-shrink: 1;
-    margin-right: 5px;
-  }
-
-  .header-top .company-select-wrapper .nav-button.company-select {
-    width: auto;
-    max-width: 90px;
-    font-size: 0.9em;
-    padding: 4px 8px;
-    height: 28px;
-  }
-
-  .header-board-row {
+  .header-top .header-actions {
     display: flex;
-    padding: 6px 8px 0;
-    justify-content: center;
+    flex-shrink: 1;
+    margin-left: auto;
+    gap: 8px;
+    align-items: center;
   }
 
-  .header-board-select-mobile {
-    width: 100%;
-    max-width: calc(100% - 16px);
-  }
-
-  .header-board-select-mobile .grid-trigger-btn {
-    width: 100%;
-    background-color: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    font-size: 0.9em;
-    padding: 4px 8px;
-    border-radius: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg fill=\"white\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 30px;
-    height: 28px;
-    box-sizing: border-box;
-    line-height: 1;
-    justify-content: space-between;
-  }
-
-  .header-board-select-mobile .grid-trigger-btn:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-
-  .header-board-select-mobile .grid-trigger-btn.selected {
-    background-color: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.3);
-    font-weight: bold;
-  }
-
-  .header-board-select-mobile .grid-trigger-btn:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+  .header-top .company-select-wrapper {
+    gap: 8px;
   }
 
   .hamburger-menu {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import './CompanySelect.css';
+import './BoardSelect.css';
 
 function BoardSelect({ value, boards = [], onChange, className = '' }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -93,7 +93,7 @@ function BoardSelect({ value, boards = [], onChange, className = '' }) {
   );
 
   return (
-    <div className={`company-grid-container ${className}`.trim()}>
+    <div className={`board-grid-container ${className}`.trim()}>
       <button className={`grid-trigger-btn ${value !== '' && value !== null && value !== undefined ? 'selected' : ''}`} onClick={toggleOverlay}>
         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
           <path d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z"/>

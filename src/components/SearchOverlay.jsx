@@ -125,7 +125,7 @@ function SearchOverlay() {
           </select>
 
           {category === 'company' ? (
-            <CompanySelect value={query} onChange={handleCompanyChange} />
+            <CompanySelect value={query} onChange={handleCompanyChange} className="company-select" />
           ) : (
             <input
               type="text"

@@ -42,6 +42,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const isIndustry = location.pathname.includes('industry');
   const isFavorites = location.pathname.includes('favorites');
   const isCompany = location.pathname.startsWith('/company');
+  const showBoardSelect = activeSearch.category === 'company' && boards.length > 0;
 
   const handleButtonClick = (buttonName) => {
     if (isTopMenuOpen) toggleMenuTop();
@@ -139,45 +140,29 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
           <div className="title" onClick={handleTitleClick}>
             🏠 ssh-reports-hub
           </div>
-          {isMobile && (
+          <div className="header-actions">
             <div className="company-select-wrapper">
               <CompanySelect
                 value={query}
                 onChange={handleCompanyChange}
-                className="nav-button company-select"
+                className="company-select"
               />
+              {showBoardSelect && (
+                <BoardSelect
+                  value={activeSearch.board}
+                  boards={boards}
+                  onChange={handleBoardChange}
+                  className="board-select"
+                />
+              )}
             </div>
-          )}
-          <div className="hamburger-menu" onClick={toggleMenuTop}>
-            <div></div>
-            <div></div>
-            <div></div>
+            <div className="hamburger-menu" onClick={toggleMenuTop}>
+              <div></div>
+              <div></div>
+              <div></div>
+            </div>
           </div>
         </div>
-
-        {!isMobile && (
-          <div className="header-filter-row">
-            {boards.length > 0 && isRecent && activeSearch.category === 'company' && (
-              <BoardSelect
-                value={activeSearch.board}
-                boards={boards}
-                onChange={handleBoardChange}
-                className="header-board-select"
-              />
-            )}
-          </div>
-        )}
-
-        {isMobile && boards.length > 0 && isRecent && activeSearch.category === 'company' && (
-          <div className="header-board-row">
-            <BoardSelect
-              value={activeSearch.board}
-              boards={boards}
-              onChange={handleBoardChange}
-              className="header-board-select-mobile"
-            />
-          </div>
-        )}
 
         <div className="header-nav">
           <button
@@ -210,15 +195,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
           >
             ★
           </button>
-          {!isMobile && (
-            <div className="company-select-wrapper">
-              <CompanySelect
-                value={query}
-                onChange={handleCompanyChange}
-                className="nav-button company-select"
-              />
-            </div>
-          )}
         </div>
       </header>
 
