@@ -2,12 +2,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CONFIG } from '../constants/config';
 import { FIRM_NAMES } from '../constants/firms';
 import { request } from '../utils/api';
-import { getSelectedCompanyOrder, normalizeSearchSelection } from '../utils/searchSelection';
+import {
+  createEmptySearchSelection,
+  getSelectedCompanyOrder,
+  normalizeSearchSelection,
+} from '../utils/searchSelection';
 import ReportContext from './reportContext';
 
 export function ReportProvider({ children }) {
-  const [activeSearch, setActiveSearch] = useState({ query: '', category: '', board: null, companyOrder: null });
-  const [stagedSearch, setStagedSearch] = useState({ query: '', category: '', board: null, companyOrder: null });
+  const [activeSearch, setActiveSearch] = useState(createEmptySearchSelection());
+  const [stagedSearch, setStagedSearch] = useState(createEmptySearchSelection());
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);

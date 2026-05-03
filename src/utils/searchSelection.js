@@ -1,5 +1,17 @@
-export function createClearedSearch() {
+export function createEmptySearchSelection() {
   return { query: '', category: '', board: null, companyOrder: null };
+}
+
+export function createClearedSearch() {
+  return createEmptySearchSelection();
+}
+
+export function createTextSearch(query, category) {
+  return {
+    ...createEmptySearchSelection(),
+    query: query ?? '',
+    category: category ?? '',
+  };
 }
 
 export function createCompanySearch(companyOrder) {
@@ -8,9 +20,9 @@ export function createCompanySearch(companyOrder) {
     : String(companyOrder);
 
   return {
+    ...createEmptySearchSelection(),
     query: normalizedCompanyOrder ?? '',
     category: 'company',
-    board: null,
     companyOrder: normalizedCompanyOrder,
   };
 }
@@ -25,12 +37,13 @@ export function toggleBoardSearch(activeSearch, boardOrder) {
 }
 
 export function normalizeSearchSelection(nextSearch) {
-  const query = nextSearch?.query ?? '';
-  const category = nextSearch?.category ?? '';
-  const board = category === 'company' ? (nextSearch?.board ?? null) : null;
+  const base = createEmptySearchSelection();
+  const query = nextSearch?.query ?? base.query;
+  const category = nextSearch?.category ?? base.category;
+  const board = category === 'company' ? (nextSearch?.board ?? base.board) : base.board;
   const companyOrder = category === 'company'
-    ? (nextSearch?.companyOrder ?? query ?? null)
-    : null;
+    ? (nextSearch?.companyOrder ?? query ?? base.companyOrder)
+    : base.companyOrder;
 
   return { query, category, board, companyOrder };
 }

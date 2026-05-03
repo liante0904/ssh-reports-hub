@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { CONFIG } from '../constants/config';
 import { request } from '../utils/api';
+import { buildReportFetchUrl } from '../utils/reportFetch';
 import { normalizeReportItem } from '../utils/reportNormalizer';
 
 export function useReportFetch(searchQuery, pathname, sortBy) {
@@ -13,41 +14,14 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
   const isLoadingRef = useRef(false);
   const hasMoreRef = useRef(true);
 
-  const buildApiUrl = useCallback(() => {
-    const params = new URLSearchParams();
-    
-    const baseUrl = CONFIG.API.REPORT_API_URL;
-    const tableName = CONFIG.API.TABLE_NAME;
-    let apiUrl = `${baseUrl}/${tableName}`;
-
-    if (pathname.includes('global')) {
-      apiUrl += '/search/';
-      params.append('mkt_tp', 'global');
-    } else if (pathname.includes('industry')) {
-      apiUrl += '/industry';
-    } else {
-      apiUrl += '/search/';
-    }
-
-    params.append('offset', offset);
-
-    if (sortBy === 'company') {
-      params.append('sort', 'company');
-    }
-
-    if (searchQuery.query && searchQuery.category) {
-      const searchValue = searchQuery.category === 'company'
-        ? (searchQuery.companyOrder ?? searchQuery.query)
-        : searchQuery.query;
-      params.append(searchQuery.category, searchValue);
-    }
-
-    if (searchQuery.board !== null && searchQuery.board !== undefined) {
-      params.append('board', searchQuery.board);
-    }
-
-    return `${apiUrl}?${params.toString()}`;
-  }, [offset, searchQuery, pathname, sortBy]);
+  const buildApiUrl = useCallback(() => buildReportFetchUrl({
+    pathname,
+    offset,
+    sortBy,
+    searchQuery,
+    baseUrl: CONFIG.API.REPORT_API_URL,
+    tableName: CONFIG.API.TABLE_NAME,
+  }), [offset, searchQuery, pathname, sortBy]);
 
   const mergeReports = useCallback((prev, newItems) => {
     const updated = { ...prev };

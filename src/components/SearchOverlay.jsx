@@ -4,6 +4,7 @@ import { useReport } from '../context/useReport';
 import { resolveSearchOverlayState } from '../utils/searchOverlay';
 import {
   buildSearchParams,
+  createTextSearch,
   createCompanySearch,
   createClearedSearch,
   getSelectedCompanyOrder,
@@ -40,7 +41,7 @@ function SearchOverlay() {
       onSearch(
         nextCategory === 'company'
           ? createCompanySearch(companyOrder ?? nextQuery)
-          : { query: nextQuery, category: nextCategory, board: null, companyOrder: null }
+          : createTextSearch(nextQuery, nextCategory)
       );
       setSearchParams(buildSearchParams({ query: nextQuery, category: nextCategory }));
     }
@@ -73,7 +74,7 @@ function SearchOverlay() {
     setSearchParams(buildSearchParams({ query: trimmedQuery, category }));
     onSearch(category === 'company'
       ? createCompanySearch(trimmedQuery)
-      : { query: trimmedQuery, category, board: null, companyOrder: null });
+      : createTextSearch(trimmedQuery, category));
   }, [query, category, onSearch, setSearchParams, showToast]);
 
   const handleKeyDown = useCallback(
