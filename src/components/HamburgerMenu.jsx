@@ -37,6 +37,11 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
     toggleKeywordOverlay
   } = useKeywords(telegramUser);
 
+  const extractAuthToken = (result) => {
+    if (!result || typeof result !== 'object') return null;
+    return result.access_token || result.token || result.auth_token || result.jwt || null;
+  };
+
   const loginWithTelegram = () => {
     if (!window.Telegram || !window.Telegram.Login) {
       alert('텔레그램 스크립트가 로딩 중입니다. 잠시 후 다시 시도해주세요.');
@@ -59,10 +64,13 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
             });
 
             if (result) {
-              if (result.access_token) {
-                localStorage.setItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN, result.access_token);
+              const authToken = extractAuthToken(result);
+              if (authToken) {
+                localStorage.setItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN, authToken);
+              } else {
+                console.warn('[Telegram Auth] Auth response did not include a token field.', result);
               }
-              const userData = { ...user, ...result.user };
+              const userData = { ...user, ...(result.user || {}) };
               setTelegramUser(userData);
               localStorage.setItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER, JSON.stringify(userData));
             }

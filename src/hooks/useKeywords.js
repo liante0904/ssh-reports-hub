@@ -15,6 +15,13 @@ export const useKeywords = (telegramUser) => {
   const hasAuthToken = Boolean(localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN));
   const isDevBypassSession = DEV_AUTH_ENABLED && !hasAuthToken;
 
+  const normalizeKeywordList = (data) => {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.items)) return data.items;
+    if (Array.isArray(data?.keywords)) return data.keywords;
+    return [];
+  };
+
   const fetchKeywords = useCallback(async () => {
     if (!telegramUser) return;
     if (isDevBypassSession) {
@@ -25,7 +32,8 @@ export const useKeywords = (telegramUser) => {
     setIsLoadingKeywords(true);
     try {
       const data = await request(`${CONFIG.API.BASE_URL}/keywords`, {}, logout);
-      if (data) setKeywords(data.filter(k => k.is_active));
+      const keywordList = normalizeKeywordList(data);
+      setKeywords(keywordList.filter(k => k.is_active));
     } catch {
       // 에러는 request 내부에서 이미 로깅됨
     } finally {
@@ -44,7 +52,8 @@ export const useKeywords = (telegramUser) => {
         method: 'POST',
         body: JSON.stringify({ keywords: updatedKeywords })
       }, logout);
-      if (data) setKeywords(data.filter(k => k.is_active));
+      const keywordList = normalizeKeywordList(data);
+      setKeywords(keywordList.filter(k => k.is_active));
     } catch {
       // 에러 로깅됨
     }
