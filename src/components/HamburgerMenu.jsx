@@ -61,6 +61,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
             const result = await request(`${baseUrl}/auth/telegram`, {
               method: 'POST',
               skipAuth: true,
+              logoutOn401: false,
               body: JSON.stringify(user),
             });
 
@@ -75,8 +76,8 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               setTelegramUser(userData);
               localStorage.setItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER, JSON.stringify(userData));
             }
-          } catch {
-            // 로깅됨
+          } catch (error) {
+            console.error('[Telegram Auth] login failed:', error);
           } finally {
             setIsAuthenticating(false);
           }

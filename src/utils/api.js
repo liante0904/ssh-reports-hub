@@ -9,7 +9,7 @@ import { CONFIG } from '../constants/config';
  */
 export async function request(url, options = {}, logout) {
   const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
-  const { skipAuth, ...requestOptions } = options;
+  const { skipAuth, logoutOn401 = true, ...requestOptions } = options;
   const method = (requestOptions.method || 'GET').toUpperCase();
   
   const defaultHeaders = {};
@@ -54,16 +54,27 @@ export async function request(url, options = {}, logout) {
     },
   };
 
+  const readErrorBody = async (response) => {
+    const text = await response.clone().text().catch(() => '');
+    if (!text) return {};
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { message: text.slice(0, 500) };
+    }
+  };
+
   try {
     const response = await fetch(url, mergedOptions);
 
     if (response.status === 401) {
-      if (logout) logout();
-      throw new Error('인증이 만료되었습니다.');
+      const errorData = await readErrorBody(response);
+      if (logout && logoutOn401) logout();
+      throw new Error(errorData.message || errorData.error || '인증이 거부되었습니다.');
     }
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = await readErrorBody(response);
       throw new Error(errorData.message || `요청 실패: ${response.status}`);
     }
 
