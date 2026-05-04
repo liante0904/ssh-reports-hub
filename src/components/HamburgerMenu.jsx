@@ -60,6 +60,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
             const baseUrl = CONFIG.API.BASE_URL;
             const result = await request(`${baseUrl}/auth/telegram`, {
               method: 'POST',
+              skipAuth: true,
               body: JSON.stringify(user),
             });
 

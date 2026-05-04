@@ -9,11 +9,12 @@ import { CONFIG } from '../constants/config';
  */
 export async function request(url, options = {}, logout) {
   const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
-  const method = (options.method || 'GET').toUpperCase();
+  const { skipAuth, ...requestOptions } = options;
+  const method = (requestOptions.method || 'GET').toUpperCase();
   
   const defaultHeaders = {};
 
-  if (token) {
+  if (token && !skipAuth) {
     defaultHeaders['Authorization'] = `Bearer ${token}`;
   }
 
@@ -22,20 +23,20 @@ export async function request(url, options = {}, logout) {
   }
 
   // 타임아웃 처리 (기본 10초)
-  let signal = options.signal;
+  let signal = requestOptions.signal;
   
   if (AbortSignal.timeout && AbortSignal.any) {
-    const timeoutSignal = AbortSignal.timeout(options.timeout || 10000);
-    signal = options.signal 
-      ? AbortSignal.any([options.signal, timeoutSignal])
+    const timeoutSignal = AbortSignal.timeout(requestOptions.timeout || 10000);
+    signal = requestOptions.signal 
+      ? AbortSignal.any([requestOptions.signal, timeoutSignal])
       : timeoutSignal;
   } else {
     // 대체 로직: AbortSignal.timeout/any가 없는 경우
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), options.timeout || 10000);
+    const timeoutId = setTimeout(() => controller.abort(), requestOptions.timeout || 10000);
     
-    if (options.signal) {
-      options.signal.addEventListener('abort', () => {
+    if (requestOptions.signal) {
+      requestOptions.signal.addEventListener('abort', () => {
         clearTimeout(timeoutId);
         controller.abort();
       });
@@ -44,12 +45,12 @@ export async function request(url, options = {}, logout) {
   }
 
   const mergedOptions = {
-    ...options,
+    ...requestOptions,
     method,
     signal,
     headers: {
       ...defaultHeaders,
-      ...options.headers,
+      ...requestOptions.headers,
     },
   };
 
