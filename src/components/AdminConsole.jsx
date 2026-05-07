@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReport } from '../context/useReport';
+import { CONFIG } from '../constants/config';
 import { FIRM_NAMES } from '../constants/firms';
 import './AdminConsole.css';
 
-/* ===== Mock Data Generators ===== */
+/* ===== Mock Data Generators (나머지 섹션용) ===== */
 
 function generateMockFirmRecords() {
   return FIRM_NAMES.map((name) => ({
@@ -70,52 +71,70 @@ function AdminConsole() {
   const [processing, setProcessing] = useState({});
   const [logLines, setLogLines] = useState([]);
 
-  // 실제 백엔드에서 시스템 상태 조회
+  // FastAPI `/admin/metrics` 에서 리얼 시스템 메트릭 조회
   useEffect(() => {
     let cancelled = false;
-    const fetchStatus = async () => {
+    const fetchMetrics = async () => {
       setStatusLoading(true);
       setStatusError(null);
       try {
-        const res = await fetch('/api/admin-status');
+        const authToken = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+        const baseUrl = CONFIG.API.BASE_URL;
+        const res = await fetch(`${baseUrl}/admin/metrics`, {
+          headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        if (!cancelled) {
-          setSystemStatus({
-            db: data.services?.db?.status || 'unknown',
-            api: data.services?.api?.status || 'unknown',
-            sftp: data.services?.scheduler?.status || 'unknown',
-            scheduler: data.services?.scheduler?.status || 'unknown',
-            lastCrawl: data.lastActivity?.lastCrawl || '정보 없음',
-            lastPdfGen: data.lastActivity?.lastPdfGen || '정보 없음',
-            totalPdfs: data.services?.db?.latency
-              ? `~${(data.services.db.latency + data.services.api.latency)}ms`
-              : '-',
-            diskUsage: data.overall === 'online' ? '정상' : '점검 필요',
-          });
+        if (cancelled) return;
+
+        // lastCrawl 시간 포맷
+        let lastCrawlDisplay = '-';
+        let lastPdfGenDisplay = '-';
+        if (data.last_activity?.last_save_time) {
+          const savedAt = new Date(data.last_activity.last_save_time);
+          const now = new Date();
+          const diffMin = Math.floor((now - savedAt) / 60000);
+          if (diffMin < 1) lastCrawlDisplay = '방금 전';
+          else if (diffMin < 60) lastCrawlDisplay = `${diffMin}분 전`;
+          else lastCrawlDisplay = `${Math.floor(diffMin / 60)}시간 전`;
+          lastPdfGenDisplay = lastCrawlDisplay;
+        }
+
+        setSystemStatus({
+          overall: data.overall,
+          db: data.database?.status || 'unknown',
+          api: data.overall === 'online' ? 'online' : 'degraded',
+          cpu: data.cpu?.percent ?? 0,
+          cpuCores: data.cpu?.cores ?? 0,
+          cpuFreq: data.cpu?.frequency_mhz,
+          memoryPercent: data.memory?.percent ?? 0,
+          memoryUsed: data.memory?.used_gb ?? 0,
+          memoryTotal: data.memory?.total_gb ?? 0,
+          diskPercent: data.disk?.percent ?? 0,
+          diskUsed: data.disk?.used_gb ?? 0,
+          diskTotal: data.disk?.total_gb ?? 0,
+          lastCrawl: lastCrawlDisplay,
+          lastPdfGen: lastPdfGenDisplay,
+          totalReports: data.reports?.total?.toLocaleString() ?? '-',
+          todayReports: data.reports?.today_inserts ?? 0,
+          uptimeDays: data.system?.uptime_days ?? 0,
+        });
+
+        // 증권사별 오늘 Insert 건수 (API에서 제공 시)
+        if (data.reports?.by_firm_today?.length > 0) {
+          // 실제 데이터로 교체 (추후 구현)
         }
       } catch (err) {
         if (!cancelled) {
           setStatusError(err.message);
-          // 폴백: mock 데이터로 대체
-          setSystemStatus({
-            db: 'online',
-            api: 'online',
-            sftp: 'online',
-            scheduler: 'online',
-            lastCrawl: '-',
-            lastPdfGen: '-',
-            totalPdfs: '-',
-            diskUsage: '-',
-          });
+          setSystemStatus(null);
         }
       } finally {
         if (!cancelled) setStatusLoading(false);
       }
     };
-    fetchStatus();
-    // 30초마다 갱신
-    const interval = setInterval(fetchStatus, 30000);
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 30000); // 30초 자동 갱신
     return () => {
       cancelled = true;
       clearInterval(interval);
@@ -223,32 +242,28 @@ function AdminConsole() {
               </span>
             </div>
             <div className="status-item">
-              <span className="status-label">SFTP 수집</span>
-              <span className={`status-value ${statusColor(systemStatus.sftp)}`}>
-                <span className={`status-dot ${statusColor(systemStatus.sftp)}`} /> {systemStatus.sftp === 'online' ? 'Online' : 'Offline'}
-              </span>
+              <span className="status-label">CPU</span>
+              <span className="status-value">{systemStatus.cpu}% {systemStatus.cpuFreq ? `(${systemStatus.cpuFreq}MHz)` : ''}</span>
             </div>
             <div className="status-item">
-              <span className="status-label">스케줄러</span>
-              <span className={`status-value ${statusColor(systemStatus.scheduler)}`}>
-                <span className={`status-dot ${statusColor(systemStatus.scheduler)}`} /> {systemStatus.scheduler === 'online' ? 'Online' : 'Offline'}
-              </span>
+              <span className="status-label">RAM</span>
+              <span className="status-value">{systemStatus.memoryPercent}% ({systemStatus.memoryUsed}GB / {systemStatus.memoryTotal}GB)</span>
+            </div>
+            <div className="status-item">
+              <span className="status-label">디스크</span>
+              <span className="status-value">{systemStatus.diskPercent}% ({systemStatus.diskUsed}GB / {systemStatus.diskTotal}GB)</span>
+            </div>
+            <div className="status-item">
+              <span className="status-label">서버 가동시간</span>
+              <span className="status-value">{systemStatus.uptimeDays}일</span>
             </div>
             <div className="status-item">
               <span className="status-label">마지막 수집</span>
               <span className="status-value">{systemStatus.lastCrawl}</span>
             </div>
             <div className="status-item">
-              <span className="status-label">마지막 PDF 생성</span>
-              <span className="status-value">{systemStatus.lastPdfGen}</span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">응답 시간</span>
-              <span className="status-value">{systemStatus.totalPdfs}</span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">종합 상태</span>
-              <span className="status-value">{systemStatus.diskUsage}</span>
+              <span className="status-label">오늘 Insert</span>
+              <span className="status-value">{systemStatus.todayReports}건</span>
             </div>
           </div>
         ) : (
