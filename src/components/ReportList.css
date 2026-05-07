@@ -282,6 +282,57 @@
   line-height: 1.4;
 }
 
+/* 확인 버튼 */
+.admin-summary-confirm {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.admin-summary-confirm-btns {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: 4px;
+}
+
+.confirm-yes,
+.confirm-no {
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75em;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.confirm-yes {
+  background: #4caf50;
+  color: #fff;
+}
+
+.confirm-no {
+  background: #f44336;
+  color: #fff;
+}
+
+/* 완료 배지 */
+.summary-completed-badge {
+  font-size: 0.75em;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #4caf50;
+  color: #fff;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.4;
+}
+
 .summary-content {
   background: var(--card-background-color);
   border: 1px solid var(--loading-border-color);

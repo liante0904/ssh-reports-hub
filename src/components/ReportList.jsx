@@ -35,7 +35,75 @@ function ReportList({ onWriterClick }) {
     }
   });
 
+  // 로그인 시 로컬 즐겨찾기를 서버로 업로드 후 동기화
+  useEffect(() => {
+    if (!telegramUser) return;
+    const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    if (!token) return;
+
+    const baseUrl = CONFIG.API.BASE_URL;
+    const LOCAL_KEY = 'report_favorites';
+    const SYNC_FLAG_KEY = 'report_favorites_synced';
+
+    // 이미 동기화한 적 있으면 서버 데이터만 가져옴
+    if (localStorage.getItem(SYNC_FLAG_KEY)) {
+      request(`${baseUrl}/favorites`, { skipAuth: false })
+        .then(data => {
+          if (data?.items) {
+            const serverFavs = {};
+            data.items.forEach(f => { serverFavs[f.report_id] = true; });
+            setFavorites(serverFavs);
+            localStorage.setItem(LOCAL_KEY, JSON.stringify(serverFavs));
+          }
+        })
+        .catch(() => {});
+      return;
+    }
+
+    // 로컬에 저장된 즐겨찾기를 서버로 업로드
+    const localSaved = localStorage.getItem(LOCAL_KEY);
+    let localFavs = {};
+    try { localFavs = localSaved ? JSON.parse(localSaved) : {}; } catch {}
+
+    const reportIds = Object.keys(localFavs).filter(id => localFavs[id]).map(Number);
+    if (reportIds.length > 0) {
+      Promise.allSettled(
+        reportIds.map(id =>
+          request(`${baseUrl}/favorites/${id}`, { method: 'POST', skipAuth: false })
+        )
+      ).then(() => {
+        // 업로드 완료 후 서버 데이터로 갱신
+        request(`${baseUrl}/favorites`, { skipAuth: false })
+          .then(data => {
+            if (data?.items) {
+              const serverFavs = {};
+              data.items.forEach(f => { serverFavs[f.report_id] = true; });
+              setFavorites(serverFavs);
+              localStorage.setItem(LOCAL_KEY, JSON.stringify(serverFavs));
+            }
+          })
+          .catch(() => {});
+      });
+    } else {
+      // 업로드할 게 없어도 서버 데이터로 갱신
+      request(`${baseUrl}/favorites`, { skipAuth: false })
+        .then(data => {
+          if (data?.items) {
+            const serverFavs = {};
+            data.items.forEach(f => { serverFavs[f.report_id] = true; });
+            setFavorites(serverFavs);
+            localStorage.setItem(LOCAL_KEY, JSON.stringify(serverFavs));
+          }
+        })
+        .catch(() => {});
+    }
+
+    // 동기화 완료 플래그 (재실행 방지)
+    localStorage.setItem(SYNC_FLAG_KEY, '1');
+  }, [telegramUser?.id]);
+
   const [summaryRequestedIds, setSummaryRequestedIds] = useState(new Set());
+  const [summaryCompletedIds, setSummaryCompletedIds] = useState(new Set());
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -73,9 +141,23 @@ function ReportList({ onWriterClick }) {
   };
 
   const toggleFavorite = (id) => {
+    const baseUrl = CONFIG.API.BASE_URL;
+    const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+
     setFavorites(prev => {
-      const next = { ...prev, [id]: !prev[id] };
+      const isAdding = !prev[id];
+      const next = { ...prev, [id]: isAdding };
       localStorage.setItem('report_favorites', JSON.stringify(next));
+
+      // 로그인 상태면 서버에도 반영
+      if (token && telegramUser) {
+        const method = isAdding ? 'POST' : 'DELETE';
+        request(`${baseUrl}/favorites/${id}`, {
+          method,
+          skipAuth: false,
+        }).catch(() => {});
+      }
+
       return next;
     });
   };
@@ -96,7 +178,7 @@ function ReportList({ onWriterClick }) {
     const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     if (!token) return;
 
-    // 즉시 UI에 "요청됨" 표시 (중복 요청 방지)
+    // 중복 요청 방지
     if (summaryRequestedIds.has(reportId)) return;
     setSummaryRequestedIds(prev => new Set(prev).add(reportId));
 
@@ -104,28 +186,35 @@ function ReportList({ onWriterClick }) {
       const result = await request(`${baseUrl}/admin/reports/${reportId}/summarize`, {
         method: 'POST',
         skipAuth: false,
-        timeout: 180000,  // 3분 (PDF 다운로드 + 텍스트 추출 + DeepSeek API)
+        timeout: 180000,
       });
       if (result?.status === 'success') {
-        console.log('[Admin] ✅ 요약 생성 완료:', result.summary_model);
-        // 새로고침하면 요약이 리포트에 바로 표시됨
-        window.location.reload();
+        setSummaryCompletedIds(prev => new Set(prev).add(reportId));
       } else if (result?.status === 'skipped') {
-        console.log('[Admin] ℹ️ 이미 요약 존재');
-      } else {
-        console.error('[Admin] ❌ 요약 생성 실패:', result?.error);
+        setSummaryCompletedIds(prev => new Set(prev).add(reportId));
       }
     } catch (error) {
       console.error('[Admin] ❌ 요청 실패:', error.message);
+      // 실패 시 요청됨 해제 (재시도 가능)
+      setSummaryRequestedIds(prev => {
+        const next = new Set(prev);
+        next.delete(reportId);
+        return next;
+      });
     }
   };
 
   const sortedDates = Object.keys(reports).sort((a, b) => b.localeCompare(a));
   const isSearchActive = !!(searchQuery.query || searchQuery.category === 'company');
   const isFavoritesPage = location.pathname.includes('favorites');
+  const isAiSummary = location.pathname.includes('ai-summary');
   const isRecent = location.pathname === '/';
 
-  // 필터링된 날짜 리스트 (즐겨찾기 페이지 대응)
+  const hasSummaryContent = (report) => {
+    return report.gemini_summary && report.gemini_summary.trim() !== "" && report.gemini_summary.trim() !== " ";
+  };
+
+  // 필터링된 날짜 리스트 (즐겨찾기 / AI요약 페이지 대응)
   const filteredSortedDates = isFavoritesPage 
     ? sortedDates.filter(date => {
         const items = reports[date];
@@ -134,6 +223,16 @@ function ReportList({ onWriterClick }) {
         }
         return Object.values(items).some(firmReports => 
           firmReports.some(report => !!favorites[report.id])
+        );
+      })
+    : isAiSummary
+    ? sortedDates.filter(date => {
+        const items = reports[date];
+        if (Array.isArray(items)) {
+          return items.some(hasSummaryContent);
+        }
+        return Object.values(items).some(firmReports =>
+          firmReports.some(hasSummaryContent)
         );
       })
     : sortedDates;
@@ -147,7 +246,11 @@ function ReportList({ onWriterClick }) {
         if (dateToggles[date]) return [];
         const items = reports[date];
         const list = Array.isArray(items) ? items : Object.values(items).flat();
-        return list.filter((report) => !isFavoritesPage || favorites[report.id]);
+        return list.filter((report) => {
+          if (isFavoritesPage && !favorites[report.id]) return false;
+          if (isAiSummary && !hasSummaryContent(report)) return false;
+          return true;
+        });
       })
       .filter(isDsReport)
       .slice(0, 3);
@@ -180,6 +283,11 @@ function ReportList({ onWriterClick }) {
             <div className="empty-icon">★</div>
             <p>즐겨찾기한 레포트가 없습니다.<br/>관심 있는 레포트에 별표를 눌러보세요!</p>
           </div>
+        ) : isAiSummary && filteredSortedDates.length === 0 && !isLoading ? (
+          <div className="empty-favorites">
+            <div className="empty-icon">🤖</div>
+            <p>AI 요약이 생성된 레포트가 없습니다.<br/>관리자가 요약을 생성하면 여기에 표시됩니다.</p>
+          </div>
         ) : filteredSortedDates.length === 0 && !isLoading ? null : (
           <InfiniteScroll
             dataLength={offset}
@@ -209,6 +317,7 @@ function ReportList({ onWriterClick }) {
                 isAdmin={isAdmin}
                 onTriggerSummary={handleTriggerSummary}
                 summaryRequestedIds={summaryRequestedIds}
+                summaryCompletedIds={summaryCompletedIds}
               />
             ))}
           </InfiniteScroll>
