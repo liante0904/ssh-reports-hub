@@ -17,7 +17,9 @@ function ReportGroup({
   onOpenShareMenu, 
   onWriterClick,
   showSortOptions,
-  setSortBy
+  setSortBy,
+  isAdmin,
+  onTriggerSummary
 }) {
   const isTimeSort = sortBy === 'time' || isFavoritesPage || Array.isArray(items);
 
@@ -65,6 +67,8 @@ function ReportGroup({
                   onOpenShareMenu={onOpenShareMenu}
                   showFirmTag={true}
                   onWriterClick={onWriterClick}
+                  isAdmin={isAdmin}
+                  onTriggerSummary={onTriggerSummary}
                 />
               ))
             }
@@ -91,6 +95,8 @@ function ReportGroup({
                     onOpenShareMenu={onOpenShareMenu}
                     showFirmTag={false}
                     onWriterClick={onWriterClick}
+                    isAdmin={isAdmin}
+                    onTriggerSummary={onTriggerSummary}
                   />
                 )) : null}
               </div>

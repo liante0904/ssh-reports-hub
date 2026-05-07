@@ -5,12 +5,15 @@ import ShareMenu from './ShareMenu';
 import ReportGroup from './report/ReportGroup';
 import { useReportFetch } from '../hooks/useReportFetch';
 import { useReport } from '../context/useReport';
+import { request } from '../utils/api';
+import { CONFIG } from '../constants/config';
 import { isDsReport, prefetchPdf } from '../utils/reportLinks';
 import { buildShareMenuData } from '../utils/shareMenuData';
 import './ReportList.css';
 
 function ReportList({ onWriterClick }) {
-  const { searchQuery, sortBy, setSortBy } = useReport();
+  const { searchQuery, sortBy, setSortBy, telegramUser } = useReport();
+  const isAdmin = telegramUser?.is_admin === true;
   const location = useLocation();
   const { 
     reports, 
@@ -84,6 +87,41 @@ function ReportList({ onWriterClick }) {
     });
     setSelectedReport(buildShareMenuData(report));
     setIsShareOpen(true);
+  };
+
+  const handleTriggerSummary = async (reportId) => {
+    const baseUrl = CONFIG.API.BASE_URL;
+    const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    if (!token) return;
+
+    try {
+      const result = await request(`${baseUrl}/admin/reports/${reportId}/summarize`, {
+        method: 'POST',
+        skipAuth: false,
+      });
+      console.log('[Admin] AI summary trigger result:', result);
+      if (result?.status === 'dry_run') {
+        alert(
+          `[Dry-Run] DeepSeek 요약 명령어가 생성되었습니다.\n\n` +
+          `보고서: ${result.title}\n` +
+          `PDF: ${result.pdf_url}\n\n` +
+          `터미널에서 아래 curl 명령어를 실행하거나,\n` +
+          `dry_run=False로 전환 후 재요청하세요.\n\n` +
+          `(명령어는 브라우저 콘솔에서 확인)`
+        );
+        console.log('[Admin] Curl command:', result.curl_command);
+      } else if (result?.status === 'success') {
+        alert('✅ AI 요약이 생성되었습니다. 페이지를 새로고침하면 반영됩니다.');
+        window.location.reload();
+      } else if (result?.status === 'skipped') {
+        alert('ℹ️ 이미 요약이 존재합니다.');
+      } else {
+        alert('❌ 요약 생성 실패: ' + (result?.error || '알 수 없는 오류'));
+      }
+    } catch (error) {
+      console.error('[Admin] Summary trigger failed:', error);
+      alert('❌ 요청 실패: ' + error.message);
+    }
   };
 
   const sortedDates = Object.keys(reports).sort((a, b) => b.localeCompare(a));
@@ -172,6 +210,8 @@ function ReportList({ onWriterClick }) {
                 onWriterClick={onWriterClick}
                 showSortOptions={index === 0 && isRecent && !isSearchActive}
                 setSortBy={setSortBy}
+                isAdmin={isAdmin}
+                onTriggerSummary={handleTriggerSummary}
               />
             ))}
           </InfiniteScroll>

@@ -245,6 +245,29 @@
   transform: rotate(180deg);
 }
 
+/* 관리자용 AI 요약 생성 버튼 */
+.admin-summary-btn {
+  background: none;
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  color: var(--primary-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  width: 26px;
+  height: 26px;
+  transition: all 0.2s;
+  opacity: 0.7;
+}
+
+.admin-summary-btn:hover {
+  opacity: 1;
+  background: var(--primary-color);
+  color: #fff;
+}
+
 .summary-content {
   background: var(--card-background-color);
   border: 1px solid var(--loading-border-color);
