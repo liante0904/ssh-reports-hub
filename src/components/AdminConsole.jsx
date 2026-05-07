@@ -70,23 +70,39 @@ function AdminConsole() {
   const [processing, setProcessing] = useState({});
   const [logLines, setLogLines] = useState([]);
 
-  // Netlify Function `/api/admin-status` 에서 시스템 상태 조회
+  // FastAPI `/admin/metrics` 리얼데이터 조회 (서버 배포 완료)
   useEffect(() => {
     let cancelled = false;
     const fetchMetrics = async () => {
       setStatusLoading(true);
       setStatusError(null);
       try {
-        const res = await fetch('/api/admin-status');
+        const authToken = localStorage.getItem('auth_token');
+        const baseUrl = 'https://ssh-oci.duckdns.org';
+        const res = await fetch(`${baseUrl}/admin/metrics`, {
+          headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+        });
+        if (res.status === 401) throw new Error('인증 필요 - 관리자 로그인 확인');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (cancelled) return;
 
+        let lastCrawlDisplay = '-', lastPdfGenDisplay = '-';
+        if (data.last_activity?.last_save_time) {
+          const savedAt = new Date(data.last_activity.last_save_time);
+          const now = new Date();
+          const diffMin = Math.floor((now - savedAt) / 60000);
+          if (diffMin < 1) lastCrawlDisplay = '방금 전';
+          else if (diffMin < 60) lastCrawlDisplay = `${diffMin}분 전`;
+          else lastCrawlDisplay = `${Math.floor(diffMin / 60)}시간 전`;
+          lastPdfGenDisplay = lastCrawlDisplay;
+        }
+
         setSystemStatus({
           overall: data.overall || 'unknown',
-          db: data.services?.db?.status || data.database?.status || 'unknown',
-          api: data.services?.api?.status || 'unknown',
-          cpu: data.cpu?.percent ?? 0,
+          db: data.database?.status || 'unknown',
+          api: data.overall === 'online' ? 'online' : 'degraded',
+          cpu: data.cpu?.percent ?? '-',
           cpuCores: data.cpu?.cores ?? 0,
           cpuFreq: data.cpu?.frequency_mhz,
           memoryPercent: data.memory?.percent ?? 0,
@@ -95,8 +111,8 @@ function AdminConsole() {
           diskPercent: data.disk?.percent ?? 0,
           diskUsed: data.disk?.used_gb ?? 0,
           diskTotal: data.disk?.total_gb ?? 0,
-          lastCrawl: data.lastActivity?.lastCrawl || '-',
-          lastPdfGen: data.lastActivity?.lastPdfGen || '-',
+          lastCrawl: lastCrawlDisplay,
+          lastPdfGen: lastPdfGenDisplay,
           totalReports: data.reports?.total?.toLocaleString() ?? '-',
           todayReports: data.reports?.today_inserts ?? 0,
           uptimeDays: data.system?.uptime_days ?? 0,
@@ -105,13 +121,12 @@ function AdminConsole() {
         if (!cancelled) {
           setStatusError(err.message);
           setSystemStatus({
-            overall: 'degraded',
-            db: 'unknown', api: 'unknown',
+            overall: 'degraded', db: 'unknown', api: 'unknown',
             cpu: 0, cpuCores: 0, cpuFreq: null,
             memoryPercent: 0, memoryUsed: 0, memoryTotal: 0,
             diskPercent: 0, diskUsed: 0, diskTotal: 0,
-            lastCrawl: '(연결 실패)', lastPdfGen: '-',
-            totalReports: '-', todayReports: 0, uptimeDays: 0,
+            lastCrawl: err.message === '인증 필요 - 관리자 로그인 확인' ? '(관리자 로그인 필요)' : '(연결 실패)',
+            lastPdfGen: '-', totalReports: '-', todayReports: 0, uptimeDays: 0,
           });
         }
       } finally {
@@ -119,11 +134,8 @@ function AdminConsole() {
       }
     };
     fetchMetrics();
-    const interval = setInterval(fetchMetrics, 30000);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
+    const interval = setInterval(fetchMetrics, 60000);
+    return () => { cancelled = true; clearInterval(interval); };
   }, []);
 
   const maxCount = Math.max(...firmRecords.map((f) => f.todayCount), 1);
