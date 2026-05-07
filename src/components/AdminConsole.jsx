@@ -127,7 +127,26 @@ function AdminConsole() {
       } catch (err) {
         if (!cancelled) {
           setStatusError(err.message);
-          setSystemStatus(null);
+          // API 실패 시에도 폴백 mock을 보여줘서 UI가 비지 않게 함
+          setSystemStatus({
+            overall: 'degraded',
+            db: 'unknown',
+            api: 'unknown',
+            cpu: 0,
+            cpuCores: 0,
+            cpuFreq: null,
+            memoryPercent: 0,
+            memoryUsed: 0,
+            memoryTotal: 0,
+            diskPercent: 0,
+            diskUsed: 0,
+            diskTotal: 0,
+            lastCrawl: '(API 연결 실패)',
+            lastPdfGen: '-',
+            totalReports: '-',
+            todayReports: 0,
+            uptimeDays: 0,
+          });
         }
       } finally {
         if (!cancelled) setStatusLoading(false);
