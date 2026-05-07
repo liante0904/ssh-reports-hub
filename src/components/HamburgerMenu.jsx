@@ -127,7 +127,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               toggleKeywordOverlay={toggleKeywordOverlay}
             />
 
-            <AdminSection />
+            <AdminSection isAdmin={telegramUser?.is_admin} />
           </div>
         </div>
       )}

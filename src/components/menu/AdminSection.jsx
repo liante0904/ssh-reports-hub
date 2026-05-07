@@ -1,10 +1,10 @@
 import React from 'react';
 import { CONFIG } from '../../constants/config';
 
-function AdminSection() {
+function AdminSection({ isAdmin }) {
   const vpnAddr = CONFIG.VPN.ADDR;
   
-  if (!vpnAddr) return null;
+  if (!vpnAddr || !isAdmin) return null;
 
   const adminLinks = [
     { name: 'VSCode', icon: '💻', path: '/code' },

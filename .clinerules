@@ -1,0 +1,120 @@
+# SSH Reports Hub — Project Rules for LLM Agents
+
+This file defines immutable project rules. Read it before making any changes. Violating these rules is an error.
+
+---
+
+## 1. Stack & Build
+
+- **Framework:** Vite + React 19 (SPA). NO Next.js, NO Remix, NO Gatsby.
+- **Language:** JavaScript (JSX). NO TypeScript, NO Flow.
+- **Styling:** Plain `.css` files only. NO Tailwind, NO CSS-in-JS, NO styled-components, NO CSS Modules.
+- **Routing:** `react-router-dom` v7 (declared in `package.json`). Do NOT touch routing unless explicitly asked.
+- **Deploy:** Netlify (`netlify.toml`, `.netlify/`). Functions in `netlify/functions/`.
+- **Build output:** `dist/` directory (gitignored).
+
+## 2. Dependency Rules
+
+- **NEVER** add, remove, or modify `package.json` or `package-lock.json` unless the user explicitly asks for a new package.
+- The only allowed runtime dependencies are the ones already in `package.json`:
+  `react`, `react-dom`, `react-infinite-scroll-component`, `react-markdown`, `react-router-dom`, `remark-gfm`
+
+## 3. File Structure
+
+```
+src/
+  components/         # UI 컴포넌트 (JSX)
+    report/           # ReportItem.jsx, ReportGroup.jsx, PDFViewerModal.jsx
+    menu/             # AdminSection.jsx, KeywordOverlay.jsx, TelegramAuth.jsx
+    *.jsx             # HamburgerMenu, Header, FloatingMenu, etc.
+  constants/          # 전역 상수 (config.js, firms.js)
+  context/            # React Context (ReportContext.jsx, reportContext.js, useReport.js)
+  hooks/              # Custom hooks (useKeywords, useReportFetch, useAppLayout 등)
+  utils/              # 순수 유틸리티 함수 (api.js, date.js, reportLinks.js, reportNormalizer.js 등)
+  main.jsx            # Entry point
+  App.jsx             # Root component
+  App.css             # Root-level styles (variables, global)
+  index.css           # Reset / base styles
+```
+
+### File creation rules
+- **NEVER** create a new file unless the user explicitly asks for it.
+- Always modify existing files first. If the logic belongs in a file that doesn't exist yet, ask the user before creating it.
+
+## 4. Code Style
+
+- **Components:** Functional components with `function ComponentName() { ... }` syntax.
+- **NO class components.** NO `React.FC`, `React.Component`, or `React.createClass`.
+- **Naming:**
+  - Component files: `PascalCase.jsx` (e.g., `ReportItem.jsx`)
+  - Utility files: `camelCase.js` (e.g., `api.js`)
+  - Constants: `UPPER_CASE` for exported constants, `CONFIG` object for config values.
+- **Export:** Always use `export default ComponentName;` at the end of component files.
+- **Hook pattern:** Custom hooks use `use` prefix, returned as `function useXxx() { return { ... }; }`.
+
+## 5. API & Data Fetching
+
+- **ALWAYS** use `import { request } from '../../utils/api'` for all HTTP calls.
+- **NEVER** use raw `fetch()` directly. The `request()` utility handles auth tokens, timeout, and 401 auto-logout.
+- API base URLs come from `CONFIG.API.*` in `src/constants/config.js`.
+- Auth token key: `CONFIG.STORAGE_KEYS.AUTH_TOKEN` ('auth_token').
+
+## 6. State Management
+
+- **Global state:** `ReportContext` (src/context/). Available via `useReport()` hook from `src/context/useReport.js`.
+- **Local state:** `useState` in components.
+- **Browser storage:** Use `localStorage.getItem(CONFIG.STORAGE_KEYS.xxx)` / `setItem()`. Never hardcode storage keys.
+
+## 7. Styling
+
+- All styles go in `.css` files imported alongside their component (e.g., `Header.css` is imported by `Header.jsx`).
+- CSS custom properties (variables) are defined in `App.css` under `:root` and `[data-theme="dark"]`.
+- **NO inline styles**, NO `style={{}}` props unless it's a dynamic value that cannot be expressed in CSS (e.g., calculated dimensions).
+- Use class names, not inline styles. Follow BEM-like naming: `.component-name__element--modifier`.
+
+## 8. Feature-Specific Rules
+
+### AI Summary (gemini_summary)
+- The field `gemini_summary` comes from the API response and is normalized in `reportNormalizer.js`.
+- UI logic is in `ReportItem.jsx` (toggle + markdown rendering). Do NOT modify the summary feature unless asked.
+- Summary visibility is controlled by `hasSummary` (checks `gemini_summary` is non-empty).
+
+### Search
+- Search state lives in `ReportContext` as `activeSearch` / `stagedSearch`.
+- Search overlay: `SearchOverlay.jsx`.
+- **DO NOT** modify search logic or add new search dimensions unless explicitly requested.
+
+### Telegram Auth
+- Login flow: `HamburgerMenu.jsx` → `TelegramAuth.jsx`.
+- User data stored in `localStorage` key `CONFIG.STORAGE_KEYS.TELEGRAM_USER`.
+- Dev bypass available when `DEV_AUTH_ENABLED` is true (see `utils/devAuth.js`).
+
+### Admin Section
+- `AdminSection.jsx` renders admin links if `CONFIG.VPN.ADDR` is set.
+- Admin access is currently gated by environment variable only (not user role).
+- **DO NOT** add user role / admin check logic without explicit user request.
+
+## 9. What NOT to do (Anti-Patterns)
+
+- DO NOT convert any file to TypeScript.
+- DO NOT add Tailwind, CSS-in-JS, or any CSS framework.
+- DO NOT add testing framework, test files, or test infrastructure.
+- DO NOT create any `.md` documentation or README files.
+- DO NOT add CI/CD configuration (GitHub Actions, etc.).
+- DO NOT touch Netlify configuration (`netlify.toml`, `netlify/functions/`) unless explicitly asked.
+- DO NOT refactor existing working code unless the user says "refactor" or "fix".
+- DO NOT add new features without explicit user request.
+- DO NOT create backup files, migration scripts, or cleanup scripts.
+
+## 10. Working with the project
+
+- Read `ARCHITECTURE.md` first for context on recent ADRs and design decisions.
+- Read `NOTICE.md` for workspace boundary rules.
+- After making changes, verify the app still builds: `npm run build` (or just `vite build`).
+- If you need to test something, ask the user before running any dev server or build.
+
+## 11. Communication
+
+- Explain what you changed and why in 1-2 sentences.
+- If you find yourself about to do something not covered by these rules, stop and ask the user.
+- If a user request contradicts these rules, apply the rules unless the user explicitly overrides them.
