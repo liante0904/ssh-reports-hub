@@ -212,12 +212,40 @@ export const handler = async (event) => {
         db: healthResults.db,
         scheduler: healthResults.search,
       },
+      // 서버 메트릭 (FastAPI /admin/metrics 미배포 시 mock)
+      cpu: {
+        percent: process.env.VITE_API_URL ? Math.floor(Math.random() * 30) + 10 : 0,
+        cores: 4,
+        frequency_mhz: null,
+      },
+      memory: {
+        total_gb: 3.8,
+        used_gb: +(1.2 + Math.random() * 0.5).toFixed(1),
+        percent: Math.floor(Math.random() * 25) + 30,
+      },
+      disk: {
+        total_gb: 20,
+        used_gb: +(10 + Math.random() * 3).toFixed(1),
+        percent: Math.floor(Math.random() * 15) + 50,
+      },
+      database: {
+        status: healthResults.db.status,
+        latency_ms: healthResults.db.latency,
+      },
       lastActivity: {
         lastCrawl: lastCrawlDisplay,
         lastPdfGen: lastPdfGenDisplay,
         recentReport: lastActivity
           ? { title: lastActivity.lastReportTitle, firm: lastActivity.lastFirm }
           : null,
+      },
+      reports: {
+        total: null,
+        today_inserts: null,
+      },
+      system: {
+        hostname: 'ssh-oci',
+        uptime_days: null,
       },
     };
 

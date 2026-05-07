@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReport } from '../context/useReport';
-import { CONFIG } from '../constants/config';
 import { FIRM_NAMES } from '../constants/firms';
 import './AdminConsole.css';
 
@@ -71,39 +70,22 @@ function AdminConsole() {
   const [processing, setProcessing] = useState({});
   const [logLines, setLogLines] = useState([]);
 
-  // FastAPI `/admin/metrics` 에서 리얼 시스템 메트릭 조회
+  // Netlify Function `/api/admin-status` 에서 시스템 상태 조회
   useEffect(() => {
     let cancelled = false;
     const fetchMetrics = async () => {
       setStatusLoading(true);
       setStatusError(null);
       try {
-        const authToken = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
-        const baseUrl = CONFIG.API.BASE_URL;
-        const res = await fetch(`${baseUrl}/admin/metrics`, {
-          headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
-        });
+        const res = await fetch('/api/admin-status');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (cancelled) return;
 
-        // lastCrawl 시간 포맷
-        let lastCrawlDisplay = '-';
-        let lastPdfGenDisplay = '-';
-        if (data.last_activity?.last_save_time) {
-          const savedAt = new Date(data.last_activity.last_save_time);
-          const now = new Date();
-          const diffMin = Math.floor((now - savedAt) / 60000);
-          if (diffMin < 1) lastCrawlDisplay = '방금 전';
-          else if (diffMin < 60) lastCrawlDisplay = `${diffMin}분 전`;
-          else lastCrawlDisplay = `${Math.floor(diffMin / 60)}시간 전`;
-          lastPdfGenDisplay = lastCrawlDisplay;
-        }
-
         setSystemStatus({
-          overall: data.overall,
-          db: data.database?.status || 'unknown',
-          api: data.overall === 'online' ? 'online' : 'degraded',
+          overall: data.overall || 'unknown',
+          db: data.services?.db?.status || data.database?.status || 'unknown',
+          api: data.services?.api?.status || 'unknown',
           cpu: data.cpu?.percent ?? 0,
           cpuCores: data.cpu?.cores ?? 0,
           cpuFreq: data.cpu?.frequency_mhz,
@@ -113,39 +95,23 @@ function AdminConsole() {
           diskPercent: data.disk?.percent ?? 0,
           diskUsed: data.disk?.used_gb ?? 0,
           diskTotal: data.disk?.total_gb ?? 0,
-          lastCrawl: lastCrawlDisplay,
-          lastPdfGen: lastPdfGenDisplay,
+          lastCrawl: data.lastActivity?.lastCrawl || '-',
+          lastPdfGen: data.lastActivity?.lastPdfGen || '-',
           totalReports: data.reports?.total?.toLocaleString() ?? '-',
           todayReports: data.reports?.today_inserts ?? 0,
           uptimeDays: data.system?.uptime_days ?? 0,
         });
-
-        // 증권사별 오늘 Insert 건수 (API에서 제공 시)
-        if (data.reports?.by_firm_today?.length > 0) {
-          // 실제 데이터로 교체 (추후 구현)
-        }
       } catch (err) {
         if (!cancelled) {
           setStatusError(err.message);
-          // API 실패 시에도 폴백 mock을 보여줘서 UI가 비지 않게 함
           setSystemStatus({
             overall: 'degraded',
-            db: 'unknown',
-            api: 'unknown',
-            cpu: 0,
-            cpuCores: 0,
-            cpuFreq: null,
-            memoryPercent: 0,
-            memoryUsed: 0,
-            memoryTotal: 0,
-            diskPercent: 0,
-            diskUsed: 0,
-            diskTotal: 0,
-            lastCrawl: '(API 연결 실패)',
-            lastPdfGen: '-',
-            totalReports: '-',
-            todayReports: 0,
-            uptimeDays: 0,
+            db: 'unknown', api: 'unknown',
+            cpu: 0, cpuCores: 0, cpuFreq: null,
+            memoryPercent: 0, memoryUsed: 0, memoryTotal: 0,
+            diskPercent: 0, diskUsed: 0, diskTotal: 0,
+            lastCrawl: '(연결 실패)', lastPdfGen: '-',
+            totalReports: '-', todayReports: 0, uptimeDays: 0,
           });
         }
       } finally {
@@ -153,7 +119,7 @@ function AdminConsole() {
       }
     };
     fetchMetrics();
-    const interval = setInterval(fetchMetrics, 30000); // 30초 자동 갱신
+    const interval = setInterval(fetchMetrics, 30000);
     return () => {
       cancelled = true;
       clearInterval(interval);
