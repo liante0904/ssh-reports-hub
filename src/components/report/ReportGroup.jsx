@@ -21,7 +21,9 @@ function ReportGroup({
   isAdmin,
   onTriggerSummary,
   summaryRequestedIds,
-  summaryCompletedIds
+  summaryCompletedIds,
+  isAiSummary,
+  hasSummaryContent
 }) {
   const isTimeSort = sortBy === 'time' || isFavoritesPage || Array.isArray(items);
 
@@ -58,6 +60,7 @@ function ReportGroup({
           <div className="report-wrapper">
             {(Array.isArray(items) ? items : Object.values(items).flat())
               .filter(r => !isFavoritesPage || favorites[r.id])
+              .filter(r => !isAiSummary || hasSummaryContent(r))
               .map(report => (
                 <ReportItem 
                   key={report.id}
@@ -88,7 +91,9 @@ function ReportGroup({
                 {firm}
               </div>
               <div className={`report-wrapper ${firmToggles[date]?.[firm] ? 'collapsed' : ''}`}>
-                {Array.isArray(firmReports) ? firmReports.map(report => (
+                {Array.isArray(firmReports) ? firmReports
+                  .filter(r => !isAiSummary || hasSummaryContent(r))
+                  .map(report => (
                   <ReportItem 
                     key={report.id}
                     report={report}

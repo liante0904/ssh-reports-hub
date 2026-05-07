@@ -318,6 +318,8 @@ function ReportList({ onWriterClick }) {
                 onTriggerSummary={handleTriggerSummary}
                 summaryRequestedIds={summaryRequestedIds}
                 summaryCompletedIds={summaryCompletedIds}
+                isAiSummary={isAiSummary}
+                hasSummaryContent={hasSummaryContent}
               />
             ))}
           </InfiniteScroll>
