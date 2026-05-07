@@ -268,6 +268,20 @@
   color: #fff;
 }
 
+/* 요청됨 배지 */
+.summary-requested-badge {
+  font-size: 0.7em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #a0a0a0;
+  color: #fff;
+  font-weight: bold;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.4;
+}
+
 .summary-content {
   background: var(--card-background-color);
   border: 1px solid var(--loading-border-color);

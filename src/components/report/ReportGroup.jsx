@@ -19,7 +19,8 @@ function ReportGroup({
   showSortOptions,
   setSortBy,
   isAdmin,
-  onTriggerSummary
+  onTriggerSummary,
+  summaryRequestedIds
 }) {
   const isTimeSort = sortBy === 'time' || isFavoritesPage || Array.isArray(items);
 
@@ -69,6 +70,7 @@ function ReportGroup({
                   onWriterClick={onWriterClick}
                   isAdmin={isAdmin}
                   onTriggerSummary={onTriggerSummary}
+                  summaryRequestedIds={summaryRequestedIds}
                 />
               ))
             }
@@ -97,6 +99,7 @@ function ReportGroup({
                     onWriterClick={onWriterClick}
                     isAdmin={isAdmin}
                     onTriggerSummary={onTriggerSummary}
+                    summaryRequestedIds={summaryRequestedIds}
                   />
                 )) : null}
               </div>

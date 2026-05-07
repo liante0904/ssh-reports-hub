@@ -50,6 +50,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const isGlobal = location.pathname.includes('global');
   const isIndustry = location.pathname.includes('industry');
   const isFavorites = location.pathname.includes('favorites');
+  const isAiSummary = location.pathname.includes('ai-summary');
   const isCompany = location.pathname.startsWith('/company');
 
   const handleButtonClick = (buttonName) => {
@@ -120,6 +121,12 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
             onClick={() => handleButtonClick('favorites')}
           >
             ★
+          </button>
+          <button
+            className={`nav-button ${isAiSummary && !isSearchActive ? 'active' : ''}`}
+            onClick={() => handleButtonClick('ai_summary')}
+          >
+            AI요약
           </button>
           <div className="company-select-wrapper header-nav-filters">
             <CompanySelect

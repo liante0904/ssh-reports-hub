@@ -14,10 +14,12 @@ const ReportItem = ({
   showFirmTag,
   onWriterClick,
   isAdmin,
-  onTriggerSummary
+  onTriggerSummary,
+  summaryRequestedIds
 }) => {
   const { id, title, writer, gemini_summary, firm, pdf_url } = report;
   const { setViewerReport } = useReport();
+  const isSummaryRequested = summaryRequestedIds?.has(id);
   
   const finalLink = getDirectUrl(report);
 
@@ -88,7 +90,7 @@ const ReportItem = ({
                   <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                 </svg>
               </button>
-              {isAdmin && !hasSummary && (
+              {isAdmin && !hasSummary && !isSummaryRequested && (
                 <button 
                   className="admin-summary-btn"
                   onClick={() => onTriggerSummary(id)}
@@ -98,6 +100,9 @@ const ReportItem = ({
                     <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86l-3 3.87L9 13.14 6 17h12l-3.86-5.14z"/>
                   </svg>
                 </button>
+              )}
+              {isAdmin && isSummaryRequested && (
+                <span className="summary-requested-badge">요청됨</span>
               )}
               <button 
                 className={`favorite-button ${isFavorite ? 'active' : ''}`}

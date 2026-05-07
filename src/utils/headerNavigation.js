@@ -5,6 +5,7 @@ export const HEADER_PATHS = {
   global: '/global',
   industry: '/industry',
   favorites: '/favorites',
+  ai_summary: '/ai-summary',
   search: '/',
 };
 

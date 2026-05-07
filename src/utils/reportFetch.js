@@ -36,5 +36,9 @@ export function buildReportFetchUrl({ pathname, offset, sortBy, searchQuery, bas
     params.append('board', searchQuery.board);
   }
 
+  if (pathname.includes('ai-summary')) {
+    params.append('has_summary', 'true');
+  }
+
   return `${apiUrl}?${params.toString()}`;
 }

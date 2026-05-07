@@ -35,6 +35,7 @@ function ReportList({ onWriterClick }) {
     }
   });
 
+  const [summaryRequestedIds, setSummaryRequestedIds] = useState(new Set());
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -44,6 +45,7 @@ function ReportList({ onWriterClick }) {
     setDateToggles({});
     setFirmToggles({});
     setSummaryToggles({});
+    setSummaryRequestedIds(new Set());
   }, [location.pathname, searchQuery, sortBy]);
 
   // 모든 날짜 그룹이 닫혀있고 다음 데이터가 있다면 자동으로 더 불러오기
@@ -94,33 +96,27 @@ function ReportList({ onWriterClick }) {
     const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     if (!token) return;
 
+    // 즉시 UI에 "요청됨" 표시 (중복 요청 방지)
+    if (summaryRequestedIds.has(reportId)) return;
+    setSummaryRequestedIds(prev => new Set(prev).add(reportId));
+
     try {
       const result = await request(`${baseUrl}/admin/reports/${reportId}/summarize`, {
         method: 'POST',
         skipAuth: false,
+        timeout: 180000,  // 3분 (PDF 다운로드 + 텍스트 추출 + DeepSeek API)
       });
-      console.log('[Admin] AI summary trigger result:', result);
-      if (result?.status === 'dry_run') {
-        alert(
-          `[Dry-Run] DeepSeek 요약 명령어가 생성되었습니다.\n\n` +
-          `보고서: ${result.title}\n` +
-          `PDF: ${result.pdf_url}\n\n` +
-          `터미널에서 아래 curl 명령어를 실행하거나,\n` +
-          `dry_run=False로 전환 후 재요청하세요.\n\n` +
-          `(명령어는 브라우저 콘솔에서 확인)`
-        );
-        console.log('[Admin] Curl command:', result.curl_command);
-      } else if (result?.status === 'success') {
-        alert('✅ AI 요약이 생성되었습니다. 페이지를 새로고침하면 반영됩니다.');
+      if (result?.status === 'success') {
+        console.log('[Admin] ✅ 요약 생성 완료:', result.summary_model);
+        // 새로고침하면 요약이 리포트에 바로 표시됨
         window.location.reload();
       } else if (result?.status === 'skipped') {
-        alert('ℹ️ 이미 요약이 존재합니다.');
+        console.log('[Admin] ℹ️ 이미 요약 존재');
       } else {
-        alert('❌ 요약 생성 실패: ' + (result?.error || '알 수 없는 오류'));
+        console.error('[Admin] ❌ 요약 생성 실패:', result?.error);
       }
     } catch (error) {
-      console.error('[Admin] Summary trigger failed:', error);
-      alert('❌ 요청 실패: ' + error.message);
+      console.error('[Admin] ❌ 요청 실패:', error.message);
     }
   };
 
@@ -212,6 +208,7 @@ function ReportList({ onWriterClick }) {
                 setSortBy={setSortBy}
                 isAdmin={isAdmin}
                 onTriggerSummary={handleTriggerSummary}
+                summaryRequestedIds={summaryRequestedIds}
               />
             ))}
           </InfiniteScroll>

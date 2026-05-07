@@ -90,6 +90,7 @@ function AppContent() {
           <Route path="/global" element={<ReportList key="global" onWriterClick={handleWriterSearch} />} />
           <Route path="/industry" element={<ReportList key="industry" onWriterClick={handleWriterSearch} />} />
           <Route path="/favorites" element={<ReportList key="favorites" onWriterClick={handleWriterSearch} />} />
+          <Route path="/ai-summary" element={<ReportList key="ai-summary" onWriterClick={handleWriterSearch} />} />
         </Routes>
       </main>
       <SearchOverlay />
