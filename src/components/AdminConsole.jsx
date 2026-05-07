@@ -160,49 +160,7 @@ function AdminConsole() {
         </div>
       </div>
 
-      {/* ===== PDF Archive History (Bar Chart) ===== */}
-      <div className="section-card">
-        <div className="section-title">
-          📊 PDF 아카이브 현황
-          <span className="badge">최근 7일</span>
-        </div>
-        <div className="archive-history">
-          {archiveHistory.map((day) => {
-            const maxVal = Math.max(...archiveHistory.map((d) => d.count), 1);
-            const heightPct = Math.max((day.count / maxVal) * 100, 4);
-            return (
-              <div className="history-bar" key={day.label}>
-                <div className="bar" style={{ height: `${heightPct}%` }} title={`${day.count}건`} />
-                <div className="bar-label">{day.label}</div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ===== Securities Firm Records ===== */}
-      <div className="section-card">
-        <div className="section-title">
-          🏦 증권사별 오늘 Insert 건수
-          <span className="badge">{new Date().toLocaleDateString('ko-KR')}</span>
-        </div>
-        <div className="firm-list">
-          {firmRecords.map((firm) => (
-            <div className="firm-row" key={firm.name}>
-              <span className="firm-name">{firm.name}</span>
-              <div className="firm-bar-bg">
-                <div
-                  className="firm-bar-fill"
-                  style={{ width: `${(firm.todayCount / maxCount) * 100}%` }}
-                />
-              </div>
-              <span className="firm-count">{firm.todayCount}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ===== System Status ===== */}
+      {/* ===== System Status (맨 위) ===== */}
       <div className="section-card">
         <div className="section-title">
           ⚙️ 시스템 운영 상태
@@ -248,6 +206,48 @@ function AdminConsole() {
             <span className="status-label">디스크 사용량</span>
             <span className="status-value">{systemStatus.diskUsage}</span>
           </div>
+        </div>
+      </div>
+
+      {/* ===== PDF Archive History (Bar Chart) ===== */}
+      <div className="section-card">
+        <div className="section-title">
+          📊 PDF 아카이브 현황
+          <span className="badge">최근 7일</span>
+        </div>
+        <div className="archive-history">
+          {archiveHistory.map((day) => {
+            const maxVal = Math.max(...archiveHistory.map((d) => d.count), 1);
+            const heightPct = Math.max((day.count / maxVal) * 100, 4);
+            return (
+              <div className="history-bar" key={day.label}>
+                <div className="bar" style={{ height: `${heightPct}%` }} title={`${day.count}건`} />
+                <div className="bar-label">{day.label}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ===== Securities Firm Records ===== */}
+      <div className="section-card">
+        <div className="section-title">
+          🏦 증권사별 오늘 Insert 건수
+          <span className="badge">{new Date().toLocaleDateString('ko-KR')}</span>
+        </div>
+        <div className="firm-list">
+          {firmRecords.map((firm) => (
+            <div className="firm-row" key={firm.name}>
+              <span className="firm-name">{firm.name}</span>
+              <div className="firm-bar-bg">
+                <div
+                  className="firm-bar-fill"
+                  style={{ width: `${(firm.todayCount / maxCount) * 100}%` }}
+                />
+              </div>
+              <span className="firm-count">{firm.todayCount}</span>
+            </div>
+          ))}
         </div>
       </div>
 
