@@ -36,6 +36,11 @@
   query = {id = ":id"}
 
 [[redirects]]
+  from = "/api/admin-status"
+  to = "/.netlify/functions/admin-status"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

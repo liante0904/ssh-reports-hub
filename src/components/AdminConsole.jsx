@@ -40,19 +40,6 @@ function generateMockSummary(archiveHistory) {
   };
 }
 
-function generateMockStatus() {
-  return {
-    db: 'online',
-    api: 'online',
-    sftp: 'online',
-    scheduler: 'online',
-    lastCrawl: '3분 전',
-    lastPdfGen: '7분 전',
-    totalPdfs: Math.floor(Math.random() * 800) + 3200,
-    diskUsage: '64%',
-  };
-}
-
 /* ===== Reprocess Log ===== */
 const REPROCESS_TASKS = [
   { id: 'today', label: '오늘건 재처리' },
@@ -77,9 +64,63 @@ function AdminConsole() {
   const [firmRecords] = useState(generateMockFirmRecords);
   const [archiveHistory] = useState(generateMockArchiveHistory);
   const [summary] = useState(() => generateMockSummary(archiveHistory));
-  const [systemStatus] = useState(generateMockStatus);
+  const [systemStatus, setSystemStatus] = useState(null);
+  const [statusLoading, setStatusLoading] = useState(true);
+  const [statusError, setStatusError] = useState(null);
   const [processing, setProcessing] = useState({});
   const [logLines, setLogLines] = useState([]);
+
+  // 실제 백엔드에서 시스템 상태 조회
+  useEffect(() => {
+    let cancelled = false;
+    const fetchStatus = async () => {
+      setStatusLoading(true);
+      setStatusError(null);
+      try {
+        const res = await fetch('/api/admin-status');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!cancelled) {
+          setSystemStatus({
+            db: data.services?.db?.status || 'unknown',
+            api: data.services?.api?.status || 'unknown',
+            sftp: data.services?.scheduler?.status || 'unknown',
+            scheduler: data.services?.scheduler?.status || 'unknown',
+            lastCrawl: data.lastActivity?.lastCrawl || '정보 없음',
+            lastPdfGen: data.lastActivity?.lastPdfGen || '정보 없음',
+            totalPdfs: data.services?.db?.latency
+              ? `~${(data.services.db.latency + data.services.api.latency)}ms`
+              : '-',
+            diskUsage: data.overall === 'online' ? '정상' : '점검 필요',
+          });
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setStatusError(err.message);
+          // 폴백: mock 데이터로 대체
+          setSystemStatus({
+            db: 'online',
+            api: 'online',
+            sftp: 'online',
+            scheduler: 'online',
+            lastCrawl: '-',
+            lastPdfGen: '-',
+            totalPdfs: '-',
+            diskUsage: '-',
+          });
+        }
+      } finally {
+        if (!cancelled) setStatusLoading(false);
+      }
+    };
+    fetchStatus();
+    // 30초마다 갱신
+    const interval = setInterval(fetchStatus, 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
 
   const maxCount = Math.max(...firmRecords.map((f) => f.todayCount), 1);
 
@@ -164,49 +205,60 @@ function AdminConsole() {
       <div className="section-card">
         <div className="section-title">
           ⚙️ 시스템 운영 상태
+          {statusLoading && <span className="badge">갱신 중...</span>}
+          {statusError && <span className="badge" style={{ background: '#ff3b30' }}>오류</span>}
         </div>
-        <div className="status-grid">
-          <div className="status-item">
-            <span className="status-label">DB 연결</span>
-            <span className={`status-value ${statusColor(systemStatus.db)}`}>
-              <span className="status-dot online" /> Online
-            </span>
+        {systemStatus ? (
+          <div className="status-grid">
+            <div className="status-item">
+              <span className="status-label">DB 연결</span>
+              <span className={`status-value ${statusColor(systemStatus.db)}`}>
+                <span className={`status-dot ${statusColor(systemStatus.db)}`} /> {systemStatus.db === 'online' ? 'Online' : 'Offline'}
+              </span>
+            </div>
+            <div className="status-item">
+              <span className="status-label">API 서버</span>
+              <span className={`status-value ${statusColor(systemStatus.api)}`}>
+                <span className={`status-dot ${statusColor(systemStatus.api)}`} /> {systemStatus.api === 'online' ? 'Online' : 'Offline'}
+              </span>
+            </div>
+            <div className="status-item">
+              <span className="status-label">SFTP 수집</span>
+              <span className={`status-value ${statusColor(systemStatus.sftp)}`}>
+                <span className={`status-dot ${statusColor(systemStatus.sftp)}`} /> {systemStatus.sftp === 'online' ? 'Online' : 'Offline'}
+              </span>
+            </div>
+            <div className="status-item">
+              <span className="status-label">스케줄러</span>
+              <span className={`status-value ${statusColor(systemStatus.scheduler)}`}>
+                <span className={`status-dot ${statusColor(systemStatus.scheduler)}`} /> {systemStatus.scheduler === 'online' ? 'Online' : 'Offline'}
+              </span>
+            </div>
+            <div className="status-item">
+              <span className="status-label">마지막 수집</span>
+              <span className="status-value">{systemStatus.lastCrawl}</span>
+            </div>
+            <div className="status-item">
+              <span className="status-label">마지막 PDF 생성</span>
+              <span className="status-value">{systemStatus.lastPdfGen}</span>
+            </div>
+            <div className="status-item">
+              <span className="status-label">응답 시간</span>
+              <span className="status-value">{systemStatus.totalPdfs}</span>
+            </div>
+            <div className="status-item">
+              <span className="status-label">종합 상태</span>
+              <span className="status-value">{systemStatus.diskUsage}</span>
+            </div>
           </div>
-          <div className="status-item">
-            <span className="status-label">API 서버</span>
-            <span className={`status-value ${statusColor(systemStatus.api)}`}>
-              <span className="status-dot online" /> Online
-            </span>
+        ) : (
+          <div className="status-grid">
+            <div className="status-item">
+              <span className="status-label">상태 로딩 중...</span>
+              <span className="status-value">⏳</span>
+            </div>
           </div>
-          <div className="status-item">
-            <span className="status-label">SFTP 수집</span>
-            <span className={`status-value ${statusColor(systemStatus.sftp)}`}>
-              <span className="status-dot online" /> Online
-            </span>
-          </div>
-          <div className="status-item">
-            <span className="status-label">스케줄러</span>
-            <span className={`status-value ${statusColor(systemStatus.scheduler)}`}>
-              <span className="status-dot online" /> Online
-            </span>
-          </div>
-          <div className="status-item">
-            <span className="status-label">마지막 수집</span>
-            <span className="status-value">{systemStatus.lastCrawl}</span>
-          </div>
-          <div className="status-item">
-            <span className="status-label">마지막 PDF 생성</span>
-            <span className="status-value">{systemStatus.lastPdfGen}</span>
-          </div>
-          <div className="status-item">
-            <span className="status-label">총 PDF 파일</span>
-            <span className="status-value">{systemStatus.totalPdfs.toLocaleString()}</span>
-          </div>
-          <div className="status-item">
-            <span className="status-label">디스크 사용량</span>
-            <span className="status-value">{systemStatus.diskUsage}</span>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* ===== PDF Archive History (Bar Chart) ===== */}
