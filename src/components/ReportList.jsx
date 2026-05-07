@@ -8,6 +8,7 @@ import { useReport } from '../context/useReport';
 import { request } from '../utils/api';
 import { CONFIG } from '../constants/config';
 import { isDsReport, prefetchPdf } from '../utils/reportLinks';
+import { normalizeReportItem } from '../utils/reportNormalizer';
 import { buildShareMenuData } from '../utils/shareMenuData';
 import './ReportList.css';
 
@@ -35,6 +36,9 @@ function ReportList({ onWriterClick }) {
     }
   });
 
+  // 즐겨찾기 페이지 전용: 서버에서 tbl_sec_reports와 JOIN된 풀 리포트 데이터
+  const [favoriteReports, setFavoriteReports] = useState(null);
+
   // 로그인 시 로컬 즐겨찾기를 서버로 업로드 후 동기화
   useEffect(() => {
     if (!telegramUser) return;
@@ -45,15 +49,18 @@ function ReportList({ onWriterClick }) {
     const LOCAL_KEY = 'report_favorites';
     const SYNC_FLAG_KEY = 'report_favorites_synced';
 
-    // 이미 동기화한 적 있으면 서버 데이터만 가져옴
+    // 이미 동기화한 적 있으면 서버 데이터만 가져옴 (로컬과 병합)
     if (localStorage.getItem(SYNC_FLAG_KEY)) {
       request(`${baseUrl}/favorites`, { skipAuth: false })
         .then(data => {
           if (data?.items) {
             const serverFavs = {};
             data.items.forEach(f => { serverFavs[f.report_id] = true; });
-            setFavorites(serverFavs);
-            localStorage.setItem(LOCAL_KEY, JSON.stringify(serverFavs));
+            setFavorites(prev => {
+              const merged = { ...prev, ...serverFavs };
+              localStorage.setItem(LOCAL_KEY, JSON.stringify(merged));
+              return merged;
+            });
           }
         })
         .catch(() => {});
@@ -72,27 +79,33 @@ function ReportList({ onWriterClick }) {
           request(`${baseUrl}/favorites/${id}`, { method: 'POST', skipAuth: false })
         )
       ).then(() => {
-        // 업로드 완료 후 서버 데이터로 갱신
+        // 업로드 완료 후 서버 데이터로 갱신 (로컬과 병합)
         request(`${baseUrl}/favorites`, { skipAuth: false })
           .then(data => {
             if (data?.items) {
               const serverFavs = {};
               data.items.forEach(f => { serverFavs[f.report_id] = true; });
-              setFavorites(serverFavs);
-              localStorage.setItem(LOCAL_KEY, JSON.stringify(serverFavs));
+              setFavorites(prev => {
+                const merged = { ...prev, ...serverFavs };
+                localStorage.setItem(LOCAL_KEY, JSON.stringify(merged));
+                return merged;
+              });
             }
           })
           .catch(() => {});
       });
     } else {
-      // 업로드할 게 없어도 서버 데이터로 갱신
+      // 업로드할 게 없어도 서버 데이터로 갱신 (로컬과 병합)
       request(`${baseUrl}/favorites`, { skipAuth: false })
         .then(data => {
           if (data?.items) {
             const serverFavs = {};
             data.items.forEach(f => { serverFavs[f.report_id] = true; });
-            setFavorites(serverFavs);
-            localStorage.setItem(LOCAL_KEY, JSON.stringify(serverFavs));
+            setFavorites(prev => {
+              const merged = { ...prev, ...serverFavs };
+              localStorage.setItem(LOCAL_KEY, JSON.stringify(merged));
+              return merged;
+            });
           }
         })
         .catch(() => {});
@@ -101,6 +114,52 @@ function ReportList({ onWriterClick }) {
     // 동기화 완료 플래그 (재실행 방지)
     localStorage.setItem(SYNC_FLAG_KEY, '1');
   }, [telegramUser?.id]);
+
+  // 즐겨찾기 페이지 진입 시 서버에서 tbl_sec_reports와 JOIN된 풀 리포트 데이터 조회
+  useEffect(() => {
+    if (!location.pathname.includes('favorites')) return;
+    if (!telegramUser) return;
+    const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    if (!token) return;
+
+    const baseUrl = CONFIG.API.BASE_URL;
+    const LOCAL_KEY = 'report_favorites';
+
+    request(`${baseUrl}/favorites`, { skipAuth: false })
+      .then(data => {
+        if (!data?.items) return;
+
+        // (A) favorites 상태 업데이트 (report_id 기준)
+        const serverFavs = {};
+        data.items.forEach(item => { serverFavs[item.report_id] = true; });
+        setFavorites(prev => {
+          const merged = { ...prev, ...serverFavs };
+          localStorage.setItem(LOCAL_KEY, JSON.stringify(merged));
+          return merged;
+        });
+
+        // (B) 서버가 tbl_sec_reports와 JOIN한 풀 리포트 데이터 정규화
+        const normalizedItems = data.items
+          .map(item => normalizeReportItem(item))
+          .filter(Boolean);
+
+        if (normalizedItems.length === 0) {
+          setFavoriteReports({});
+          return;
+        }
+
+        // 날짜별 그룹핑 (useReportFetch의 mergeReports 로직과 동일하게)
+        const grouped = {};
+        normalizedItems.forEach(report => {
+          const { date } = report;
+          if (!grouped[date] || !Array.isArray(grouped[date])) grouped[date] = [];
+          const exists = grouped[date].some(r => r.id === report.id);
+          if (!exists) grouped[date].push(report);
+        });
+        setFavoriteReports(grouped);
+      })
+      .catch(() => {});
+  }, [location.pathname, telegramUser?.id]);
 
   const [summaryRequestedIds, setSummaryRequestedIds] = useState(new Set());
   const [summaryCompletedIds, setSummaryCompletedIds] = useState(new Set());
@@ -204,20 +263,27 @@ function ReportList({ onWriterClick }) {
     }
   };
 
-  const sortedDates = Object.keys(reports).sort((a, b) => b.localeCompare(a));
   const isSearchActive = !!(searchQuery.query || searchQuery.category === 'company');
   const isFavoritesPage = location.pathname.includes('favorites');
   const isAiSummary = location.pathname.includes('ai-summary');
   const isRecent = location.pathname === '/';
 
+  // 즐겨찾기 페이지: 서버 JOIN 데이터 우선, fallback으로 useReportFetch 데이터 사용
+  const displayReports = isFavoritesPage && favoriteReports ? favoriteReports : reports;
+  const sortedDates = Object.keys(displayReports).sort((a, b) => b.localeCompare(a));
+
   const hasSummaryContent = (report) => {
     return report.gemini_summary && report.gemini_summary.trim() !== "" && report.gemini_summary.trim() !== " ";
   };
 
-  // 필터링된 날짜 리스트 (즐겨찾기 / AI요약 페이지 대응)
-  const filteredSortedDates = isFavoritesPage 
+  // 필터링된 날짜 리스트
+  // 즐겨찾기 페이지(favoriteReports 사용 시): 서버에서 이미 tbl_sec_reports 기준으로 필터링됨
+  // AI요약 페이지: summary 존재하는 날짜만
+  const filteredSortedDates = isFavoritesPage && favoriteReports
+    ? sortedDates  // 서버에서 이미 유효한 데이터만 보내줌
+    : isFavoritesPage
     ? sortedDates.filter(date => {
-        const items = reports[date];
+        const items = displayReports[date];
         if (Array.isArray(items)) {
           return items.some(report => !!favorites[report.id]);
         }
@@ -227,7 +293,7 @@ function ReportList({ onWriterClick }) {
       })
     : isAiSummary
     ? sortedDates.filter(date => {
-        const items = reports[date];
+        const items = displayReports[date];
         if (Array.isArray(items)) {
           return items.some(hasSummaryContent);
         }
@@ -244,10 +310,10 @@ function ReportList({ onWriterClick }) {
       .slice(0, 2)
       .flatMap((date) => {
         if (dateToggles[date]) return [];
-        const items = reports[date];
+        const items = displayReports[date];
         const list = Array.isArray(items) ? items : Object.values(items).flat();
         return list.filter((report) => {
-          if (isFavoritesPage && !favorites[report.id]) return false;
+          if (isFavoritesPage && !favoriteReports && !favorites[report.id]) return false;
           if (isAiSummary && !hasSummaryContent(report)) return false;
           return true;
         });
@@ -276,9 +342,16 @@ function ReportList({ onWriterClick }) {
   return (
     <div className="report-list-wrapper">
       <div className="container" id="report-container">
-        {offset === 0 && isLoading ? (
+        {isFavoritesPage && !favoriteReports && offset === 0 && isLoading ? (
           <div className={`loading-overlay ${isSearchActive ? 'search-loading' : ''}`}>로딩 중...</div>
-        ) : isFavoritesPage && filteredSortedDates.length === 0 && !isLoading ? (
+        ) : isFavoritesPage && favoriteReports && Object.keys(favoriteReports).length === 0 && !isLoading ? (
+          <div className="empty-favorites">
+            <div className="empty-icon">★</div>
+            <p>즐겨찾기한 레포트가 없습니다.<br/>관심 있는 레포트에 별표를 눌러보세요!</p>
+          </div>
+        ) : !isFavoritesPage && offset === 0 && isLoading ? (
+          <div className={`loading-overlay ${isSearchActive ? 'search-loading' : ''}`}>로딩 중...</div>
+        ) : isFavoritesPage && !favoriteReports && filteredSortedDates.length === 0 && !isLoading ? (
           <div className="empty-favorites">
             <div className="empty-icon">★</div>
             <p>즐겨찾기한 레포트가 없습니다.<br/>관심 있는 레포트에 별표를 눌러보세요!</p>
@@ -299,7 +372,7 @@ function ReportList({ onWriterClick }) {
               <ReportGroup 
                 key={date}
                 date={date}
-                items={reports[date]}
+                items={displayReports[date]}
                 isCollapsed={!!dateToggles[date]}
                 onToggleDate={toggleDate}
                 sortBy={sortBy}
@@ -325,6 +398,7 @@ function ReportList({ onWriterClick }) {
           </InfiniteScroll>
         )}
         {isLoading && hasMore && <div className="loading-overlay">로딩 중...</div>}
+        {isFavoritesPage && !favoriteReports && !isLoading && <div className="loading-overlay">즐겨찾기 불러오는 중...</div>}
       </div>
 
       <ShareMenu 
