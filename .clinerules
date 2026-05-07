@@ -105,6 +105,7 @@ src/
 - DO NOT refactor existing working code unless the user says "refactor" or "fix".
 - DO NOT add new features without explicit user request.
 - DO NOT create backup files, migration scripts, or cleanup scripts.
+- DO NOT read, modify, or reference any files under `~/secrets/`. This directory contains credentials and API keys. Treat it as out of bounds.
 
 ## 10. Working with the project
 

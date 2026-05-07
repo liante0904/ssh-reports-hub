@@ -11,3 +11,5 @@ deno.lock
 .venv/
 .env
 .env.*
+secrets/
+~/secrets/
