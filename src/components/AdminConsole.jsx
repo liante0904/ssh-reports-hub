@@ -112,6 +112,15 @@ function AdminConsole() {
   const [statusError, setStatusError] = useState(null);
   const [processing, setProcessing] = useState({});
   const [logLines, setLogLines] = useState([]);
+  const [refreshIntervalMs, setRefreshIntervalMs] = useState(60000);
+  const [manualRefreshKey, setManualRefreshKey] = useState(0);
+
+  const REFRESH_OPTIONS = [
+    { label: '30초', value: 30000 },
+    { label: '1분', value: 60000 },
+    { label: '3분', value: 180000 },
+    { label: '5분', value: 300000 },
+  ];
 
   // FastAPI `/admin/metrics` 조회
   useEffect(() => {
@@ -202,9 +211,9 @@ function AdminConsole() {
       }
     };
     fetchMetrics();
-    const interval = setInterval(fetchMetrics, 60000);
+    const interval = setInterval(fetchMetrics, refreshIntervalMs);
     return () => { cancelled = true; clearInterval(interval); };
-  }, []);
+  }, [refreshIntervalMs, manualRefreshKey]);
 
   const maxCount = Math.max(...firmRecords.map((f) => f.todayCount), 1);
 
@@ -353,6 +362,30 @@ function AdminConsole() {
         {telegramUser.first_name || telegramUser.username} 님, 환영합니다 ·{' '}
         {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}
       </p>
+
+      {/* ===== Refresh Controls ===== */}
+      <div className="refresh-bar">
+        <button
+          className="refresh-btn"
+          onClick={() => setManualRefreshKey(k => k + 1)}
+          disabled={statusLoading}
+          title="수동 갱신"
+        >
+          ↻ {statusLoading ? '갱신 중...' : '새로고침'}
+        </button>
+        <span className="refresh-label">자동 갱신:</span>
+        <div className="refresh-interval-group">
+          {REFRESH_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              className={`refresh-interval-btn ${refreshIntervalMs === opt.value ? 'active' : ''}`}
+              onClick={() => setRefreshIntervalMs(opt.value)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* ===== Summary Cards ===== */}
       <div className="summary-row">
