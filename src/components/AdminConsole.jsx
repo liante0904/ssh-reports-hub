@@ -5,42 +5,6 @@ import { FIRM_NAMES } from '../constants/firms';
 import { CONFIG } from '../constants/config';
 import './AdminConsole.css';
 
-/* ===== Mock Data Generators (나머지 섹션용) ===== */
-
-function generateMockFirmRecords() {
-  return FIRM_NAMES.map((name) => ({
-    name,
-    todayCount: Math.floor(Math.random() * 40) + 1,
-  })).sort((a, b) => b.todayCount - a.todayCount);
-}
-
-function generateMockArchiveHistory() {
-  const days = [];
-  const today = new Date();
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    const label = `${d.getMonth() + 1}/${d.getDate()}`;
-    days.push({
-      label,
-      count: Math.floor(Math.random() * 150) + 30,
-    });
-  }
-  return days;
-}
-
-function generateMockSummary(archiveHistory) {
-  const totalArchived = archiveHistory.reduce((sum, d) => sum + d.count, 0);
-  const todayCount = archiveHistory[archiveHistory.length - 1]?.count || 0;
-  return {
-    totalArchived,
-    todayCount,
-    activeFirms: Math.floor(Math.random() * 3) + 26, // 26~28
-    totalFirms: FIRM_NAMES.length,
-    pendingReprocess: Math.floor(Math.random() * 5),
-  };
-}
-
 /* ===== Reprocess Log ===== */
 const REPROCESS_TASKS = [
   { id: 'today', label: '오늘건 재처리' },
@@ -136,16 +100,20 @@ function AdminConsole() {
     }
   }, [telegramUser, navigate]);
 
-  const [firmRecords] = useState(generateMockFirmRecords);
-  const [archiveHistory] = useState(generateMockArchiveHistory);
-  const [summary] = useState(() => generateMockSummary(archiveHistory));
+  const [firmRecords, setFirmRecords] = useState([]);
+  const [archiveHistory, setArchiveHistory] = useState([]);
+  const [summary, setSummary] = useState({
+    totalArchived: 0, todayCount: 0,
+    activeFirms: 0, totalFirms: FIRM_NAMES.length,
+    pendingReprocess: 0,
+  });
   const [systemStatus, setSystemStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(true);
   const [statusError, setStatusError] = useState(null);
   const [processing, setProcessing] = useState({});
   const [logLines, setLogLines] = useState([]);
 
-  // FastAPI `/admin/metrics` 리얼데이터 조회 (서버 배포 완료)
+  // FastAPI `/admin/metrics` 조회
   useEffect(() => {
     let cancelled = false;
     const fetchMetrics = async () => {
@@ -191,6 +159,31 @@ function AdminConsole() {
           totalReports: data.reports?.total?.toLocaleString() ?? '-',
           todayReports: data.reports?.today_inserts ?? 0,
           uptimeDays: data.system?.uptime_days ?? 0,
+        });
+
+        // 증권사별 실적
+        const byFirm = (data.reports?.by_firm_today || []).map(f => ({
+          name: f.firm,
+          todayCount: f.count,
+        }));
+        setFirmRecords(byFirm);
+
+        // 아카이브 히스토리
+        const hist = (data.reports?.archive_history || []).map(h => ({
+          label: h.label,
+          count: h.count,
+        }));
+        setArchiveHistory(hist);
+
+        // 요약
+        const totalArchived = hist.reduce((sum, d) => sum + d.count, 0);
+        const todayCount = hist.length > 0 ? hist[hist.length - 1].count : 0;
+        setSummary({
+          totalArchived,
+          todayCount,
+          activeFirms: data.reports?.active_firms_today ?? 0,
+          totalFirms: FIRM_NAMES.length,
+          pendingReprocess: 0,
         });
       } catch (err) {
         if (!cancelled) {
