@@ -49,6 +49,70 @@ const REPROCESS_TASKS = [
   { id: 'pdf-regen', label: 'PDF 재생성' },
 ];
 
+/* ===== Log Content Colorizer ===== */
+
+const LOG_LEVEL_COLORS = {
+  ERROR: '#ff3b30',
+  WARNING: '#ff9500',
+  INFO: '#34c759',
+  SUCCESS: '#30d158',
+  DEBUG: '#007aff',
+};
+
+/** URL 정규식 */
+const URL_RE = /https?:\/\/[^\s'")>]+/g;
+
+function LogContent({ text }) {
+  const lines = text.split('\n');
+  return (
+    <pre className="log-viewer-pre">
+      {lines.map((line, i) => {
+        // 로그 레벨 추출: "2026-05-08 00:02:31 | DEBUG    | ..."
+        const levelMatch = line.match(/^\S+\s+\S+\s+\|\s+(\w+)\s+\|/);
+        const level = levelMatch ? levelMatch[1] : null;
+        const levelColor = LOG_LEVEL_COLORS[level] || null;
+
+        // URL 하이라이팅 (파란색 밑줄)
+        const parts = [];
+        let lastIdx = 0;
+        let urlMatch;
+        // eslint-disable-next-line no-cond-assign
+        while ((urlMatch = URL_RE.exec(line)) !== null) {
+          if (urlMatch.index > lastIdx) {
+            parts.push(line.slice(lastIdx, urlMatch.index));
+          }
+          parts.push(
+            <a key={`u${i}_${urlMatch.index}`}
+               href={urlMatch[0]}
+               target="_blank"
+               rel="noopener noreferrer"
+               className="log-url">
+              {urlMatch[0]}
+            </a>
+          );
+          lastIdx = urlMatch.index + urlMatch[0].length;
+        }
+        if (lastIdx < line.length) {
+          parts.push(line.slice(lastIdx));
+        }
+
+        // 파싱된 부분이 없으면 전체 줄
+        const content = parts.length > 0 ? parts : line;
+
+        return (
+          <div key={i} className="log-line">
+            {levelColor ? (
+              <span style={{ color: levelColor }}>{content}</span>
+            ) : (
+              content
+            )}
+          </div>
+        );
+      })}
+    </pre>
+  );
+}
+
 /* ===== Main Component ===== */
 
 function AdminConsole() {
@@ -547,9 +611,11 @@ function AdminConsole() {
           {logViewer.loading ? (
             <div className="log-browser-loading">⏳ 로그 내용 로딩 중...</div>
           ) : (
-            <pre className="log-viewer-content" ref={logViewerRef}>
-              {logViewer.content || '(빈 파일)'}
-            </pre>
+            <div className="log-viewer-content" ref={logViewerRef}>
+              {logViewer.content
+                ? <LogContent text={logViewer.content} />
+                : '(빈 파일)'}
+            </div>
           )}
         </div>
       )}

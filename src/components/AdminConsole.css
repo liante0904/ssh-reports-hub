@@ -475,15 +475,33 @@ html[data-theme='dark'] .status-item {
   color: var(--text-color);
   border: 1px solid var(--secondary-background-color);
   border-radius: 8px;
-  padding: 12px;
+  padding: 0;
+  max-height: 500px;
+  overflow: auto;
+  margin: 0;
+}
+
+.log-viewer-pre {
   font-family: 'Courier New', monospace;
   font-size: 0.75em;
   line-height: 1.5;
-  max-height: 500px;
-  overflow: auto;
   white-space: pre-wrap;
   word-break: break-all;
   margin: 0;
+  padding: 12px;
+}
+
+.log-viewer-pre .log-line {
+  padding: 1px 0;
+}
+
+.log-url {
+  color: #007aff;
+  text-decoration: underline;
+}
+
+.log-url:hover {
+  opacity: 0.7;
 }
 
 /* 모바일 대응 */
