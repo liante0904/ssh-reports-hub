@@ -179,7 +179,10 @@ function AdminConsole() {
   /* ===== Log Browser (서버 로그 파일 탐색/보기) ===== */
   const API_BASE = CONFIG.API.BASE_URL;
   const authToken = localStorage.getItem('auth_token');
-  const authHeaders = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+  const authHeaders = React.useMemo(
+    () => (authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    [authToken]
+  );
 
   const [logBrowser, setLogBrowser] = useState({
     entries: [],
