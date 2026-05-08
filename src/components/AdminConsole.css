@@ -257,8 +257,9 @@
 .reprocess-log {
   margin-top: 12px;
   padding: 10px;
-  background: #1a1a1a;
-  color: #0f0;
+  background: var(--card-background-color);
+  color: var(--text-color);
+  border: 1px solid var(--secondary-background-color);
   border-radius: 8px;
   font-size: 0.75em;
   font-family: 'Courier New', monospace;
@@ -308,10 +309,6 @@
 }
 
 /* 다크모드 대응 */
-html[data-theme='dark'] .reprocess-log {
-  background: #0a0a0a;
-}
-
 html[data-theme='dark'] .status-item {
   background: var(--secondary-background-color);
 }
@@ -474,8 +471,9 @@ html[data-theme='dark'] .status-item {
 }
 
 .log-viewer-content {
-  background: #1a1a1a;
-  color: #0f0;
+  background: var(--card-background-color);
+  color: var(--text-color);
+  border: 1px solid var(--secondary-background-color);
   border-radius: 8px;
   padding: 12px;
   font-family: 'Courier New', monospace;
@@ -486,10 +484,6 @@ html[data-theme='dark'] .status-item {
   white-space: pre-wrap;
   word-break: break-all;
   margin: 0;
-}
-
-html[data-theme='dark'] .log-viewer-content {
-  background: #0a0a0a;
 }
 
 /* 모바일 대응 */
