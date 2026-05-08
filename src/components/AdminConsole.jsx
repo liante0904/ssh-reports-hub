@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReport } from '../context/useReport';
 import { FIRM_NAMES } from '../constants/firms';
+import { CONFIG } from '../constants/config';
 import './AdminConsole.css';
 
 /* ===== Mock Data Generators (나머지 섹션용) ===== */
@@ -174,6 +175,96 @@ function AdminConsole() {
   const clearLog = useCallback(() => {
     setLogLines([]);
   }, []);
+
+  /* ===== Log Browser (서버 로그 파일 탐색/보기) ===== */
+  const API_BASE = CONFIG.API.BASE_URL;
+  const authToken = localStorage.getItem('auth_token');
+  const authHeaders = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+
+  const [logBrowser, setLogBrowser] = useState({
+    entries: [],
+    currentPath: null,
+    loading: false,
+    error: null,
+  });
+  const [logViewer, setLogViewer] = useState({
+    file: null,
+    content: '',
+    loading: false,
+    error: null,
+  });
+  const logViewerRef = useRef(null);
+
+  const fetchLogDir = useCallback(async (path) => {
+    setLogBrowser((prev) => ({ ...prev, loading: true, error: null }));
+    try {
+      const params = path ? `?path=${encodeURIComponent(path)}` : '';
+      const res = await fetch(`${API_BASE}/admin/logs${params}`, {
+        headers: authHeaders,
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setLogBrowser({
+        entries: data.entries || [],
+        currentPath: data.current_path || null,
+        loading: false,
+        error: null,
+      });
+    } catch (err) {
+      setLogBrowser((prev) => ({ ...prev, loading: false, error: err.message }));
+    }
+  }, [API_BASE, authHeaders]);
+
+  const fetchLogFile = useCallback(async (filePath, opts = {}) => {
+    const { tail = false, lines = 500 } = opts;
+    setLogViewer({ file: filePath, content: '', loading: true, error: null });
+    try {
+      const params = new URLSearchParams({
+        file: filePath,
+        lines: String(lines),
+        tail: String(tail),
+      });
+      const res = await fetch(`${API_BASE}/admin/logs/view?${params}`, {
+        headers: authHeaders,
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.detail || `HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      setLogViewer({
+        file: filePath,
+        content: data.content || '',
+        loading: false,
+        error: null,
+      });
+      // 자동 스크롤 (tail 모드에서 bottom)
+      setTimeout(() => {
+        if (logViewerRef.current) {
+          logViewerRef.current.scrollTop = logViewerRef.current.scrollHeight;
+        }
+      }, 50);
+    } catch (err) {
+      setLogViewer((prev) => ({ ...prev, loading: false, error: err.message }));
+    }
+  }, [API_BASE, authHeaders]);
+
+  const openLogDir = useCallback((path) => {
+    setLogViewer({ file: null, content: '', loading: false, error: null });
+    fetchLogDir(path);
+  }, [fetchLogDir]);
+
+  const goLogRoot = useCallback(() => {
+    setLogViewer({ file: null, content: '', loading: false, error: null });
+    fetchLogDir(null);
+  }, [fetchLogDir]);
+
+  // 최초 마운트 시 로그 디렉토리 로드
+  useEffect(() => {
+    if (telegramUser?.is_admin) {
+      fetchLogDir(null);
+    }
+  }, [telegramUser?.is_admin, fetchLogDir]);
 
   if (!telegramUser?.is_admin) {
     return null;
@@ -356,6 +447,109 @@ function AdminConsole() {
           </div>
         )}
       </div>
+
+      {/* ===== Log Browser (서버 로그 파일 탐색/보기) ===== */}
+      <div className="section-card log-browser-section">
+        <div className="section-title">
+          📂 서버 로그 파일
+          {logBrowser.currentPath && (
+            <span className="badge" style={{ cursor: 'pointer' }} onClick={goLogRoot}>
+              ← 루트
+            </span>
+          )}
+          <button
+            className="refresh-btn"
+            onClick={() => fetchLogDir(logBrowser.currentPath)}
+            disabled={logBrowser.loading}
+            title="새로고침"
+          >
+            ↻
+          </button>
+        </div>
+
+        {/* 에러 */}
+        {logBrowser.error && (
+          <div className="log-browser-error">
+            로그 목록 로딩 실패: {logBrowser.error}
+          </div>
+        )}
+
+        {/* 파일 목록 */}
+        {logBrowser.loading ? (
+          <div className="log-browser-loading">⏳ 로그 목록 로딩 중...</div>
+        ) : logBrowser.entries.length === 0 && !logBrowser.error ? (
+          <div className="log-browser-empty">로그 디렉토리가 없습니다.</div>
+        ) : (
+          <div className="log-browser-list">
+            {logBrowser.entries.map((entry, i) => (
+              <div
+                key={i}
+                className={`log-entry ${entry.type === 'directory' ? 'log-entry-dir' : ''} ${entry.archived ? 'log-entry-archived' : ''}`}
+                onClick={() => {
+                  if (entry.type === 'directory') {
+                    openLogDir(entry.full_path);
+                  } else if (!entry.archived) {
+                    fetchLogFile(entry.full_path, { tail: true });
+                  }
+                }}
+              >
+                <span className="log-entry-icon">
+                  {entry.type === 'directory' ? '📁' : entry.archived ? '📦' : '📄'}
+                </span>
+                <span className="log-entry-name">{entry.name}</span>
+                <span className="log-entry-meta">
+                  {entry.description && (
+                    <span className="log-entry-desc">{entry.description}</span>
+                  )}
+                  {entry.size && <span className="log-entry-size">{entry.size}</span>}
+                  {entry.modified && <span className="log-entry-modified">{entry.modified}</span>}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ===== Log Viewer (파일 내용 보기) ===== */}
+      {logViewer.file && (
+        <div className="section-card log-viewer-section">
+          <div className="section-title">
+            <span className="log-viewer-title" onClick={goLogRoot} style={{ cursor: 'pointer' }}>
+              📄 {logViewer.file.split('/').pop()}
+            </span>
+            <span className="badge">tail 500</span>
+            <button
+              className="refresh-btn"
+              onClick={() => fetchLogFile(logViewer.file, { tail: true })}
+              disabled={logViewer.loading}
+              title="새로고침"
+            >
+              ↻
+            </button>
+            <button
+              className="close-btn"
+              onClick={() => setLogViewer({ file: null, content: '', loading: false, error: null })}
+              title="닫기"
+            >
+              ✕
+            </button>
+          </div>
+
+          {logViewer.error && (
+            <div className="log-browser-error">
+              로그 읽기 실패: {logViewer.error}
+            </div>
+          )}
+
+          {logViewer.loading ? (
+            <div className="log-browser-loading">⏳ 로그 내용 로딩 중...</div>
+          ) : (
+            <pre className="log-viewer-content" ref={logViewerRef}>
+              {logViewer.content || '(빈 파일)'}
+            </pre>
+          )}
+        </div>
+      )}
     </div>
   );
 }
