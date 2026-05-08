@@ -62,50 +62,60 @@ const LOG_LEVEL_COLORS = {
 /** URL 정규식 */
 const URL_RE = /https?:\/\/[^\s'")>]+/g;
 
+/**
+ * 텍스트 조각 안에 URL이 있으면 <a>로 감싼 배열로 쪼갠다.
+ */
+function linkify(text, lineIdx, offset) {
+  const pieces = [];
+  let last = 0;
+  let m;
+  // eslint-disable-next-line no-cond-assign
+  while ((m = URL_RE.exec(text)) !== null) {
+    if (m.index > last) pieces.push(text.slice(last, m.index));
+    pieces.push(
+      <a key={`u${lineIdx}_${offset + m.index}`}
+         href={m[0]}
+         target="_blank"
+         rel="noopener noreferrer"
+         className="log-url">
+        {m[0]}
+      </a>
+    );
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) pieces.push(text.slice(last));
+  return pieces.length > 0 ? pieces : text;
+}
+
 function LogContent({ text }) {
   const lines = text.split('\n');
+  // 정규식: "2026-05-08 00:02:31 | DEBUG    | ..."
+  // 캡처: (앞부분) (LEVEL) (뒷부분)
+  const LEVEL_RE = /^(\S+\s+\S+\s+\|\s+)(\w+)(\s+\|.*)$/;
+
   return (
     <pre className="log-viewer-pre">
       {lines.map((line, i) => {
-        // 로그 레벨 추출: "2026-05-08 00:02:31 | DEBUG    | ..."
-        const levelMatch = line.match(/^\S+\s+\S+\s+\|\s+(\w+)\s+\|/);
-        const level = levelMatch ? levelMatch[1] : null;
-        const levelColor = LOG_LEVEL_COLORS[level] || null;
-
-        // URL 하이라이팅 (파란색 밑줄)
-        const parts = [];
-        let lastIdx = 0;
-        let urlMatch;
-        // eslint-disable-next-line no-cond-assign
-        while ((urlMatch = URL_RE.exec(line)) !== null) {
-          if (urlMatch.index > lastIdx) {
-            parts.push(line.slice(lastIdx, urlMatch.index));
-          }
-          parts.push(
-            <a key={`u${i}_${urlMatch.index}`}
-               href={urlMatch[0]}
-               target="_blank"
-               rel="noopener noreferrer"
-               className="log-url">
-              {urlMatch[0]}
-            </a>
+        const m = line.match(LEVEL_RE);
+        if (m) {
+          const level = m[2];
+          const color = LOG_LEVEL_COLORS[level];
+          return (
+            <div key={i} className="log-line">
+              {linkify(m[1], i, 0)}
+              {color ? (
+                <span style={{ color, fontWeight: 600 }}>{level}</span>
+              ) : (
+                level
+              )}
+              {linkify(m[3], i, m[1].length + level.length)}
+            </div>
           );
-          lastIdx = urlMatch.index + urlMatch[0].length;
         }
-        if (lastIdx < line.length) {
-          parts.push(line.slice(lastIdx));
-        }
-
-        // 파싱된 부분이 없으면 전체 줄
-        const content = parts.length > 0 ? parts : line;
-
+        // 레벨 패턴 없으면 일반 줄 (URL만 링크)
         return (
           <div key={i} className="log-line">
-            {levelColor ? (
-              <span style={{ color: levelColor }}>{content}</span>
-            ) : (
-              content
-            )}
+            {linkify(line, i, 0)}
           </div>
         );
       })}
