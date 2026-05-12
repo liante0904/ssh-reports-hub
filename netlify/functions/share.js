@@ -76,7 +76,27 @@ export const handler = async (event) => {
     const apiUrl = buildReportSearchUrl(id);
     
     const response = await fetchWithTimeout(apiUrl);
-    const data = await response.json();
+    const responseText = await response.text();
+    if (!response.ok) {
+      console.error('[Share] Report API Error:', response.status, responseText.slice(0, 300));
+      return {
+        statusCode: 502,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
+        body: 'Report API request failed',
+      };
+    }
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (jsonError) {
+      console.error('[Share] Report API JSON parse error:', jsonError, responseText.slice(0, 300));
+      return {
+        statusCode: 502,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
+        body: 'Report API returned non-JSON response',
+      };
+    }
     const report = data.items?.[0];
 
     if (!report) return { statusCode: 404, body: 'Report not found' };
