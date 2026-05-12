@@ -1,23 +1,18 @@
-function buildReportRoute(pathname, baseUrl, tableName) {
-  const normalizedBaseUrl = baseUrl.replace(/\/$/, '');
-  const normalizedTableName = tableName.replace(/^\//, '').replace(/\/$/, '');
-  let apiUrl = `${normalizedBaseUrl}/${normalizedTableName}`;
+function buildReportRoute(pathname, baseUrl) {
+  const apiUrl = baseUrl.replace(/\/$/, '');
   const params = new URLSearchParams();
 
   if (pathname.includes('global')) {
-    apiUrl += '/search/';
     params.append('mkt_tp', 'global');
-  } else if (pathname.includes('industry')) {
-    apiUrl += '/industry';
-  } else {
-    apiUrl += '/search/';
   }
+  // industry, search 등 모두 동일한 /search 엔드포인트 사용
+  // (external_api.py의 /search가 통합 검색)
 
-  return { apiUrl, params };
+  return { apiUrl: `${apiUrl}/search`, params };
 }
 
-export function buildReportFetchUrl({ pathname, offset, sortBy, searchQuery, baseUrl, tableName }) {
-  const { apiUrl, params } = buildReportRoute(pathname, baseUrl, tableName);
+export function buildReportFetchUrl({ pathname, offset, sortBy, searchQuery, baseUrl }) {
+  const { apiUrl, params } = buildReportRoute(pathname, baseUrl);
 
   params.append('offset', offset);
 

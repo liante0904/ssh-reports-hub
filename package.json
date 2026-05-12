@@ -11,8 +11,11 @@
     "build": "npm run setup-pdfjs && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node test/admin-status.test.js",
-    "test:all": "echo 'No automated test suite yet. Use: node test/admin-status.test.js'"
+    "test": "node test/run-all.js",
+    "test:unit": "node test/unit/utils.test.js",
+    "test:integration": "node test/integration/api.test.js",
+    "test:e2e": "node test/admin-status.test.js",
+    "test:all": "node test/run-all.js"
   },
   "dependencies": {
     "react": "^19.0.0",

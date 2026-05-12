@@ -20,7 +20,6 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
     sortBy,
     searchQuery,
     baseUrl: CONFIG.API.REPORT_API_URL,
-    tableName: CONFIG.API.TABLE_NAME,
   }), [offset, searchQuery, pathname, sortBy]);
 
   const mergeReports = useCallback((prev, newItems) => {
