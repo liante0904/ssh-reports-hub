@@ -32,17 +32,6 @@ function assertEqual(actual, expected, label) {
   }
 }
 
-function assertThrows(fn, label) {
-  try {
-    fn();
-    console.log(`  ❌ FAIL: ${label} (should have thrown)`);
-    failed++;
-  } catch (e) {
-    console.log(`  ✅ PASS: ${label}`);
-    passed++;
-  }
-}
-
 // ─── Test 1: formatDate (src/utils/date.js) ───
 console.log('\n─── [Test 1] formatDate (date.js) ───');
 

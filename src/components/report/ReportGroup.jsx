@@ -1,5 +1,28 @@
 import React from 'react';
 import ReportItem from './ReportItem';
+import { getFirmOrderByName } from '../../constants/firms';
+
+function getReportsArray(items) {
+  return Array.isArray(items) ? items : Object.values(items || {}).flat();
+}
+
+function getCompanyGroups(items) {
+  const grouped = new Map();
+
+  getReportsArray(items).forEach((report) => {
+    const firm = report.firm || 'Unknown';
+    if (!grouped.has(firm)) grouped.set(firm, []);
+    grouped.get(firm).push(report);
+  });
+
+  return Array.from(grouped.entries()).sort(([firmA], [firmB]) => {
+    const orderA = getFirmOrderByName(firmA);
+    const orderB = getFirmOrderByName(firmB);
+    const normalizedA = orderA === null ? Number.MAX_SAFE_INTEGER : orderA;
+    const normalizedB = orderB === null ? Number.MAX_SAFE_INTEGER : orderB;
+    return normalizedA - normalizedB || firmA.localeCompare(firmB, 'ko');
+  });
+}
 
 function ReportGroup({ 
   date, 
@@ -25,7 +48,9 @@ function ReportGroup({
   isAiSummary,
   hasSummaryContent
 }) {
-  const isTimeSort = sortBy === 'time' || isFavoritesPage || Array.isArray(items);
+  const isTimeSort = sortBy === 'time' || isFavoritesPage;
+  const reportsArray = getReportsArray(items);
+  const companyGroups = getCompanyGroups(items);
 
   return (
     <div className="date-group">
@@ -58,7 +83,7 @@ function ReportGroup({
         {isTimeSort ? (
           /* 평탄화 리스트 (시간순, 즐겨찾기, 또는 데이터가 아직 배열인 경우) */
           <div className="report-wrapper">
-            {(Array.isArray(items) ? items : Object.values(items).flat())
+            {reportsArray
               .filter(r => !isFavoritesPage || favorites[r.id])
               .filter(r => !isAiSummary || hasSummaryContent(r))
               .map(report => (
@@ -82,7 +107,7 @@ function ReportGroup({
           </div>
         ) : (
           /* 증권사별 그룹화 리스트 (회사별 모드 + 데이터가 객체인 경우) */
-          Object.entries(items).map(([firm, firmReports]) => (
+          companyGroups.map(([firm, firmReports]) => (
             <div className="company-group" key={firm}>
               <div 
                 className={`company-title ${!firmToggles[date]?.[firm] ? 'expanded' : ''}`} 

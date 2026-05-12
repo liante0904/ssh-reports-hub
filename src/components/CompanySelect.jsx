@@ -14,11 +14,15 @@ const firm_colors = {
 
 function CompanySelect({ value, onChange, className = '' }) {
   const { isOpen, searchTerm, setSearchTerm, toggleOverlay, closeOverlay } = useGridOverlay();
+  const selectedValue = value === null || value === undefined ? '' : value.toString();
 
   const selectedName = hasGridSelection(value) ? (getFirmNameByOrder(value) || "증권사 필터") : "증권사 필터";
 
   const handleSelect = (idx) => {
-    onChange({ target: { value: idx.toString() } });
+    const nextValue = idx === null || idx === undefined ? '' : idx.toString();
+    if (nextValue !== selectedValue) {
+      onChange({ target: { value: nextValue } });
+    }
     closeOverlay();
   };
 
@@ -49,7 +53,7 @@ function CompanySelect({ value, onChange, className = '' }) {
       <div className="grid-overlay-content">
         <div className="firm-checkerboard">
           <div
-            className={`checker-item all ${value === "" ? 'active' : ''}`}
+            className={`checker-item all ${selectedValue === "" ? 'active' : ''}`}
             onClick={() => handleSelect("")}
           >
             <div className="checker-icon">ALL</div>
@@ -63,7 +67,7 @@ function CompanySelect({ value, onChange, className = '' }) {
             return (
               <div
                 key={order}
-                className={`checker-item ${value.toString() === order.toString() ? 'active' : ''}`}
+                className={`checker-item ${selectedValue === order.toString() ? 'active' : ''}`}
                 onClick={() => handleSelect(order)}
               >
                 <div className="checker-icon" style={{ backgroundColor: themeColor + '15', color: themeColor }}>

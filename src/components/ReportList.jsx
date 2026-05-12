@@ -70,7 +70,11 @@ function ReportList({ onWriterClick }) {
     // 로컬에 저장된 즐겨찾기를 서버로 업로드
     const localSaved = localStorage.getItem(LOCAL_KEY);
     let localFavs = {};
-    try { localFavs = localSaved ? JSON.parse(localSaved) : {}; } catch {}
+    try {
+      localFavs = localSaved ? JSON.parse(localSaved) : {};
+    } catch {
+      localFavs = {};
+    }
 
     const reportIds = Object.keys(localFavs).filter(id => localFavs[id]).map(Number);
     if (reportIds.length > 0) {

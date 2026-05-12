@@ -1,4 +1,11 @@
 const FETCH_TIMEOUT_MS = 8000;
+const DEFAULT_API_BASE_URL = 'https://ssh-oci.duckdns.org';
+const DEFAULT_API_PATH = '/external/api';
+const KNOWN_REPORT_API_PATHS = [
+  '/external/api',
+  '/pub/api',
+  '/ords/admin/data_main_daily_send',
+];
 
 async function fetchWithTimeout(url, options = {}, ms = FETCH_TIMEOUT_MS) {
   const controller = new AbortController();
@@ -17,6 +24,38 @@ function isDsReport(report, pdfUrl = '') {
   return String(firmOrder) === '11' || String(firmId) === '11' || firm.includes('DS') || firm.includes('디에스') || /(^|\.)ds-sec\.co\.kr/i.test(pdfUrl);
 }
 
+function trimSlashes(value = '') {
+  return String(value).replace(/^\/+/, '').replace(/\/+$/, '');
+}
+
+function hasKnownReportApiPath(url) {
+  try {
+    const pathname = new URL(url).pathname.replace(/\/$/, '');
+    return KNOWN_REPORT_API_PATHS.some(path => pathname.endsWith(path));
+  } catch {
+    return false;
+  }
+}
+
+export function buildReportSearchUrl(reportId, env = process.env) {
+  const explicitReportApiUrl = env.VITE_REPORT_API_URL;
+  const apiBaseUrl = (explicitReportApiUrl || env.VITE_API_URL || DEFAULT_API_BASE_URL).replace(/\/$/, '');
+  const apiPath = env.VITE_API_PATH || DEFAULT_API_PATH;
+  const tableName = trimSlashes(env.VITE_TABLE_NAME || 'api');
+
+  let reportApiUrl = apiBaseUrl;
+
+  if (!hasKnownReportApiPath(reportApiUrl)) {
+    if (explicitReportApiUrl || /\/pub$/i.test(reportApiUrl)) {
+      reportApiUrl = `${reportApiUrl}/${tableName}`;
+    } else {
+      reportApiUrl = `${reportApiUrl}/${trimSlashes(apiPath)}`;
+    }
+  }
+
+  return `${reportApiUrl.replace(/\/$/, '')}/search/?report_id=${encodeURIComponent(reportId)}`;
+}
+
 export const handler = async (event) => {
   const { id, warmup } = event.queryStringParameters || {};
 
@@ -25,11 +64,6 @@ export const handler = async (event) => {
     return { statusCode: 200, body: 'Warmed up' };
   }
 
-  const REPORT_API_URL =
-    process.env.VITE_REPORT_API_URL ||
-    process.env.VITE_API_URL ||
-    'https://ssh-oci.duckdns.org/pub';
-  const TABLE_NAME = process.env.VITE_TABLE_NAME || 'api';
   const SITE_URL = 'https://ssh-oci.netlify.app';
   const requestHost = event.headers?.host || 'ssh-oci.netlify.app';
   const requestOrigin = event.headers?.origin || `https://${requestHost}`;
@@ -39,9 +73,7 @@ export const handler = async (event) => {
   if (!id) return { statusCode: 400, body: 'ID missing' };
 
   try {
-    const baseUrl = REPORT_API_URL.replace(/\/$/, '');
-    const tableName = TABLE_NAME.replace(/^\//, '').replace(/\/$/, '');
-    const apiUrl = `${baseUrl}/${tableName}/search/?report_id=${id}`;
+    const apiUrl = buildReportSearchUrl(id);
     
     const response = await fetchWithTimeout(apiUrl);
     const data = await response.json();

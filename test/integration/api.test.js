@@ -93,15 +93,12 @@ async function runTests() {
   // ────────────────────────────────────────────
   console.log('\n─── [Section 2] Public API ───');
 
-  let searchWorking = false;
-
   const searchRes = await assertHttp200(
     `${BASE_URL}/external/api/search/?sort_by=time&limit=3`,
     'GET /external/api/search/ (최신 3건)'
   );
 
   if (searchRes) {
-    searchWorking = true;
     try {
       const data = await searchRes.json();
       assert(Array.isArray(data.items), 'search 응답: items는 배열', `length=${data.items?.length || 0}`);
@@ -119,7 +116,6 @@ async function runTests() {
     } catch (e) {
       console.log(`  ❌ FAIL: search 응답 파싱 실패 (${e.message})`);
       failed++;
-      searchWorking = false;
     }
   }
 
