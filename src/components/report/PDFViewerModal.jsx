@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { getProxyPdfUrl, isDsReport } from '../../utils/reportLinks';
+import { getProxyPdfUrl } from '../../utils/reportLinks';
 import './PDFViewerModal.css';
 
 const PDFViewerModal = ({ report, onClose }) => {
@@ -73,29 +73,14 @@ const PDFViewerModal = ({ report, onClose }) => {
   }, [report]);
 
   const { title = '' } = report || {};
-  const userAgent = navigator.userAgent || '';
-  const isIos = /iPad|iPhone|iPod/i.test(userAgent);
-  const isMobile = /Android|iPad|iPhone|iPod/i.test(userAgent) || window.matchMedia('(max-width: 768px)').matches;
 
-  // PDF 경로 결정
+  // 브라우저 내장 PDF 뷰어로 통일 (pdf.js 제거)
+  // Chrome/Firefox/Safari/Edge 모두 네이티브 C++ 렌더링 → JS보다 빠름
+  // getProxyPdfUrl 내부에서 DS/proxy 분기 처리
   const viewerUrl = useMemo(() => {
     if (!report) return '';
-
-    const origin = window.location.origin;
-    const proxyUrl = getProxyPdfUrl(report, origin);
-
-    // DS는 pdf.js 초기화/사전 요청이 느려서 모든 환경에서 브라우저 PDF 뷰어만 사용
-    if (isDsReport(report) || isIos || isMobile) {
-      return proxyUrl;
-    }
-
-    // 그 외(안드로이드, PC)는 셀프 호스팅된 pdf.js로 통일하여 일관성 확보
-    const viewerPath = `${origin}/lib/pdfjs/web/viewer.html`;
-    const viewerParams = `file=${encodeURIComponent(proxyUrl)}`;
-    const viewerHash = 'pagemode=none&zoom=page-width';
-    
-    return `${viewerPath}?${viewerParams}#${viewerHash}`;
-  }, [isIos, isMobile, report]);
+    return getProxyPdfUrl(report, window.location.origin);
+  }, [report]);
 
   if (!report) return null;
 
