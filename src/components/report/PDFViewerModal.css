@@ -25,6 +25,55 @@
   color: white;
   box-sizing: border-box;
   flex: 0 0 auto;
+  gap: 8px;
+}
+
+.pdf-viewer-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.pdf-viewer-firm-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pdf-viewer-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.pdf-viewer-share-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pdf-viewer-share-btn:hover,
+.pdf-viewer-share-btn:active {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
 }
 
 .pdf-viewer-title {
@@ -33,7 +82,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 70%;
 }
 
 .pdf-viewer-close {
@@ -90,8 +138,12 @@
     padding: env(safe-area-inset-top, 0px) 8px 0 12px;
   }
 
+  .pdf-viewer-firm-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
   .pdf-viewer-title {
-    max-width: calc(100vw - 72px);
     font-size: 13px;
   }
 
