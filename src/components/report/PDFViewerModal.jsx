@@ -140,7 +140,7 @@ const PDFViewerModal = ({ report, onClose }) => {
           </button>
         </div>
       </div>
-      <div className="pdf-viewer-body">
+      <div className="pdf-viewer-body" style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
         {isLoading && (
           <div className="pdf-viewer-spinner">
             <svg viewBox="0 0 24 24" width="48" height="48" className="spinner-icon">
@@ -154,6 +154,7 @@ const PDFViewerModal = ({ report, onClose }) => {
           className="pdf-viewer-iframe"
           title="PDF Viewer"
           allow="fullscreen"
+          width="100%"
           onLoad={() => setIsLoading(false)}
           style={{ opacity: isLoading ? 0 : 1 }}
         />
