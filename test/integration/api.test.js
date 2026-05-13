@@ -6,6 +6,9 @@
  *   - /external/api/search/
  *   - /external/api/companies
  *   - /external/api/boards
+ *   - /keywords, /keywords/sync
+ *   - /favorites
+ *   - /admin/metrics
  *
  * 사용법:
  *   node test/integration/api.test.js
@@ -37,13 +40,21 @@ function skip(label, reason = '') {
 
 async function assertHttpOk(url, label, options = {}) {
   const timeoutMs = options.timeout || 10000;
+  const method = options.method || 'GET';
+  const body = options.body || undefined;
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
-    const res = await fetch(url, {
+    const fetchOptions = {
+      method,
       signal: controller.signal,
       headers: options.headers || {},
-    });
+    };
+    if (body) {
+      fetchOptions.body = body;
+      fetchOptions.headers['Content-Type'] = 'application/json';
+    }
+    const res = await fetch(url, fetchOptions);
     clearTimeout(timeout);
     return { res, ok: res.ok, status: res.status };
   } catch (err) {
@@ -156,6 +167,39 @@ async function runTests() {
       console.log(`  ❌ FAIL: boards 응답 파싱 실패 (${e.message})`);
       failed++;
     }
+  }
+
+  // ────────────────────────────────────────────
+  // Section 2.5: 인증 필요 API (토큰 없으면 401 → 존재 확인으로 충분)
+  // ────────────────────────────────────────────
+  console.log('\n─── [Section 2.5] 인증 필요 API ───');
+
+  {
+    const kwRes = await assertHttpOk(`${BASE_URL}/keywords`, 'GET /keywords');
+    assert(kwRes.status === 200 || kwRes.status === 401,
+      '/keywords 응답이 200 또는 401', `HTTP ${kwRes.status}`);
+  }
+  {
+    const syncRes = await assertHttpOk(`${BASE_URL}/keywords/sync`, 'POST /keywords/sync',
+      { method: 'POST', body: JSON.stringify({ keywords: [] }) });
+    assert(syncRes.status === 200 || syncRes.status === 401 || syncRes.status === 405,
+      '/keywords/sync 응답이 200/401/405', `HTTP ${syncRes.status}`);
+  }
+  {
+    const favRes = await assertHttpOk(`${BASE_URL}/favorites`, 'GET /favorites');
+    assert(favRes.status === 200 || favRes.status === 401,
+      '/favorites 응답이 200 또는 401', `HTTP ${favRes.status}`);
+  }
+  {
+    const favIdRes = await assertHttpOk(`${BASE_URL}/favorites/1`, 'POST /favorites/{id}',
+      { method: 'POST' });
+    assert(favIdRes.status === 200 || favIdRes.status === 401 || favIdRes.status === 404,
+      'POST /favorites/{id} 응답이 200/401/404', `HTTP ${favIdRes.status}`);
+  }
+  {
+    const metricRes = await assertHttpOk(`${BASE_URL}/admin/metrics`, 'GET /admin/metrics');
+    assert(metricRes.status === 200 || metricRes.status === 401,
+      '/admin/metrics 응답이 200 또는 401', `HTTP ${metricRes.status}`);
   }
 
   // ────────────────────────────────────────────
