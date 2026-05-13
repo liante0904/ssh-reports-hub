@@ -4,7 +4,6 @@ const DEFAULT_API_PATH = '/external/api';
 const KNOWN_REPORT_API_PATHS = [
   '/external/api',
   '/pub/api',
-  '/ords/admin/data_main_daily_send',
 ];
 
 async function fetchWithTimeout(url, options = {}, ms = FETCH_TIMEOUT_MS) {

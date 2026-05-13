@@ -1,14 +1,12 @@
 /**
  * 애플리케이션 전역 설정 및 환경 변수 관리
  *
- * API 경로 전환:
- *   VITE_API_PATH=/external/api  → 신규 external API (기본값)
- *   VITE_API_PATH=/ords/admin/data_main_daily_send → 레거시 ORDS (revert)
+ * API 경로:
+ *   VITE_API_PATH=/external/api  → external API (기본값)
  */
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://ssh-oci.duckdns.org').replace(/\/$/, '');
 
-// 단일 API 경로 변수 — .env 한 줄로 ords ↔ external 전환 가능
 const API_PATH = import.meta.env.VITE_API_PATH || '/external/api';
 
 const REPORT_API_URL = import.meta.env.VITE_REPORT_API_URL
