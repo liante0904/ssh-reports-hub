@@ -103,3 +103,26 @@
     min-width: 0;
   }
 }
+
+/* PDF 로딩 스피너 */
+.pdf-viewer-spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  background-color: #525659;
+  z-index: 1;
+}
+
+.spinner-icon {
+  animation: pdf-spin 0.9s linear infinite;
+}
+
+@keyframes pdf-spin {
+  to { transform: rotate(360deg); }
+}

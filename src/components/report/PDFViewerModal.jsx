@@ -1,14 +1,20 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getProxyPdfUrl, isDsReport } from '../../utils/reportLinks';
 import './PDFViewerModal.css';
 
 const PDFViewerModal = ({ report, onClose }) => {
   const historyPushedRef = useRef(false);
   const onCloseRef = useRef(onClose);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
+
+  // 리포트 변경 시 로딩 상태 리셋
+  useEffect(() => {
+    if (report) setIsLoading(true);
+  }, [report]);
 
   // 모달 오픈 시 바디 스크롤 방지
   useEffect(() => {
@@ -104,11 +110,21 @@ const PDFViewerModal = ({ report, onClose }) => {
         </button>
       </div>
       <div className="pdf-viewer-body">
+        {isLoading && (
+          <div className="pdf-viewer-spinner">
+            <svg viewBox="0 0 24 24" width="48" height="48" className="spinner-icon">
+              <circle cx="12" cy="12" r="10" fill="none" stroke="var(--primary-color, #007aff)" strokeWidth="2.5" strokeDasharray="31.4 31.4" strokeLinecap="round" />
+            </svg>
+            <span>PDF 불러오는 중...</span>
+          </div>
+        )}
         <iframe 
           src={viewerUrl} 
           className="pdf-viewer-iframe"
           title="PDF Viewer"
           allow="fullscreen"
+          onLoad={() => setIsLoading(false)}
+          style={{ opacity: isLoading ? 0 : 1 }}
         />
       </div>
     </div>
