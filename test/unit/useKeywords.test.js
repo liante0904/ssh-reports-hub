@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useKeywords } from '../../src/hooks/useKeywords';
 import { useReport } from '../../src/context/useReport';
 import { request } from '../../src/utils/api';
@@ -40,13 +40,14 @@ describe('useKeywords', () => {
 
     request.mockResolvedValue(mockKeywords);
 
-    const { result, waitForNextUpdate } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
+    const { result } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
 
     expect(result.current.isLoadingKeywords).toBe(true);
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.isLoadingKeywords).toBe(false);
+    });
 
-    expect(result.current.isLoadingKeywords).toBe(false);
     expect(result.current.keywords).toEqual(mockKeywords);
     expect(request).toHaveBeenCalledWith(`${CONFIG.API.BASE_URL}/keywords`, {}, expect.any(Function));
   });
@@ -66,21 +67,23 @@ describe('useKeywords', () => {
     request.mockResolvedValueOnce(initialKeywords); // fetchKeywords
     request.mockResolvedValueOnce([...initialKeywords, { keyword: 'new', is_active: true }]); // syncKeywords
 
-    const { result, waitForNextUpdate } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
+    const { result } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.isLoadingKeywords).toBe(false);
+    });
 
     act(() => {
       result.current.setNewKeyword('new');
       result.current.handleAddKeyword();
     });
 
-    await waitForNextUpdate();
-
-    expect(result.current.keywords).toEqual([
-      { keyword: 'existing', is_active: true },
-      { keyword: 'new', is_active: true }
-    ]);
+    await waitFor(() => {
+      expect(result.current.keywords).toEqual([
+        { keyword: 'existing', is_active: true },
+        { keyword: 'new', is_active: true }
+      ]);
+    });
   });
 
   it('should handle delete keyword', async () => {
@@ -92,19 +95,21 @@ describe('useKeywords', () => {
     request.mockResolvedValueOnce(initialKeywords); // fetchKeywords
     request.mockResolvedValueOnce([{ keyword: 'test2', is_active: true }]); // syncKeywords
 
-    const { result, waitForNextUpdate } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
+    const { result } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.isLoadingKeywords).toBe(false);
+    });
 
     act(() => {
       result.current.handleDeleteKeyword('test1');
     });
 
-    await waitForNextUpdate();
-
-    expect(result.current.keywords).toEqual([
-      { keyword: 'test2', is_active: true }
-    ]);
+    await waitFor(() => {
+      expect(result.current.keywords).toEqual([
+        { keyword: 'test2', is_active: true }
+      ]);
+    });
   });
 
   it('should handle undo delete', async () => {
@@ -117,22 +122,28 @@ describe('useKeywords', () => {
     request.mockResolvedValueOnce([{ keyword: 'test2', is_active: true }]); // syncKeywords after delete
     request.mockResolvedValueOnce(initialKeywords); // syncKeywords after undo
 
-    const { result, waitForNextUpdate } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
+    const { result } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.isLoadingKeywords).toBe(false);
+    });
 
     act(() => {
       result.current.handleDeleteKeyword('test1');
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.keywords).toEqual([
+        { keyword: 'test2', is_active: true }
+      ]);
+    });
 
     act(() => {
       result.current.handleUndoDelete();
     });
 
-    await waitForNextUpdate();
-
-    expect(result.current.keywords).toEqual(initialKeywords);
+    await waitFor(() => {
+      expect(result.current.keywords).toEqual(initialKeywords);
+    });
   });
 });
