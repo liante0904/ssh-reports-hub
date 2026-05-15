@@ -6,7 +6,11 @@ import { CONFIG } from '../../src/constants/config';
 import { DEV_AUTH_ENABLED } from '../../src/utils/devAuth';
 
 // 모킹
-jest.mock('../../src/context/useReport');
+jest.mock('../../src/context/useReport', () => ({
+  useReport: () => ({
+    logout: jest.fn()
+  })
+}));
 jest.mock('../../src/utils/api');
 jest.mock('../../src/constants/config', () => ({
   CONFIG: {
