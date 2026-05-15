@@ -113,7 +113,8 @@ export const useKeywords = (telegramUser) => {
       setKeywords([]);
       setIsKeywordOverlayOpen(false);
     }
-  }, [telegramUser, fetchKeywords]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [telegramUser]);
 
   return {
     keywords,
