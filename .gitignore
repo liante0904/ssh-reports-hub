@@ -31,3 +31,4 @@ dist-ssr
 .env
 .codex
 public/lib/pdfjs
+.aider*

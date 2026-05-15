@@ -27,8 +27,10 @@ jest.mock('../../src/utils/devAuth', () => ({
 }));
 
 describe('useKeywords', () => {
+  const telegramUser = { id: 123, first_name: 'Test' };
+
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
     localStorage.clear();
   });
 
@@ -40,7 +42,7 @@ describe('useKeywords', () => {
 
     request.mockResolvedValue(mockKeywords);
 
-    const { result } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
+    const { result } = renderHook(() => useKeywords(telegramUser));
 
     expect(result.current.isLoadingKeywords).toBe(true);
 
@@ -67,14 +69,17 @@ describe('useKeywords', () => {
     request.mockResolvedValueOnce(initialKeywords); // fetchKeywords
     request.mockResolvedValueOnce([...initialKeywords, { keyword: 'new', is_active: true }]); // syncKeywords
 
-    const { result } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
+    const { result } = renderHook(() => useKeywords(telegramUser));
 
     await waitFor(() => {
       expect(result.current.isLoadingKeywords).toBe(false);
     });
 
-    act(() => {
+    await act(async () => {
       result.current.setNewKeyword('new');
+    });
+
+    act(() => {
       result.current.handleAddKeyword();
     });
 
@@ -95,7 +100,7 @@ describe('useKeywords', () => {
     request.mockResolvedValueOnce(initialKeywords); // fetchKeywords
     request.mockResolvedValueOnce([{ keyword: 'test2', is_active: true }]); // syncKeywords
 
-    const { result } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
+    const { result } = renderHook(() => useKeywords(telegramUser));
 
     await waitFor(() => {
       expect(result.current.isLoadingKeywords).toBe(false);
@@ -122,7 +127,7 @@ describe('useKeywords', () => {
     request.mockResolvedValueOnce([{ keyword: 'test2', is_active: true }]); // syncKeywords after delete
     request.mockResolvedValueOnce(initialKeywords); // syncKeywords after undo
 
-    const { result } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
+    const { result } = renderHook(() => useKeywords(telegramUser));
 
     await waitFor(() => {
       expect(result.current.isLoadingKeywords).toBe(false);
