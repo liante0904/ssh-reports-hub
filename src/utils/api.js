@@ -1,6 +1,16 @@
 import { CONFIG } from '../constants/config';
 
 /**
+ * ╔══════════════════════════════════════════════════════════════╗
+ * ║  🚨 API 호출 추가 시 반드시 아래 2개 파일도 같이 수정할 것  ║
+ * ║                                                              ║
+ * ║  1. API_REFERENCE.md          ← 엔드포인트 문서화            ║
+ * ║  2. test/integration/api.test.js  ← 엔드포인트 테스트 추가   ║
+ * ║                                                              ║
+ * ║  CI 에서 test/verify-api-coverage.js 가 검증함.              ║
+ * ║  빠뜨리면 PR 머지 불가.                                      ║
+ * ╚══════════════════════════════════════════════════════════════╝
+ *
  * 전역 API 요청 유틸리티
  * @param {string} url 
  * @param {object} options 

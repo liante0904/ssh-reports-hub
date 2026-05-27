@@ -50,7 +50,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
           setIsAuthenticating(true);
           try {
             const baseUrl = CONFIG.API.BASE_URL;
-            const result = await request(`${baseUrl}/auth/telegram`, {
+            const result = await request(`${baseUrl}/external/auth/telegram`, {
               method: 'POST',
               skipAuth: true,
               logoutOn401: false,

@@ -33,7 +33,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     handleSearchButtonClick,
     handleTitleClick,
     isSearchActive,
-    query,
     selectedCompanyOrder,
     showBoardSelect,
   } = useHeaderSearchState({

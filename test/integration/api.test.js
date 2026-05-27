@@ -1,0 +1,252 @@
+/**
+ * API 통합 테스트 - 업스트림 서버 엔드포인트 검증
+ *
+ * 테스트 대상:
+ *   - /health
+ *   - /external/api/search/
+ *   - /external/api/companies
+ *   - /external/api/boards
+ *   - /keywords, /keywords/sync
+ *   - /favorites
+ *   - /admin/metrics
+ *
+ * 사용법:
+ *   node test/integration/api.test.js
+ *
+ * 환경변수:
+ *   VITE_API_URL - 업스트림 서버 주소 (기본값: https://ssh-oci.duckdns.org)
+ */
+
+const BASE_URL = (process.env.VITE_API_URL || 'https://ssh-oci.duckdns.org').replace(/\/$/, '');
+
+let passed = 0;
+let failed = 0;
+let skipped = 0;
+
+function assert(condition, label, detail = '') {
+  if (condition) {
+    console.log(`  ✅ PASS: ${label}${detail ? ` (${detail})` : ''}`);
+    passed++;
+  } else {
+    console.log(`  ❌ FAIL: ${label}${detail ? ` (${detail})` : ''}`);
+    failed++;
+  }
+}
+
+function skip(label, reason = '') {
+  console.log(`  ⏭️ SKIP: ${label}${reason ? ` (${reason})` : ''}`);
+  skipped++;
+}
+
+async function assertHttpOk(url, label, options = {}) {
+  const timeoutMs = options.timeout || 10000;
+  const method = options.method || 'GET';
+  const body = options.body || undefined;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const fetchOptions = {
+      method,
+      signal: controller.signal,
+      headers: options.headers || {},
+    };
+    if (body) {
+      fetchOptions.body = body;
+      fetchOptions.headers['Content-Type'] = 'application/json';
+    }
+    const res = await fetch(url, fetchOptions);
+    clearTimeout(timeout);
+    return { res, ok: res.ok, status: res.status };
+  } catch (err) {
+    return { res: null, ok: false, status: 0, error: err.message };
+  }
+}
+
+async function assertHttp200(url, label, options = {}) {
+  const { res, ok, status, error } = await assertHttpOk(url, label, options);
+  if (ok) {
+    console.log(`  ✅ PASS: ${label} (HTTP ${status})`);
+    passed++;
+    return res;
+  } else {
+    console.log(`  ❌ FAIL: ${label} (HTTP ${status || error})`);
+    failed++;
+    return null;
+  }
+}
+
+async function runTests() {
+  console.log('\n════════════════════════════════════════════');
+  console.log('  API 통합 테스트');
+  console.log(`  대상 서버: ${BASE_URL}`);
+  console.log('════════════════════════════════════════════\n');
+
+  // ────────────────────────────────────────────
+  // Section 1: 기본 헬스 체크
+  // ────────────────────────────────────────────
+  console.log('─── [Section 1] 기본 인프라 ───');
+
+  const healthRes = await assertHttp200(`${BASE_URL}/health`, '/health (서버 상태)');
+
+  if (healthRes) {
+    try {
+      const body = await healthRes.json();
+      assert(body.status === 'ok', 'health body.status === "ok"', JSON.stringify(body));
+    } catch {
+      skip('health 응답 JSON 파싱');
+    }
+  }
+
+  // ────────────────────────────────────────────
+  // Section 2: Public Search API
+  // ────────────────────────────────────────────
+  console.log('\n─── [Section 2] Public API ───');
+
+  const searchRes = await assertHttp200(
+    `${BASE_URL}/external/api/search/?sort_by=time&limit=3`,
+    'GET /external/api/search/ (최신 3건)'
+  );
+
+  if (searchRes) {
+    try {
+      const data = await searchRes.json();
+      assert(Array.isArray(data.items), 'search 응답: items는 배열', `length=${data.items?.length || 0}`);
+      assert(typeof data.hasMore === 'boolean', 'search 응답: hasMore는 boolean');
+      assert(typeof data.count === 'number', 'search 응답: count는 number', `count=${data.count}`);
+
+      if (data.items?.length > 0) {
+        const item = data.items[0];
+        assert(typeof item.report_id === 'number', '아이템에 report_id 있음');
+        assert(typeof item.firm_nm === 'string', '아이템에 firm_nm 있음');
+        assert(typeof item.article_title === 'string', '아이템에 article_title 있음');
+        assert(typeof item.reg_dt === 'string', '아이템에 reg_dt 있음');
+        assert(typeof item.save_time === 'string', '아이템에 save_time 있음');
+      }
+    } catch (e) {
+      console.log(`  ❌ FAIL: search 응답 파싱 실패 (${e.message})`);
+      failed++;
+    }
+  }
+
+  // Companies API
+  const companiesRes = await assertHttp200(
+    `${BASE_URL}/external/api/companies`,
+    'GET /external/api/companies'
+  );
+
+  if (companiesRes) {
+    try {
+      const companies = await companiesRes.json();
+      assert(Array.isArray(companies), 'companies 응답: 배열', `length=${companies.length}`);
+      if (companies.length > 0) {
+        assert(typeof companies[0].name === 'string', 'company.name 있음');
+        assert(typeof companies[0].report_count === 'number', 'company.report_count 있음');
+      }
+
+      const knownFirms = ['LS증권', '삼성증권', '키움증권', '한국투자증권', '대신증권'];
+      const firmNames = companies.map(c => c.name);
+      const matched = knownFirms.filter(f => firmNames.includes(f));
+      assert(matched.length >= 3, `알려진 증권사명 ${matched.length}개 매칭`, matched.join(', '));
+    } catch (e) {
+      console.log(`  ❌ FAIL: companies 응답 파싱 실패 (${e.message})`);
+      failed++;
+    }
+  }
+
+  // Boards API (company 파라미터 필수)
+  const boardsRes = await assertHttp200(
+    `${BASE_URL}/external/api/boards?company=0`,
+    'GET /external/api/boards?company=0'
+  );
+
+  if (boardsRes) {
+    try {
+      const boards = await boardsRes.json();
+      assert(Array.isArray(boards), 'boards 응답: 배열', `length=${boards.length}`);
+    } catch (e) {
+      console.log(`  ❌ FAIL: boards 응답 파싱 실패 (${e.message})`);
+      failed++;
+    }
+  }
+
+  // ────────────────────────────────────────────
+  // Section 2.5: 인증 필요 API (토큰 없으면 401 → 존재 확인으로 충분)
+  // ────────────────────────────────────────────
+  console.log('\n─── [Section 2.5] 인증 필요 API ───');
+
+  {
+    const kwRes = await assertHttpOk(`${BASE_URL}/keywords`, 'GET /keywords');
+    assert(kwRes.status === 200 || kwRes.status === 401,
+      '/keywords 응답이 200 또는 401', `HTTP ${kwRes.status}`);
+  }
+  {
+    const syncRes = await assertHttpOk(`${BASE_URL}/keywords/sync`, 'POST /keywords/sync',
+      { method: 'POST', body: JSON.stringify({ keywords: [] }) });
+    assert(syncRes.status === 200 || syncRes.status === 401 || syncRes.status === 405,
+      '/keywords/sync 응답이 200/401/405', `HTTP ${syncRes.status}`);
+  }
+  {
+    const favRes = await assertHttpOk(`${BASE_URL}/favorites`, 'GET /favorites');
+    assert(favRes.status === 200 || favRes.status === 401,
+      '/favorites 응답이 200 또는 401', `HTTP ${favRes.status}`);
+  }
+  {
+    const favIdRes = await assertHttpOk(`${BASE_URL}/favorites/1`, 'POST /favorites/{id}',
+      { method: 'POST' });
+    assert(favIdRes.status === 200 || favIdRes.status === 401 || favIdRes.status === 404,
+      'POST /favorites/{id} 응답이 200/401/404', `HTTP ${favIdRes.status}`);
+  }
+  {
+    const metricRes = await assertHttpOk(`${BASE_URL}/admin/metrics`, 'GET /admin/metrics');
+    assert(metricRes.status === 200 || metricRes.status === 401,
+      '/admin/metrics 응답이 200 또는 401', `HTTP ${metricRes.status}`);
+  }
+
+  // ────────────────────────────────────────────
+  // Section 3: 응답 시간 성능
+  // ────────────────────────────────────────────
+  console.log('\n─── [Section 3] 응답 시간 ───');
+
+  const endpoints = [
+    { name: '/health', url: `${BASE_URL}/health` },
+    { name: '/external/api/search/', url: `${BASE_URL}/external/api/search/?limit=5` },
+    { name: '/external/api/companies', url: `${BASE_URL}/external/api/companies` },
+  ];
+
+  for (const ep of endpoints) {
+    const start = Date.now();
+    try {
+      const res = await fetch(ep.url, { signal: AbortSignal.timeout(10000) });
+      const elapsed = Date.now() - start;
+      if (res.ok) {
+        const perfOk = elapsed < 3000;
+        if (perfOk) {
+          console.log(`  ✅ PASS: ${ep.name} 응답시간 ${elapsed}ms (< 3000ms)`);
+          passed++;
+        } else {
+          console.log(`  ⚠️ WARN: ${ep.name} 응답시간 ${elapsed}ms (>= 3000ms)`);
+          skipped++;
+        }
+      } else {
+        console.log(`  ❌ FAIL: ${ep.name} 응답 실패 HTTP ${res.status} (${elapsed}ms)`);
+        failed++;
+      }
+    } catch {
+      const elapsed = Date.now() - start;
+      console.log(`  ❌ FAIL: ${ep.name} 타임아웃/실패 (${elapsed}ms)`);
+      failed++;
+    }
+  }
+
+  // ─── 결과 요약 ───
+  console.log('\n════════════════════════════════════════════');
+  console.log(`  결과: ${passed} 통과, ${failed} 실패, ${skipped} 건너뜀 (총 ${passed + failed + skipped}개)`);
+  console.log('════════════════════════════════════════════\n');
+
+  process.exit(failed > 0 ? 1 : 0);
+}
+
+runTests().catch((err) => {
+  console.error('테스트 실행 중 오류:', err);
+  process.exit(1);
+});

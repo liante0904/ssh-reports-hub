@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Unit Test: 서버 없이 순수 로직 검증, 무조건 블로킹 ──
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run test:unit
+
+  # ── API 커버리지 검증: 새 API 추가 시 문서+테스트 누락 방지, 무조건 블로킹 ──
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: node test/verify-api-coverage.js
+
+  # ── Integration Test: 실서버 엔드포인트 검증, 실패해도 머지는 허용 ──
+  integration:
+    runs-on: ubuntu-latest
+    needs: unit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run test:integration
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://ssh-oci.duckdns.org' }}
+    continue-on-error: true
+
+  # ── E2E Smoke: admin-status + share-ds, 실패해도 머지는 허용 ──
+  e2e:
+    runs-on: ubuntu-latest
+    needs: unit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: node test/admin-status.test.js
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://ssh-oci.duckdns.org' }}
+      - run: node test/integration/share-ds-smoke.test.js
+        env:
+          SHARE_BASE_URL: ${{ secrets.SHARE_BASE_URL || 'https://ssh-oci.netlify.app' }}
+    continue-on-error: true
+
+  # ── Lint ──
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+    continue-on-error: true

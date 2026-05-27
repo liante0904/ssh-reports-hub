@@ -4,7 +4,7 @@ import { request } from '../utils/api';
 import { buildReportFetchUrl } from '../utils/reportFetch';
 import { normalizeReportItem } from '../utils/reportNormalizer';
 
-export function useReportFetch(searchQuery, pathname, sortBy) {
+export function useReportFetch(searchQuery, pathname) {
   const [reports, setReports] = useState({});
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -17,35 +17,29 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
   const buildApiUrl = useCallback(() => buildReportFetchUrl({
     pathname,
     offset,
-    sortBy,
     searchQuery,
     baseUrl: CONFIG.API.REPORT_API_URL,
-    tableName: CONFIG.API.TABLE_NAME,
-  }), [offset, searchQuery, pathname, sortBy]);
+  }), [offset, searchQuery, pathname]);
 
   const mergeReports = useCallback((prev, newItems) => {
     const updated = { ...prev };
 
     for (const item of newItems) {
       const report = normalizeReportItem(item);
-      const { date, firm } = report;
+      const { date } = report;
 
-      // sortBy === 'time'일 때는 배열로 저장하여 서버 순차 정렬 유지
-      // sortBy === 'company'일 때는 기존처럼 증권사별 객체로 저장 (리팩토링 대상이나 일단 호환성 유지)
-      if (sortBy === 'time') {
-        if (!updated[date] || !Array.isArray(updated[date])) updated[date] = [];
-        const exists = updated[date].some((r) => r.id === report.id);
-        if (!exists) updated[date].push(report);
-      } else {
-        if (!updated[date] || Array.isArray(updated[date])) updated[date] = {};
-        if (!updated[date][firm]) updated[date][firm] = [];
-        const exists = updated[date][firm].some((r) => r.id === report.id);
-        if (!exists) updated[date][firm].push(report);
+      if (!updated[date] || !Array.isArray(updated[date])) {
+        updated[date] = Array.isArray(updated[date])
+          ? updated[date]
+          : Object.values(updated[date] || {}).flat();
       }
+
+      const exists = updated[date].some((r) => r.id === report.id);
+      if (!exists) updated[date].push(report);
     }
 
     return updated;
-  }, [sortBy]);
+  }, []);
 
   const fetchReports = useCallback(async (isInitial = false) => {
     if (!hasMoreRef.current && !isInitial) return;
@@ -85,7 +79,7 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
     setOffset(0);
     setHasMore(true);
     hasMoreRef.current = true;
-  }, [searchQuery, pathname, sortBy]);
+  }, [searchQuery, pathname]);
 
   useEffect(() => {
     if (offset === 0) {
