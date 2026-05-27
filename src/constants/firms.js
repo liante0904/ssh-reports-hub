@@ -6,6 +6,23 @@ export const FIRM_NAMES = [
   "교보증권", "IBK투자증권", "SK증권", "유안타증권"
 ];
 
+export const FIRM_OPTIONS = FIRM_NAMES.map((name, order) => ({ order, name }));
+
+export function getFirmNameByOrder(order) {
+  const numericOrder = Number(order);
+  if (!Number.isInteger(numericOrder) || numericOrder < 0 || numericOrder >= FIRM_NAMES.length) {
+    return '';
+  }
+  return FIRM_NAMES[numericOrder] || '';
+}
+
+export function getFirmOrderByName(name) {
+  const normalizedName = typeof name === 'string' ? name.trim() : '';
+  if (!normalizedName) return null;
+  const order = FIRM_NAMES.indexOf(normalizedName);
+  return order >= 0 ? order : null;
+}
+
 export const CATEGORIES = {
   RECENT: 'recent',
   GLOBAL: 'global',

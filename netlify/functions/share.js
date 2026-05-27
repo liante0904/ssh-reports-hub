@@ -28,7 +28,6 @@ export const handler = async (event) => {
   const REPORT_API_URL =
     process.env.VITE_REPORT_API_URL ||
     process.env.VITE_API_URL ||
-    process.env.VITE_ORACLE_REST_API ||
     'https://ssh-oci.duckdns.org/pub';
   const TABLE_NAME = process.env.VITE_TABLE_NAME || 'api';
   const SITE_URL = 'https://ssh-oci.netlify.app';

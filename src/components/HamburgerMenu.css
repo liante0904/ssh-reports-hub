@@ -120,27 +120,13 @@
   margin: 10px 0;
 }
 
-.menu-item-select .company-grid-container {
+.menu-item-select .company-select {
   width: 100%;
 }
 
-.menu-item-select .grid-trigger-btn {
+.menu-item-select .company-select .grid-trigger-btn {
   width: 100%;
-  justify-content: center;
-  padding: 12px 15px;
-  border-radius: 15px;
-  font-size: 1.1em;
-  font-weight: bold;
-  background-color: #f0f0f5;
-  border: none;
-  color: #007aff;
-  box-sizing: border-box;
-  height: auto;
-  min-height: 48px;
-}
-
-.menu-item-select .grid-trigger-btn:hover {
-  background-color: #e0e0e5;
+  justify-content: flex-start;
 }
 
 /* 텔레그램 섹션 스타일 */
@@ -212,6 +198,24 @@
 .telegram-custom-login-btn:hover {
   background-color: #0077b5;
   transform: translateY(-1px);
+}
+
+.telegram-dev-login-btn {
+  background-color: #10b981;
+  color: white;
+}
+
+.telegram-dev-login-btn:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
+.telegram-dev-desc {
+  margin: 0;
+  font-size: 0.8em;
+  line-height: 1.4;
+  color: #047857;
+  text-align: center;
 }
 
 .telegram-app-login-btn {

@@ -2,6 +2,10 @@
 
 React를 사용하여 구축된 주식 리포트 조회용 웹 애플리케이션입니다.
 
+## Workspace Boundary
+
+This repository is public-only. See [NOTICE.md](./NOTICE.md) for the required boundary rules.
+
 ## ✨ 주요 기능
 
 - **키워드 알림**: 텔레그램 로그인을 통해 관심 키워드에 대한 실시간 알림을 설정할 수 있습니다.
@@ -68,13 +72,18 @@ npm install
 ### 3. 개발 서버 실행
 
 ```bash
-npm run dev
+make local
 ```
 
 ## 📜 사용 가능한 스크립트
 
-- `npm run dev`: Netlify Dev 환경에서 앱을 실행합니다. (신규 API 사용)
-- `npm run dev:legacy`: 기존 API 환경으로 앱을 실행합니다.
+- `make local`: Vite dev 서버를 실행합니다.
+- `make netlify`: Netlify Dev 환경에서 앱을 실행합니다.
+- `make dev`: Vite dev 서버를 실행합니다.
+- `make tunnel`: SSH 별칭 `oci`를 사용해 `localhost:8888` 터널을 엽니다.
+- `npm run dev`: Vite dev 서버를 실행합니다.
+- `npm run netlify`: Netlify Dev 환경에서 앱을 실행합니다.
+- `npm run netlify:legacy`: 기존 API 환경으로 앱을 실행합니다.
 - `npm run build`: 프로덕션용으로 앱을 빌드합니다.
 - `npm run lint`: ESLint를 사용하여 코드 스타일을 검사합니다.
 - `npm run preview`: 프로덕션 빌드를 로컬에서 미리 봅니다.

@@ -1,20 +1,19 @@
-import React, { useState, useEffect, forwardRef } from 'react';
+import React, { forwardRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import HamburgerMenu from './HamburgerMenu';
 import CompanySelect from './CompanySelect';
 import BoardSelect from './BoardSelect';
 import { useReport } from '../context/useReport';
+import { HEADER_PATHS } from '../utils/headerNavigation';
+import { useHeaderSearchState } from '../hooks/useHeaderSearchState';
 import './Header.css';
 
 const Header = forwardRef(({ isNavVisible }, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isSearchActive, setIsSearchActive] = useState(false);
-  const [query, setQuery] = useState(searchParams.get('q') || '');
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1023);
 
-  const { 
+  const {
     toggleSearch, 
     isTopMenuOpen, 
     toggleMenuTop, 
@@ -23,19 +22,29 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     handleSearch,
     setSortBy,
     boards,
-    activeSearch
+    activeSearch,
   } = useReport();
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 1023);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
+  const {
+    clearSearchState,
+    handleBoardChange,
+    handleCompanyChange,
+    handleSearchButtonClick,
+    handleTitleClick,
+    isSearchActive,
+    query,
+    selectedCompanyOrder,
+    showBoardSelect,
+  } = useHeaderSearchState({
+    activeSearch,
+    boards,
+    handleSearch,
+    navigate,
+    searchParams,
+    setSearchParams,
+    setSortBy,
+    toggleSearch,
+  });
 
   const isRecent = location.pathname === '/';
   const isGlobal = location.pathname.includes('global');
@@ -48,88 +57,21 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     if (isMenuOpen) toggleMenu();
     
     if (buttonName !== 'search') {
-      handleSearch({ query: '', category: '', board: null });
-      setIsSearchActive(false);
-    } else {
-      setIsSearchActive(true);
+      clearSearchState({ navigateHome: false });
     }
-    
+
     if (buttonName === 'recent') {
       setSortBy('time');
     }
 
-    if (buttonName !== 'search') {
-      setQuery('');
-      setSearchParams({}, { replace: true });
-    }
-
-    const PATH_MAP = {
-      recent: '/',
-      global: '/global',
-      industry: '/industry',
-      favorites: '/favorites',
-      search: '/'
-    };
-
-    const targetPath = PATH_MAP[buttonName];
+    const targetPath = HEADER_PATHS[buttonName];
     if (targetPath && buttonName !== 'search') {
       navigate({ pathname: targetPath });
     }
 
     if (buttonName === 'search') {
-      setQuery('');
-      toggleSearch();
+      handleSearchButtonClick();
     }
-  };
-
-  const handleCompanyChange = (e) => {
-    const selectedValue = e.target.value;
-
-    setQuery(selectedValue);
-    setIsSearchActive(true);
-    setSortBy('time');
-
-    if (selectedValue) {
-      setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
-      handleSearch({ query: selectedValue, category: 'company', board: null });
-    } else {
-      setSearchParams({}, { replace: true });
-      handleSearch({ query: '', category: 'company', board: null });
-    }
-
-    navigate({ pathname: '/' });
-  };
-
-  const handleBoardClick = (boardOrder) => {
-    const newBoard = activeSearch.board === boardOrder ? null : boardOrder;
-    handleSearch({ ...activeSearch, board: newBoard });
-  };
-
-  const handleBoardChange = (e) => {
-    const selectedValue = e.target.value;
-    handleBoardClick(selectedValue === '' ? null : Number(selectedValue));
-  };
-
-  useEffect(() => {
-    const urlQuery = searchParams.get('q') || '';
-    const urlCategory = searchParams.get('category') || '';
-    if (urlCategory === 'company') {
-      setQuery(urlQuery);
-      setIsSearchActive(true);
-    } else {
-      setQuery('');
-    }
-  }, [searchParams]);
-
-  const handleTitleClick = () => {
-    if (isTopMenuOpen) toggleMenuTop();
-    if (isMenuOpen) toggleMenu();
-    setIsSearchActive(false);
-    handleSearch({ query: '', category: '', board: null });
-    setQuery('');
-    setSearchParams({}, { replace: true });
-    setSortBy('time');
-    navigate({ pathname: '/' });
   };
 
   return (
@@ -139,51 +81,14 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
           <div className="title" onClick={handleTitleClick}>
             🏠 ssh-reports-hub
           </div>
-          {isMobile && (
-            <div className="company-select-wrapper">
-              <CompanySelect
-                value={query}
-                onChange={handleCompanyChange}
-                className="nav-button company-select"
-              />
+          <div className="header-actions">
+            <div className="hamburger-menu" onClick={toggleMenuTop}>
+              <div></div>
+              <div></div>
+              <div></div>
             </div>
-          )}
-          <div className="hamburger-menu" onClick={toggleMenuTop}>
-            <div></div>
-            <div></div>
-            <div></div>
           </div>
         </div>
-
-        {!isMobile && (
-          <div className="header-filter-row">
-            <CompanySelect
-              value={query}
-              onChange={handleCompanyChange}
-              className="header-company-select"
-            />
-
-            {boards.length > 0 && isRecent && activeSearch.category === 'company' && (
-              <BoardSelect
-                value={activeSearch.board}
-                boards={boards}
-                onChange={handleBoardChange}
-                className="header-board-select"
-              />
-            )}
-          </div>
-        )}
-
-        {isMobile && boards.length > 0 && isRecent && activeSearch.category === 'company' && (
-          <div className="header-board-row">
-            <BoardSelect
-              value={activeSearch.board}
-              boards={boards}
-              onChange={handleBoardChange}
-              className="header-board-select-mobile"
-            />
-          </div>
-        )}
 
         <div className="header-nav">
           <button
@@ -216,13 +121,28 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
           >
             ★
           </button>
+          <div className="company-select-wrapper header-nav-filters">
+            <CompanySelect
+              value={selectedCompanyOrder}
+              onChange={handleCompanyChange}
+              className="company-select"
+            />
+            {showBoardSelect && (
+              <BoardSelect
+                value={activeSearch.board}
+                boards={boards}
+                onChange={handleBoardChange}
+                className="board-select"
+              />
+            )}
+          </div>
         </div>
       </header>
 
       <HamburgerMenu
         isOpen={isTopMenuOpen}
         toggleMenu={toggleMenuTop}
-        selectedCompany={query}
+        selectedCompany={selectedCompanyOrder}
         handleCompanyChange={handleCompanyChange}
         handleHeaderClick={handleButtonClick}
       />

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useReport } from '../context/useReport';
 import { CONFIG } from '../constants/config';
 import { request } from '../utils/api';
+import { DEV_AUTH_ENABLED } from '../utils/devAuth';
 
 export const useKeywords = (telegramUser) => {
   const { logout } = useReport();
@@ -11,8 +12,16 @@ export const useKeywords = (telegramUser) => {
   const [isKeywordOverlayOpen, setIsKeywordOverlayOpen] = useState(false);
   const [lastDeleted, setLastDeleted] = useState(null);
 
+  const hasAuthToken = Boolean(localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN));
+  const isDevBypassSession = DEV_AUTH_ENABLED && !hasAuthToken;
+
   const fetchKeywords = useCallback(async () => {
     if (!telegramUser) return;
+    if (isDevBypassSession()) {
+      setKeywords([]);
+      return;
+    }
+
     setIsLoadingKeywords(true);
     try {
       const data = await request(`${CONFIG.API.BASE_URL}/keywords`, {}, logout);
@@ -22,9 +31,14 @@ export const useKeywords = (telegramUser) => {
     } finally {
       setIsLoadingKeywords(false);
     }
-  }, [logout, telegramUser]);
+  }, [logout, telegramUser, isDevBypassSession]);
 
   const syncKeywords = async (updatedKeywords) => {
+    if (isDevBypassSession()) {
+      setKeywords(updatedKeywords.map((keyword) => ({ keyword, is_active: true })));
+      return;
+    }
+
     try {
       const data = await request(`${CONFIG.API.BASE_URL}/keywords/sync`, {
         method: 'POST',
@@ -39,7 +53,7 @@ export const useKeywords = (telegramUser) => {
   const handleAddKeyword = () => {
     const trimmed = newKeyword.trim();
     if (!trimmed) return;
-    
+
     if (keywords.some(k => k.keyword === trimmed)) {
       setNewKeyword('');
       return;
@@ -54,7 +68,7 @@ export const useKeywords = (telegramUser) => {
     const nextKeywords = keywords
       .filter(k => k.keyword !== keywordToDelete)
       .map(k => k.keyword);
-    
+
     setLastDeleted({ type: 'single', data: [keywordToDelete] });
     syncKeywords(nextKeywords);
   };
@@ -73,7 +87,7 @@ export const useKeywords = (telegramUser) => {
 
     const currentKeywordList = keywords.map(k => k.keyword);
     const restoredKeywords = [...new Set([...currentKeywordList, ...lastDeleted.data])];
-    
+
     syncKeywords(restoredKeywords);
     setLastDeleted(null);
   };

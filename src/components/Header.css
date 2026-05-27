@@ -35,7 +35,11 @@ header.nav-hidden {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 12px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+  box-sizing: border-box;
 }
 
 /* 제목 스타일 */
@@ -72,9 +76,23 @@ header.nav-hidden {
 /* 두 번째 줄 네비게이션 스타일 */
 .header-nav {
   display: flex;
-  justify-content: center;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  justify-content: flex-start;
   gap: 20px;
-  padding: 5px 0;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5px 15px;
+  box-sizing: border-box;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+
+.header-nav::-webkit-scrollbar {
+  display: none;
 }
 
 /* 네비게이션 버튼 스타일 */
@@ -91,6 +109,8 @@ header.nav-hidden {
   align-items: center;
   justify-content: center;
   height: 32px;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .nav-button:hover {
@@ -104,31 +124,56 @@ header.nav-hidden {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
 .company-select-wrapper {
-  display: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  width: auto;
 }
 
-.header-filter-row {
-  display: none;
+.header-nav-filters {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-width: 0;
+  white-space: nowrap;
+  width: auto;
 }
 
-.header-board-row {
-  display: none;
+.header-nav-filters .grid-trigger-btn span {
+  white-space: nowrap;
 }
 
-/* 데스크탑 화면 */
-@media (min-width: 1024px) {
+/* 태블릿/작은 데스크탑 */
+@media (min-width: 1024px) and (max-width: 1279px) {
   header {
     max-width: 100%;
     margin: auto;
   }
 
   .header-top {
-    padding: 0 12px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+    box-sizing: border-box;
   }
 
   .title {
-    margin: 0 120px;
     padding: 6px 0;
   }
 
@@ -136,7 +181,6 @@ header.nav-hidden {
     width: 40px;
     height: 28px;
     padding: 2px 0;
-    margin: 0 120px;
   }
 
   .hamburger-menu div {
@@ -144,87 +188,121 @@ header.nav-hidden {
     height: 4px;
   }
 
-  .header-filter-row {
-    display: flex;
-    align-items: center;
+  .header-actions {
     gap: 12px;
-    padding: 6px 12px 2px;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
-  .header-company-select {
-    flex: 0 0 auto;
+  .header-nav-filters {
+    padding-top: 0;
   }
 
-  .header-company-select .grid-trigger-btn {
-    height: 32px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    background-color: rgba(255, 255, 255, 0.16);
-    color: white;
-    font-size: 0.95em;
-    box-shadow: none;
+  .header-nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none;
+    white-space: nowrap !important;
+  }
+
+  .header-nav > * {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: max-content !important;
+  }
+
+  .header-nav-filters .grid-trigger-btn {
+    padding: 8px 12px;
+    font-size: 0.9em;
+  }
+
+  .header-nav-filters .grid-trigger-btn span {
     max-width: 220px;
   }
+}
 
-  .header-company-select .grid-trigger-btn:hover {
-    background-color: rgba(255, 255, 255, 0.24);
+/* 데스크탑 화면 */
+@media (min-width: 1280px) {
+  header {
+    max-width: 100%;
+    margin: auto;
   }
 
-  .header-company-select .grid-trigger-btn.selected {
-    background-color: white;
-    border-color: white;
-    color: #007aff;
-    font-weight: 700;
+  .header-top {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+    box-sizing: border-box;
   }
 
-  .header-company-select .grid-trigger-btn span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .title {
+    padding: 6px 0;
   }
 
-  .header-board-select {
-    flex: 0 0 auto;
+  .hamburger-menu {
+    width: 40px;
+    height: 28px;
+    padding: 2px 0;
   }
 
-  .header-board-select .grid-trigger-btn {
-    height: 32px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    background-color: rgba(255, 255, 255, 0.16);
-    color: white;
-    font-size: 0.95em;
-    box-shadow: none;
-    max-width: 240px;
+  .hamburger-menu div {
+    width: 34px;
+    height: 4px;
   }
 
-  .header-board-select .grid-trigger-btn:hover {
-    background-color: rgba(255, 255, 255, 0.24);
+  .header-actions {
+    gap: 12px;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
-  .header-board-select .grid-trigger-btn.selected {
-    background-color: white;
-    border-color: white;
-    color: #007aff;
-    font-weight: 700;
+  .header-nav-filters {
+    margin-left: 0;
   }
 
-  .header-board-select .grid-trigger-btn span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .header-nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none;
+    white-space: nowrap !important;
+  }
+
+  .header-nav > * {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: max-content !important;
+  }
+
+  .header-nav-filters .grid-trigger-btn {
+    padding: 8px 12px;
+    font-size: 0.9em;
+  }
+
+  .header-nav-filters .grid-trigger-btn span {
+    max-width: 220px;
   }
 }
 
 /* 모바일 화면 */
-@media (max-width: 1023px) {
+@media (max-width: 767px) {
   .header-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 8px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 10px;
+    box-sizing: border-box;
   }
 
   .header-top .title {
@@ -232,40 +310,17 @@ header.nav-hidden {
     font-size: 1em;
   }
 
-  .header-top .company-select-wrapper {
-    display: block;
-    flex-shrink: 1;
-    margin-right: 5px;
-  }
-
-  .header-top .company-select-wrapper .grid-trigger-btn {
-    width: auto;
-    max-width: 120px;
-    font-size: 0.9em;
-    padding: 4px 8px;
-    height: 28px;
-    border-radius: 16px;
-  }
-
-  .header-board-row {
+  .header-top .header-actions {
     display: flex;
-    padding: 6px 8px 0;
-    justify-content: center;
+    flex-shrink: 1;
+    margin-left: auto;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
   }
 
-  .header-board-select {
-    width: 100%;
-    max-width: calc(100% - 16px);
-  }
-
-  .header-board-select .grid-trigger-btn {
-    width: 100%;
-    justify-content: space-between;
-    padding: 6px 12px;
-    height: 32px;
-    border-radius: 16px;
-    font-size: 0.9em;
-    max-width: none;
+  .header-top .company-select-wrapper {
+    gap: 8px;
   }
 
   .hamburger-menu {
@@ -280,19 +335,36 @@ header.nav-hidden {
   }
 
   .header-nav {
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    gap: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
     padding: 5px 10px;
+    box-sizing: border-box;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    white-space: normal;
+  }
+
+  .header-nav > * {
+    flex: 0 0 auto;
+    min-width: max-content;
   }
 
   .nav-button {
     flex-shrink: 0;
     font-size: 0.9em;
-    padding: 4px 8px;
+    padding: 4px 20px;
     height: 28px;
   }
 
+  .header-nav-filters {
+    width: 100%;
+    margin-left: 0;
+    padding-top: 6px;
+    justify-content: center;
+  }
 }
