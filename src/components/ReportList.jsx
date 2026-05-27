@@ -16,13 +16,15 @@ function ReportList({ onWriterClick }) {
   const { searchQuery, sortBy, setSortBy, telegramUser } = useReport();
   const isAdmin = telegramUser?.is_admin === true;
   const location = useLocation();
+  const isOutlook = location.pathname.includes('outlook');
+  const [outlookYear, setOutlookYear] = useState(null);
   const { 
     reports, 
     isLoading, 
     hasMore, 
     offset, 
     fetchReports 
-  } = useReportFetch(searchQuery, location.pathname, sortBy);
+  } = useReportFetch(searchQuery, location.pathname, outlookYear);
 
   const [dateToggles, setDateToggles] = useState({});
   const [firmToggles, setFirmToggles] = useState({});
@@ -346,6 +348,21 @@ function ReportList({ onWriterClick }) {
   return (
     <div className="report-list-wrapper">
       <div className="container" id="report-container">
+        {isOutlook && !isLoading && (
+          <div className="outlook-year-filter">
+            <button
+              className={`year-chip ${outlookYear === null ? 'active' : ''}`}
+              onClick={() => setOutlookYear(null)}
+            >전체</button>
+            {[2026, 2025, 2024, 2023].map(year => (
+              <button
+                key={year}
+                className={`year-chip ${outlookYear === year ? 'active' : ''}`}
+                onClick={() => setOutlookYear(outlookYear === year ? null : year)}
+              >{year}년</button>
+            ))}
+          </div>
+        )}
         {isFavoritesPage && !favoriteReports && offset === 0 && isLoading ? (
           <div className={`loading-overlay ${isSearchActive ? 'search-loading' : ''}`}>로딩 중...</div>
         ) : isFavoritesPage && favoriteReports && Object.keys(favoriteReports).length === 0 && !isLoading ? (
@@ -364,6 +381,11 @@ function ReportList({ onWriterClick }) {
           <div className="empty-favorites">
             <div className="empty-icon">🤖</div>
             <p>AI 요약이 생성된 레포트가 없습니다.<br/>관리자가 요약을 생성하면 여기에 표시됩니다.</p>
+          </div>
+        ) : isOutlook && filteredSortedDates.length === 0 && !isLoading ? (
+          <div className="empty-favorites">
+            <div className="empty-icon">🔮</div>
+            <p>전망 관련 레포트가 없습니다.<br/>2026년 하반기 전망 등 시장 전망 레포트가 여기에 표시됩니다.</p>
           </div>
         ) : filteredSortedDates.length === 0 && !isLoading ? null : (
           <InfiniteScroll

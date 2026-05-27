@@ -11,7 +11,7 @@ function buildReportRoute(pathname, baseUrl) {
   return { apiUrl: `${apiUrl}/search`, params };
 }
 
-export function buildReportFetchUrl({ pathname, offset, sortBy, searchQuery, baseUrl }) {
+export function buildReportFetchUrl({ pathname, offset, sortBy, searchQuery, baseUrl, outlookYear }) {
   const { apiUrl, params } = buildReportRoute(pathname, baseUrl);
 
   params.append('offset', offset);
@@ -33,6 +33,13 @@ export function buildReportFetchUrl({ pathname, offset, sortBy, searchQuery, bas
 
   if (pathname.includes('ai-summary')) {
     params.append('has_summary', 'true');
+  }
+
+  if (pathname.includes('outlook')) {
+    params.append('outlook', 'true');
+    if (outlookYear) {
+      params.append('outlook_year', outlookYear);
+    }
   }
 
   return `${apiUrl}?${params.toString()}`;

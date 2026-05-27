@@ -50,6 +50,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const isGlobal = location.pathname.includes('global');
   const isIndustry = location.pathname.includes('industry');
   const isFavorites = location.pathname.includes('favorites');
+  const isOutlook = location.pathname.includes('outlook');
   const isAiSummary = location.pathname.includes('ai-summary');
   const isCompany = location.pathname.startsWith('/company');
 
@@ -162,6 +163,12 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
             onClick={() => handleButtonClick('favorites')}
           >
             ★
+          </button>
+          <button
+            className={`nav-button ${isOutlook && !isSearchActive ? 'active' : ''}`}
+            onClick={() => handleButtonClick('outlook')}
+          >
+            🔮 전망
           </button>
           <button
             className={`nav-button ${isAiSummary && !isSearchActive ? 'active' : ''}`}

@@ -70,6 +70,12 @@ function FloatingMenu({ isFloatingNavVisible }) {
               <div className="menu-item" onClick={() => { navigate('/industry'); toggleMenu(); }}>
                 <span className="icon">🏭</span> 산업
               </div>
+              <div className="menu-item" onClick={() => { navigate('/outlook'); toggleMenu(); }}>
+                <span className="icon">🔮</span> 전망
+              </div>
+              <div className="menu-item" onClick={() => { navigate('/ai-summary'); toggleMenu(); }}>
+                <span className="icon">🤖</span> AI요약
+              </div>
             </div>
           </div>
         </div>

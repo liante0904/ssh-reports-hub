@@ -219,6 +219,41 @@
   flex-shrink: 0;
 }
 
+/* ── Tag badges (enricher) ── */
+.report-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 4px 0 0 0;
+}
+
+.tag {
+  font-size: 0.65em;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+.tag-sector {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.tag-stock {
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+}
+
+.tag-keyword {
+  background: #f3e5f5;
+  color: #7b1fa2;
+  border: 1px solid #ce93d8;
+}
+
 .summary-toggle-btn {
   background: none;
   border: none;
@@ -473,4 +508,37 @@
   font-size: 1.1em;
   line-height: 1.6;
   opacity: 0.8;
+}
+
+/* 연도별 전망 필터 칩 */
+.outlook-year-filter {
+  display: flex;
+  gap: 8px;
+  padding: 10px 0 14px 0;
+  flex-wrap: wrap;
+}
+
+.year-chip {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--loading-border-color);
+  background: var(--card-background-color);
+  color: var(--text-color);
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.year-chip:hover {
+  background: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+}
+
+.year-chip.active {
+  background: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+  font-weight: 600;
 }

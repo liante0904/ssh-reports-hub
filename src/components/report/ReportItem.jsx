@@ -18,7 +18,7 @@ const ReportItem = ({
   summaryRequestedIds,
   summaryCompletedIds
 }) => {
-  const { id, title, writer, gemini_summary, firm, pdf_url } = report;
+  const { id, title, writer, gemini_summary, firm, pdf_url, tags, stock_names, sector } = report;
   const { setViewerReport } = useReport();
   const [showConfirm, setShowConfirm] = useState(false);
   const isSummaryRequested = summaryRequestedIds?.has(id);
@@ -66,6 +66,17 @@ const ReportItem = ({
               )}
             </div>
           </div>
+          {(tags && tags.length > 0 || stock_names && stock_names.length > 0 || sector) && (
+            <div className="report-tags">
+              {sector && <span className="tag tag-sector">{sector}</span>}
+              {stock_names && stock_names.slice(0, 3).map((s, i) => (
+                <span key={`stock-${i}`} className="tag tag-stock">{s}</span>
+              ))}
+              {tags && tags.slice(0, 5).map((t, i) => (
+                <span key={`tag-${i}`} className="tag tag-keyword">{t}</span>
+              ))}
+            </div>
+          )}
           <div className="report-footer">
             <p className="report-writer" onClick={() => onWriterClick?.(writer)} style={{cursor: onWriterClick ? 'pointer' : 'default'}}>
               작성자: {writer} <span className="writer-search-icon">🔍</span>
