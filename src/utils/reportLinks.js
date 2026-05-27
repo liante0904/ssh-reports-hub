@@ -26,8 +26,7 @@ export function getProxyPdfUrl(report, origin = window.location.origin) {
 const prefetchedPdfUrls = new Set();
 
 export function prefetchPdf(report, origin = window.location.origin) {
-  if (!isDsReport(report)) return;
-
+  // 절약 모드 / 2G 이하 → 스킵
   const connection = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
   if (connection?.saveData || /(^|-)2g$/i.test(connection?.effectiveType || '')) return;
 
@@ -35,11 +34,21 @@ export function prefetchPdf(report, origin = window.location.origin) {
   if (!proxyUrl || prefetchedPdfUrls.has(proxyUrl)) return;
 
   prefetchedPdfUrls.add(proxyUrl);
-  fetch(proxyUrl, { method: 'GET', cache: 'force-cache' })
-    .then((res) => res.arrayBuffer())
-    .catch(() => {
-      prefetchedPdfUrls.delete(proxyUrl);
-    });
+
+  // <link rel="prefetch"> → 브라우저가 HTTP 캐시에 미리 다운로드
+  // iframe이 같은 URL 열면 캐시에서 즉시 로드 (0ms)
+  const link = document.createElement('link');
+  link.rel = 'prefetch';
+  link.href = proxyUrl;
+  link.as = 'document';
+  document.head.appendChild(link);
+
+  // fallback: prefetch 지원 안 하는 구형 브라우저용
+  if (!('relList' in HTMLLinkElement.prototype)) {
+    fetch(proxyUrl, { method: 'GET', cache: 'force-cache' })
+      .then((res) => res.arrayBuffer())
+      .catch(() => { prefetchedPdfUrls.delete(proxyUrl); });
+  }
 }
 
 export function getDirectUrl(report) {
