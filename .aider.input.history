@@ -1,0 +1,765 @@
+
+# 2026-05-14 07:40:18.970527
++Yes
+
+# 2026-05-14 07:40:37.201566
++/add
+
+# 2026-05-14 07:41:46.474969
++/add src/components/report/PDFViewerModal.jsx 컴포넌트가 아이폰이나 안드로이드 같은 모바일에서 열릴때 가로 너비가 휴대폰 크기에 딱 맞게 초기에 열리도록 설정 수정 못함 ?
+
+# 2026-05-14 07:41:59.392484
++N
+
+# 2026-05-14 07:42:53.989060
++/add src/components/report/PDFViewerModal.jsx
+
+# 2026-05-14 07:42:55.320172
++컴포넌트가 아이폰이나 안드로이드 같은 모바일에서 열릴때 가로 너비가 휴대폰 크기에 딱 맞게 초기에 열리도록 설정 수정 못함 ?
+
+# 2026-05-14 07:43:41.630913
++해당 수정내용 테스트코드 돌려보고 큰 오류 없으면 바로 메인 브런치 푸시 가능 ?
+
+# 2026-05-14 07:43:59.365514
++D
+
+# 2026-05-14 07:44:40.864682
++/help
+
+# 2026-05-14 07:45:10.955514
++/settings
+
+# 2026-05-14 07:45:39.796411
++/clear
+
+# 2026-05-14 07:46:14.214151
++혹시 멀티 에이전트나 상위 폴더의 백엔드를 스캔하거나 연동하는 코딩은 못함 ? 상위 apps/ 폴더에서 프론트와 백엔드가 있는데 거기서 켜야함 ?
+
+# 2026-05-15 11:16:52.015533
++/add src/components/menu/TelegramAuth.jsx
+
+# 2026-05-15 11:17:38.640774
++현재 우리웹에 텔레그램 로그인 기능이 잘 작동은 하는데.. 로그인유지(그러니까 로그인 성공후 시간이 흐른뒤 다시 페이지 접속한 경우) 로그인 창은 로그인 된걸로 인식되나, 즐겨찾기나, 키워드 목록 리스트에 데이터가 제대로 반영되지 않는 거 수정좀
+
+# 2026-05-15 11:18:01.330214
++D
+
+# 2026-05-15 11:18:40.835427
++어느정도 수정된거임? 테스트해서 바로 반영해도 되는 난이도인가 ?
+
+# 2026-05-15 11:18:58.535747
++현재 우리웹에 텔레그램 로그인 기능이 잘 작동은 하는데.. 로그인유지(그러니까 로그인 성공후 시간이 흐른뒤 다시 페이지 접속한 경우) 로그인 창은 로그인 된걸로 인식되나, 즐겨찾기나, 키워드 목록 리스트에 데이터가 제대로 반영되지 않는 거 수정좀
+
+# 2026-05-15 13:02:53.733772
++/add src/components/menu/TelegramAuth.jsx
+
+# 2026-05-15 13:02:56.828307
++현재 우리웹에 텔레그램 로그인 기능이 잘 작동은 하는데.. 로그인유지(그러니까 로그인 성공후 시간이 흐른뒤 다시 페이지 접속한 경우) 로그인 창은 로그인 된걸로 인식되나, 즐겨찾기나, 키워드 목록 리스트에 데이터가 제대로 반영되지 않는 거 수정좀
+
+# 2026-05-15 13:03:16.742539
++Yes
+
+# 2026-05-15 13:03:42.657910
++테스트 후 바로 메인에 반영해도 됨 ?
+
+# 2026-05-15 13:04:11.668520
++테스트 코드 작성 
+
+# 2026-05-15 13:04:39.052923
++Yes
+
+# 2026-05-15 13:04:42.557755
++D
+
+# 2026-05-15 13:05:15.013050
++Y
+
+# 2026-05-15 13:05:21.287842
++D
+
+# 2026-05-15 13:05:39.158083
++운영 데이터 손상이 없는 경우 테스트 진행하고 이상없으면 메인 반영
+
+# 2026-05-15 13:06:21.848215
++
++ubuntu@arm2:~/workspace/external.reports-hub/apps/frontend/ssh-reports-hub$  npm install npx jest test/unit/useKeywords.test.js
++npm error code ENOTDIR
++npm error syscall open
++npm error path /home/ubuntu/workspace/external.reports-hub/apps/frontend/ssh-reports-hub/test/unit/useKeywords.test.js/package.json
++npm error errno -20
++npm error Could not read package.json: Error: ENOTDIR: not a directory, open '/home/ubuntu/workspace/external.reports-hub/apps/frontend/ssh-reports-hub/test/unit/useKeywords.test.js/package.json'
++npm error A complete log of this run can be found in: /home/ubuntu/.npm/_logs/2026-05-15T04_06_14_709Z-debug-0.log
+
+# 2026-05-15 13:06:43.517754
++
++ubuntu@arm2:~/workspace/external.reports-hub/apps/frontend/ssh-reports-hub$ npm install
++npm error code ERESOLVE
++npm error ERESOLVE unable to resolve dependency tree
++npm error
++npm error While resolving: ssh-reports-hub@0.0.0
++npm error Found: react@19.2.6
++npm error node_modules/react
++npm error   react@"^19.0.0" from the root project
++npm error
++npm error Could not resolve dependency:
++npm error peer react@"^18.0.0" from @testing-library/react@14.3.1
++npm error node_modules/@testing-library/react
++npm error   dev @testing-library/react@"^14.0.0" from the root project
++npm error
++npm error Fix the upstream dependency conflict, or retry
++npm error this command with --force or --legacy-peer-deps
++npm error to accept an incorrect (and potentially broken) dependency resolution.
++npm error
++npm error
++npm error For a full report see:
++npm error /home/ubuntu/.npm/_logs/2026-05-15T04_06_36_323Z-eresolve-report.txt
++npm error A complete log of this run can be found in: /home/ubuntu/.npm/_logs/2026-05-15T04_06_36_323Z-debug-0.log
++ubuntu@arm2:~/workspace/external.reports-hub/apps/frontend/ssh-reports-hub$
++[7] 1:npm* 2:python-
+
+# 2026-05-15 13:06:45.112858
++Y
+
+# 2026-05-15 13:06:45.116273
++/run npm install
+
+# 2026-05-15 13:06:45.116483
++/run npm install
+
+# 2026-05-15 13:06:46.969209
++/run npx jest test/unit/useKeywords.test.js
+
+# 2026-05-15 13:06:46.969276
++/run npx jest test/unit/useKeywords.test.js
+
+# 2026-05-15 13:07:08.532759
++D
+
+# 2026-05-15 13:07:13.653094
++추가 진행
+
+# 2026-05-15 13:07:21.355466
++D
+
+# 2026-05-15 13:07:58.733264
++
++npm error
++npm error For a full report see:
++npm error /home/ubuntu/.npm/_logs/2026-05-15T04_07_49_215Z-eresolve-report.txt
++npm error A complete log of this run can be found in: /home/ubuntu/.npm/_logs/2026-05-15T04_07_49_215Z-debug-0.log
++ubuntu@arm2:~/workspace/external.reports-hub/apps/frontend/ssh-reports-hub$ npm install
++npm error code ERESOLVE
++npm error ERESOLVE unable to resolve dependency tree
++npm error
++npm error While resolving: ssh-reports-hub@0.0.0
++npm error Found: react@19.2.6
++npm error node_modules/react
++npm error   react@"^19.0.0" from the root project
++npm error
++npm error Could not resolve dependency:
++npm error peer react@"^18.0.0" from @testing-library/react@14.3.1
++npm error node_modules/@testing-library/react
++npm error   dev @testing-library/react@"^14.0.0" from the root project
++npm error
++npm error Fix the upstream dependency conflict, or retry
++npm error this command with --force or --legacy-peer-deps
++npm error to accept an incorrect (and potentially broken) dependency resolution.
++npm error
++npm error
++npm error For a full report see:
++npm error /home/ubuntu/.npm/_logs/2026-05-15T04_07_54_356Z-eresolve-report.txt
++npm error A complete log of this run can be found in: /home/ubuntu/.npm/_logs/2026-05-15T04_07_54_356Z-debug-0.log
++ubuntu@arm2:~/workspace/external.reports-hub/apps/frontend/ssh-reports-hub$
+
+# 2026-05-15 13:09:44.105411
++D
+
+# 2026-05-15 13:10:01.290320
++
++Run shell command? (Y)es/(N)o/(S)kip all/(D)on't ask again [Yes]: D
++
++npm install --save-dev @testing-library/react@latest --legacy-peer-deps
++Run shell command? (Y)es/(N)o/(S)kip all/(D)on't ask again [Yes]: D => D는 실행안함 ?
+
+# 2026-05-15 13:10:17.800172
++y
+
+# 2026-05-15 13:10:17.803549
++/run npm install --legacy-peer-deps
+
+# 2026-05-15 13:10:17.803584
++/run npm install --legacy-peer-deps
+
+# 2026-05-15 13:10:37.575670
++알아서 좀 실행하면 안됨? 몹시 귀찮음
+
+# 2026-05-15 13:10:59.030264
++y
+
+# 2026-05-15 13:10:59.033538
++/run npm install --legacy-peer-deps && npx jest test/unit/useKeywords.test.js
+
+# 2026-05-15 13:10:59.033574
++/run npm install --legacy-peer-deps && npx jest test/unit/useKeywords.test.js
+
+# 2026-05-15 13:11:25.101091
++
++Run `npm audit` for details.
++● Validation Error:
++
++  Test environment jest-environment-jsdom cannot be found. Make sure the testEnvironment configuration option points to an existing node module.
++
++  Configuration Documentation:
++  https://jestjs.io/docs/configuration
++
++
++As of Jest 28 "jest-environment-jsdom" is no longer shipped by default, make sure to install it separately.
++───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
++babel.config.js               package.json src/components/menu/TelegramAuth.jsx src/hooks/useKeywords.js  \\ 
++ubuntu@arm2:~/workspace/external.reports-hub/apps/frontend/ssh-reports-hub$
++ubuntu@arm2:~/workspace/external.reports-hub/apps/frontend/ssh-reports-hub$
++  npm audit fix --force
++npm warn using --force Recommended protections disabled.
++npm warn audit Updating netlify-cli to 26.0.1, which is a SemVer major change.
++npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
++npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
++npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
++
++added 833 packages, removed 769 packages, changed 18 packages, and audited 1723 packages in 1m
++
++440 packages are looking for funding
++  run `npm fund` for details
++
++# npm audit report
++
++uuid  13.0.0
++Severity: moderate
++uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided - https://github.com/advisories/GHSA-w5hq-g745-h8pq
++fix available via `npm audit fix --force`
++Will install netlify-cli@23.14.0, which is a breaking change
++node_modules/uuid
++  netlify-cli  >=23.15.0
++  Depends on vulnerable versions of uuid
+
+# 2026-05-15 13:11:30.680538
++n
+
+# 2026-05-15 13:11:40.145257
++y
+
+# 2026-05-15 13:11:40.185771
++/run npm install --save-dev jest-environment-jsdom --legacy-peer-deps
+
+# 2026-05-15 13:11:40.185926
++/run npm install --save-dev jest-environment-jsdom --legacy-peer-deps
+
+# 2026-05-15 13:12:05.830830
++y대신 엔터로 못함 ?
+
+# 2026-05-15 13:12:10.980360
++/run npm install --save-dev jest-environment-jsdom --legacy-peer-deps && npx jest test/unit/useKeywords.test.js
+
+# 2026-05-15 13:12:10.980423
++/run npm install --save-dev jest-environment-jsdom --legacy-peer-deps && npx jest test/unit/useKeywords.test.js
+
+# 2026-05-15 13:12:23.830756
++
++
++npm install --save-dev jest-environment-jsdom --legacy-peer-deps && npx jest test/unit/useKeywords.test.js
++Run shell command? (Y)es/(N)o/(D)on't ask again [Yes]:
++
++Running npm install --save-dev jest-environment-jsdom --legacy-peer-deps && npx jest test/unit/useKeywords.test.js
++
++changed 1 package, and audited 1715 packages in 5s
++
++366 packages are looking for funding
++  run `npm fund` for details
++
++32 vulnerabilities (1 low, 15 moderate, 16 high)
++
++To address all issues, run:
++  npm audit fix
++
++Run `npm audit` for details.
++ FAIL  test/unit/useKeywords.test.js
++  ● Test suite failed to run
++
++    ReferenceError: module is not defined in ES module scope
++    This file is being treated as an ES module because it has a '.js' file extension and '/home/ubuntu/workspace/extern
++al.reports-hub/apps/frontend/ssh-reports-hub/package.json' contains "type": "module". To treat it as a CommonJS script,
++ rename it to use the '.cjs' file extension.
++
++    > 1 | module.exports = {
++        | ^
++      2 |   presets: [
++      3 |     '@babel/preset-env',
++      4 |     ['@babel/preset-react', { runtime: 'automatic' }]
++
++      at file:/home/ubuntu/workspace/external.reports-hub/apps/frontend/ssh-reports-hub/babel.config.js:1:1
++      at loadPartialConfigSync (node_modules/@babel/core/src/config/index.ts:50:60)
++      at loadPartialConfigSync (node_modules/@babel/core/src/config/index.ts:69:14)
++      at ScriptTransformer._getCacheKey (node_modules/@jest/transform/build/ScriptTransformer.js:228:41)
++      at ScriptTransformer._getFileCachePath (node_modules/@jest/transform/build/ScriptTransformer.js:289:27)
++      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/ScriptTransformer.js:525:32)
++      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/ScriptTransformer.js:674:40)
++      at ScriptTransformer.transform (node_modules/@jest/transform/build/ScriptTransformer.js:726:19)
++
++Test Suites: 1 failed, 1 total
+
+# 2026-05-15 13:12:43.520545
++
++npx jest test/unit/useKeywords.test.js
++
++실행요청 왜 안함 제발좀 귀찮음
+
+# 2026-05-15 13:12:56.530979
++왜 실행 못함 ? 
+
+# 2026-05-15 13:13:00.300505
++
++  npm audit fix
++
++Run `npm audit` for details.
++ubuntu@arm2:~/workspace/external.reports-hub/apps/frontend/ssh-reports-hub$
++npx jest test/unit/useKeywords.test.js
++ FAIL  test/unit/useKeywords.test.js
++  ● Test suite failed to run
++
++    Cannot find module '@testing-library/dom' from 'node_modules/@testing-library/react/dist/pure.js'
++
++    Require stack:
++      node_modules/@testing-library/react/dist/pure.js
++      node_modules/@testing-library/react/dist/index.js
++      test/unit/useKeywords.test.js
++
++    > 1 | import { renderHook, act } from '@testing-library/react';
++        | ^
++      2 | import { useKeywords } from '../../src/hooks/useKeywords';
++      3 | import { useReport } from '../../src/context/useReport';
++      4 | import { request } from '../../src/utils/api';
++
++      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
++      at Object.<anonymous> (node_modules/@testing-library/react/dist/pure.js:46:12)
++      at Object.<anonymous> (node_modules/@testing-library/react/dist/index.js:7:13)
++      at Object.require (test/unit/useKeywords.test.js:1:1)
++
++Test Suites: 1 failed, 1 total
++Tests:       0 total
++Snapshots:   0 total
++Time:        1.47 s
++Ran all test suites matching /test\/unit\/useKeywords.test.js/i.
++ubuntu@arm2:~/workspace/external.reports-hub/apps/frontend/ssh-reports-hub$
+
+# 2026-05-15 13:13:05.455264
++
++
++npx jest test/unit/useKeywords.test.js
++
++
++
++Tokens: 28k sent, 72 received. Cost: $0.0078 message
+
+# 2026-05-15 13:13:09.471583
++/run npm install --save-dev @testing-library/dom --legacy-peer-deps
+
+# 2026-05-15 13:13:09.471630
++/run npm install --save-dev @testing-library/dom --legacy-peer-deps
+
+# 2026-05-15 13:13:21.365833
++
++> Tokens: 28k sent, 72 received. Cost: $0.0078 message
++Please answer with one of: yes, no, skip, all, don't
++Run shell command? (Y)es/(N)o/(S)kip all/(D)on't ask again [Yes]:
++
++Running npm install --save-dev @testing-library/dom --legacy-peer-deps
++
++added 8 packages, changed 1 package, and audited 1723 packages in 5s
++
++366 packages are looking for funding
++  run `npm fund` for details
++
++32 vulnerabilities (1 low, 15 moderate, 16 high)
++
++To address all issues, run:
++  npm audit fix
++
++Run `npm audit` for details.
++───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
++babel.config.js               package.json src/components/menu/TelegramAuth.jsx src/hooks/useKeywords.js
++test/unit/useKeywords.test.js
++>
+
+# 2026-05-15 13:13:48.075580
++
++  ● useKeywords › should handle undo delete
++
++    TypeError: Cannot read properties of undefined (reading 'logout')
++
++       6 |
++       7 | export const useKeywords = (telegramUser) => {
++    >  8 |   const { logout } = useReport();
++         |           ^
++       9 |   const [keywords, setKeywords] = useState([]);
++      10 |   const [newKeyword, setNewKeyword] = useState('');
++      11 |   const [isLoadingKeywords, setIsLoadingKeywords] = useState(false);
++
++      at logout (src/hooks/useKeywords.js:8:11)
++      at test/unit/useKeywords.test.js:116:71
++      at TestComponent (node_modules/@testing-library/react/dist/pure.js:330:27)
++      at Object.react-stack-bottom-frame (node_modules/react-dom/cjs/react-dom-client.development.js:23863:20)
++      at renderWithHooks (node_modules/react-dom/cjs/react-dom-client.development.js:5529:22)
++      at updateFunctionComponent (node_modules/react-dom/cjs/react-dom-client.development.js:8897:19)
++      at beginWork (node_modules/react-dom/cjs/react-dom-client.development.js:10522:18)
++      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:1522:13)
++      at performUnitOfWork (node_modules/react-dom/cjs/react-dom-client.development.js:15140:22)
++      at workLoopSync (node_modules/react-dom/cjs/react-dom-client.development.js:14956:41)
++      at renderRootSync (node_modules/react-dom/cjs/react-dom-client.development.js:14936:11)
++      at performWorkOnRoot (node_modules/react-dom/cjs/react-dom-client.development.js:14462:44)
++      at performWorkOnRootViaSchedulerTask (node_modules/react-dom/cjs/react-dom-client.development.js:16216:7)
++      at flushActQueue (node_modules/react/cjs/react.development.js:566:34)
++      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:859:10)
++      at node_modules/@testing-library/react/dist/act-compat.js:46:25
++      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
++      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
++      at renderHook (node_modules/@testing-library/react/dist/pure.js:339:7)
++      at test/unit/useKeywords.test.js:116:53
++      at call (test/unit/useKeywords.test.js:2:1)
++      at Generator.tryCatch (test/unit/useKeywords.test.js:2:1)
++      at Generator._invoke [as next] (test/unit/useKeywords.test.js:2:1)
++      at asyncGeneratorStep (test/unit/useKeywords.test.js:2:1)
++      at asyncGeneratorStep (test/unit/useKeywords.test.js:2:1)
++      at _next (test/unit/useKeywords.test.js:2:1)
++      at Object.<anonymous> (test/unit/useKeywords.test.js:2:1)
++
++Test Suites: 1 failed, 1 total
++Tests:       5 failed, 5 total
++Snapshots:   0 total
++Time:        2.09 s
++Ran all test suites matching /test\/unit\/useKeywords.test.js/i.
+
+# 2026-05-15 13:14:09.025723
++)
++      at Object.<anonymous> (test/unit/useKeywords.test.js:55:34)
++
++  console.error
++    Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
++
++      111 |       fetchKeywords();
++      112 |     } else {
++    > 113 |       setKeywords([]);
++          |       ^
++      114 |       setIsKeywordOverlayOpen(false);
++      115 |     }
++      116 |   }, [telegramUser, fetchKeywords]);
++
++      at getRootForUpdatedFiber (node_modules/react-dom/cjs/react-dom-client.development.js:3867:17)
++      at enqueueConcurrentHookUpdate (node_modules/react-dom/cjs/react-dom-client.development.js:3820:14)
++      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:6966:18)
++      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:6927:7)
++      at setKeywords (src/hooks/useKeywords.js:113:7)
++      at Object.react-stack-bottom-frame (node_modules/react-dom/cjs/react-dom-client.development.js:23949:20)
++      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:1522:13)
++      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom-client.development.js:11905:29)
++      at commitHookPassiveMountEffects (node_modules/react-dom/cjs/react-dom-client.development.js:12028:11)
++      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:13841:13)
++      at recursivelyTraversePassiveMountEffects (node_modules/react-dom/cjs/react-dom-client.development.js:13815:11)
++      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:13853:11)
++      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom-client.development.js:15737:9)
++      at node_modules/react-dom/cjs/react-dom-client.development.js:15379:15
++      at flushActQueue (node_modules/react/cjs/react.development.js:566:34)
++      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:859:10)
++      at node_modules/@testing-library/react/dist/act-compat.js:46:25
++      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
++      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
++      at renderHook (node_modules/@testing-library/react/dist/pure.js:339:7)
++      at Object.<anonymous> (test/unit/useKeywords.test.js:55:34)
+
+# 2026-05-15 13:14:26.475455
++
++
++    TypeError: waitForNextUpdate is not a function
++
++       95 |     const { result, waitForNextUpdate } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
++       96 |
++    >  97 |     await waitForNextUpdate();
++          |           ^
++       98 |
++       99 |     act(() => {
++      100 |       result.current.handleDeleteKeyword('test1');
++
++      at waitForNextUpdate (test/unit/useKeywords.test.js:97:11)
++      at call (test/unit/useKeywords.test.js:2:1)
++      at Generator.tryCatch (test/unit/useKeywords.test.js:2:1)
++      at Generator._invoke [as next] (test/unit/useKeywords.test.js:2:1)
++      at asyncGeneratorStep (test/unit/useKeywords.test.js:2:1)
++      at asyncGeneratorStep (test/unit/useKeywords.test.js:2:1)
++      at _next (test/unit/useKeywords.test.js:2:1)
++      at Object.<anonymous> (test/unit/useKeywords.test.js:2:1)
++
++  ● useKeywords › should handle undo delete
++
++    TypeError: waitForNextUpdate is not a function
++
++      120 |     const { result, waitForNextUpdate } = renderHook(() => useKeywords({ id: 123, first_name: 'Test' }));
++      121 |
++    > 122 |     await waitForNextUpdate();
++          |           ^
++      123 |
++      124 |     act(() => {
++      125 |       result.current.handleDeleteKeyword('test1');
++
++      at waitForNextUpdate (test/unit/useKeywords.test.js:122:11)
++      at call (test/unit/useKeywords.test.js:2:1)
++      at Generator.tryCatch (test/unit/useKeywords.test.js:2:1)
++      at Generator._invoke [as next] (test/unit/useKeywords.test.js:2:1)
++      at asyncGeneratorStep (test/unit/useKeywords.test.js:2:1)
++      at asyncGeneratorStep (test/unit/useKeywords.test.js:2:1)
++      at _next (test/unit/useKeywords.test.js:2:1)
++      at Object.<anonymous> (test/unit/useKeywords.test.js:2:1)
++
++Test Suites: 1 failed, 1 total
++Tests:       4 failed, 1 passed, 5 total
++Snapshots:   0 total
++Time:        1.821 s, estimated 2 s
++Ran all test suites matching /test\/unit\/useKeywords.test.js/i.
++ubuntu@arm2:~/workspace/external.reports-hub/apps/frontend/ssh-reports-hub$
+
+# 2026-05-15 13:14:52.735654
++-client.development.js:3820:14)
++      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:6966:18)
++      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:6927:7)
++      at setKeywords (src/hooks/useKeywords.js:36:7)
++      at call (src/hooks/useKeywords.js:2:1)
++      at Generator.tryCatch (src/hooks/useKeywords.js:2:1)
++      at Generator._invoke [as next] (src/hooks/useKeywords.js:2:1)
++      at asyncGeneratorStep (src/hooks/useKeywords.js:2:1)
++      at asyncGeneratorStep (src/hooks/useKeywords.js:2:1)
++
++  console.error
++    Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
++
++      34 |       const data = await request(`${CONFIG.API.BASE_URL}/keywords`, {}, logout);
++      35 |       const keywordList = normalizeKeywordList(data);
++    > 36 |       setKeywords(keywordList.filter(k => k.is_active));
++         |       ^
++      37 |     } catch {
++      38 |       // 에러는 request 내부에서 이미 로깅됨
++      39 |     } finally {
++
++      at getRootForUpdatedFiber (node_modules/react-dom/cjs/react-dom-client.development.js:3867:17)
++      at enqueueConcurrentHookUpdate (node_modules/react-dom/cjs/react-dom-client.development.js:3820:14)
++      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:6966:18)
++      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:6927:7)
++      at setKeywords (src/hooks/useKeywords.js:36:7)
++      at call (src/hooks/useKeywords.js:2:1)
++      at Generator.tryCatch (src/hooks/useKeywords.js:2:1)
++      at Generator._invoke [as next] (src/hooks/useKeywords.js:2:1)
++      at asyncGeneratorStep (src/hooks/useKeywords.js:2:1)
++      at asyncGeneratorStep (src/hooks/useKeywords.js:2:1)
++
++  console.error
++    Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
++
++      34 |       const data = await request(`${CONFIG.API.BASE_URL}/keywords`, {}, logout);
++      35 |       const keywordList = normalizeKeywordList(data);
++    > 36 |       setKeywords(keywordList.filter(k => k.is_active));
++         |       ^
++      37 |     } catch {
++      38 |       // 에러는 request 내부에서 이미 로깅됨
++      39 |     } finally {
++
++      at getRootForUpdatedFiber (node_modules/react-dom/cjs/react-dom-client.development.js:3867:17)
++      at enqueueConcurrentHookUpdate (node_modules/react-dom/cjs/react-dom-client.development.js:3820:14)
++      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:6966:18)
++      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:6927:7)
++      at setKeywords (src/hooks/useKeywords.js:36:7)
++      at call (src/hooks/useKeywords.js:2:1)
++      at Generator.tryCatch (src/hooks/useKeywords.js:2:1)
++      at Generator._invoke [as next] (src/hooks/useKeywords.js:2:1)
++      at asyncGeneratorStep (src/hooks/useKeywords.js:2:1)
++      at asyncGeneratorStep (src/hooks/useKeywords.js:2:1)
++
++  console.error
++    Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
++
++      34 |       const data = await request(`${CONFIG.API.BASE_URL}/keywords`, {}, logout);
++      35 |       const keywordList = normalizeKeywordList(data);
++    > 36 |       setKeywords(keywordList.filter(k => k.is_active));
++         |       ^
++      37 |     } catch {
++      38 |       // 에러는 request 내부에서 이미 로깅됨
++      39 |     } finally {
++
++      at getRootForUpdatedFiber (node_modules/react-dom/cjs/react-dom-client.development.js:3867:17)
++      at enqueueConcurrentHookUpdate (node_modules/react-dom/cjs/react-dom-client.development.js:3820:14)
++      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:6966:18)
++      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:6927:7)
++      at setKeywords (src/hooks/useKeywords.js:36:7)
++      at call (src/hooks/useKeywords.js:2:1)
++      at Generator.tryCatch (src/hooks/useKeywords.js:2:1)
++      at Generator._invoke [as next] (src/hooks/useKeywords.js:2:1)
++      at asyncGeneratorStep (src/hooks/useKeywords.js:2:1)
++      at asyncGeneratorStep (src/hooks/useKeywords.js:2:1)
++
++  console.error
++    Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
++
++      34 |       const data = await request(`${CONFIG.API.BASE_URL}/keywords`, {}, logout);
++      35 |       const keywordList = normalizeKeywordList(data);
++    > 36 |       setKeywords(keywordList.filter(k => k.is_active));
++         |       ^
++      37 |     } catch {
++      38 |       // 에러는 request 내부에서 이미 로깅됨
++      39 |     } finally {
++
++      at getRootForUpdatedFiber (node_modules/react-dom/cjs/react-dom-client.development.js:3867:17)
++      at enqueueConcurrentHookUpdate (node_modules/react-dom/cjs/react-dom-client.development.js:3820:14)
++      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:6966:18)
++      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:6927:7)
++      at setKeywords (src/hooks/useKeywords.js:36:7)
++      at call (src/hooks/useKeywords.js:2:1)
++      at Generator.tryCatch (src/hooks/useKeywords.js:2:1)
++      at Generator._invoke [as next] (src/hooks/useKeywords.js:2:1)
++      at asyncGeneratorStep (src/hooks/useKeywords.js:2:1)
++      at asyncGeneratorStep (src/hooks/useKeywords.js:2:1)
++
++ FAIL  test/unit/useKeywords.test.js
++  useKeywords
++    ✓ should fetch keywords when telegramUser is provided (74 ms)
++    ✓ should not fetch keywords when telegramUser is null (6 ms)
++    ✕ should handle add keyword (1065 ms)
++    ✕ should handle delete keyword (1055 ms)
++    ✕ should handle undo delete (1055 ms)
++
++  ● useKeywords › should handle add keyword
++
++    expect(received).toEqual(expected) // deep equality
++
++    - Expected  - 2
++    + Received  + 2
++
++      Array [
++        Object {
++          "is_active": true,
++    -     "keyword": "existing",
++    +     "keyword": "test1",
++        },
++        Object {
++          "is_active": true,
++    -     "keyword": "new",
++    +     "keyword": "test2",
++        },
++      ]
++
++    Ignored nodes: comments, script, style
++    <html>
++      <head />
++      <body>
++        <div />
++      </body>
++    </html>
++
++      80 |
++      81 |     await waitFor(() => {
++    > 82 |       expect(result.current.keywords).toEqual([
++         |                                       ^
++      83 |         { keyword: 'existing', is_active: true },
++      84 |         { keyword: 'new', is_active: true }
++      85 |       ]);
++
++      at toEqual (test/unit/useKeywords.test.js:82:39)
++      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
++      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
++      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
++      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:579:19)
++
++  ● useKeywords › should handle delete keyword
++
++    expect(received).toEqual(expected) // deep equality
++
++    - Expected  - 0
++    + Received  + 4
++
++      Array [
++        Object {
++          "is_active": true,
++    +     "keyword": "test1",
++    +   },
++    +   Object {
++    +     "is_active": true,
++          "keyword": "test2",
++        },
++      ]
++
++    Ignored nodes: comments, script, style
++    <html>
++      <head />
++      <body>
++        <div />
++      </body>
++    </html>
++
++      107 |
++      108 |     await waitFor(() => {
++    > 109 |       expect(result.current.keywords).toEqual([
++          |                                       ^
++      110 |         { keyword: 'test2', is_active: true }
++      111 |       ]);
++      112 |     });
++
++      at toEqual (test/unit/useKeywords.test.js:109:39)
++      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
++      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
++      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
++      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:579:19)
++
++  ● useKeywords › should handle undo delete
++
++    expect(received).toEqual(expected) // deep equality
++
++    - Expected  - 0
++    + Received  + 4
++
++      Array [
++        Object {
++          "is_active": true,
++    +     "keyword": "test1",
++    +   },
++    +   Object {
++    +     "is_active": true,
++          "keyword": "test2",
++        },
++      ]
++
++    Ignored nodes: comments, script, style
++    <html>
++      <head />
++      <body>
++        <div />
++      </body>
++    </html>
++
++      134 |
++      135 |     await waitFor(() => {
++    > 136 |       expect(result.current.keywords).toEqual([
++          |                                       ^
++      137 |         { keyword: 'test2', is_active: true }
++      138 |       ]);
++      139 |     });
++
++      at toEqual (test/unit/useKeywords.test.js:136:39)
++      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
++      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
++      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
++      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:579:19)
++
++Test Suites: 1 failed, 1 total
++Tests:       3 failed, 2 passed, 5 total
++Snapshots:   0 total
++Time:        4.895 s
+
+# 2026-05-17 13:22:11.373805
++/add src/main.jsx 
+
+# 2026-05-17 13:23:05.493662
++관리자페이지 추가(회원가입 기능시 관리자 승인으로 회원 사용여부) 

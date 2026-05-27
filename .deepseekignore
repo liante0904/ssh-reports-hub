@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.netlify/
+public/lib/pdfjs/
+package-lock.json
+deno.lock
+*.log
+**/*.map
+**/pg_data/**
+**/__pycache__/
+.venv/
+.env
+.env.*
+secrets/
+~/secrets/
