@@ -46,5 +46,6 @@ export const CONFIG = {
     AUTH_TOKEN: 'auth_token',
     TELEGRAM_USER: 'telegram_user',
     THEME: 'theme',
+    REMEMBER_ME: 'remember_me',
   }
 };

@@ -77,7 +77,21 @@ export const handler = async (event) => {
   if (!url) return { statusCode: 400, body: 'URL missing' };
 
   const targetUrl = decodeURIComponent(url);
-  const boardUrl = referer ? decodeURIComponent(referer) : targetUrl.replace('download.php', 'board.php');
+  let boardUrl;
+  if (referer) {
+    let resolved = decodeURIComponent(referer);
+    // 상대 경로(예: ../bbs/board.php?...)를 targetUrl 기준 절대 URL로 변환
+    if (!/^https?:\/\//i.test(resolved)) {
+      try {
+        resolved = new URL(resolved, targetUrl).toString();
+      } catch {
+        resolved = null;
+      }
+    }
+    boardUrl = resolved || targetUrl.replace('download.php', 'board.php');
+  } else {
+    boardUrl = targetUrl.replace('download.php', 'board.php');
+  }
 
   try {
     const targetHost = new URL(targetUrl).hostname;

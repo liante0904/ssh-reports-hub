@@ -17,11 +17,26 @@ export function ReportProvider({ children }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTopMenuOpen, setIsTopMenuOpen] = useState(false);
 
+  // 로그인 유지 여부
+  const [rememberMe, setRememberMe] = useState(() => {
+    try {
+      return localStorage.getItem(CONFIG.STORAGE_KEYS.REMEMBER_ME) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   // 텔레그램 사용자 상태 (Context로 전역화)
+  // 로그인 유지 설정에 따라 localStorage 또는 sessionStorage 에서 복원
   const [telegramUser, setTelegramUser] = useState(() => {
     try {
-      const saved = localStorage.getItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
-      return saved ? JSON.parse(saved) : null;
+      // 먼저 localStorage 확인 (rememberMe=true 로 저장된 경우)
+      const savedLocal = localStorage.getItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
+      if (savedLocal) return JSON.parse(savedLocal);
+      // sessionStorage 확인 (rememberMe=false 로 저장된 경우)
+      const savedSession = sessionStorage.getItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
+      if (savedSession) return JSON.parse(savedSession);
+      return null;
     } catch {
       return null;
     }
@@ -107,7 +122,11 @@ export function ReportProvider({ children }) {
   const logout = useCallback(() => {
     localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
+    localStorage.removeItem(CONFIG.STORAGE_KEYS.REMEMBER_ME);
+    sessionStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
     setTelegramUser(null);
+    setRememberMe(false);
     window.location.reload();
   }, []);
 
@@ -143,6 +162,8 @@ export function ReportProvider({ children }) {
     toggleTheme,
     telegramUser,
     setTelegramUser,
+    rememberMe,
+    setRememberMe,
     logout
   };
 

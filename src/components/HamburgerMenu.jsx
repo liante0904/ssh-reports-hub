@@ -8,12 +8,21 @@ import { useKeywords } from '../hooks/useKeywords';
 import { useReport } from '../context/useReport';
 import { CONFIG } from '../constants/config';
 import { request } from '../utils/api';
-import { createDevTelegramUser, persistTelegramUser } from '../utils/devAuth';
+import { createDevTelegramUser } from '../utils/devAuth';
 import './HamburgerMenu.css';
 
 function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChange, handleHeaderClick }) {
-  const { telegramUser, setTelegramUser, logout } = useReport();
+  const { telegramUser, setTelegramUser, rememberMe, setRememberMe, logout } = useReport();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+  // rememberMe 여부에 따라 localStorage 또는 sessionStorage 에 인증 정보 저장
+  const persistAuth = (token, user) => {
+    const storage = rememberMe ? localStorage : sessionStorage;
+    if (token) storage.setItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN, token);
+    storage.setItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER, JSON.stringify(user));
+    // rememberMe 설정 자체는 항상 localStorage 에 저장 (다음 방문 시 복원용)
+    localStorage.setItem(CONFIG.STORAGE_KEYS.REMEMBER_ME, rememberMe ? 'true' : 'false');
+  };
 
   const {
     keywords,
@@ -59,14 +68,12 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
 
             if (result) {
               const authToken = extractAuthToken(result);
-              if (authToken) {
-                localStorage.setItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN, authToken);
-              } else {
+              if (!authToken) {
                 console.warn('[Telegram Auth] Auth response did not include a token field.', result);
               }
               const userData = { ...user, ...(result.user || {}) };
               setTelegramUser(userData);
-              localStorage.setItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER, JSON.stringify(userData));
+              persistAuth(authToken, userData);
             }
           } catch (error) {
             console.error('[Telegram Auth] login failed:', error);
@@ -81,7 +88,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
   const loginWithDevBypass = () => {
     const devUser = createDevTelegramUser();
     setTelegramUser(devUser);
-    persistTelegramUser(devUser);
+    persistAuth(null, devUser);
   };
 
   const loginWithTelegramApp = () => {
@@ -117,6 +124,8 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               loginWithDevBypass={loginWithDevBypass}
               handleLogout={logout}
               toggleKeywordOverlay={toggleKeywordOverlay}
+              rememberMe={rememberMe}
+              setRememberMe={setRememberMe}
             />
 
             <AdminSection isAdmin={telegramUser?.is_admin} />

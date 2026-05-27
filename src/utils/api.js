@@ -18,7 +18,8 @@ import { CONFIG } from '../constants/config';
  * @returns {Promise<any>}
  */
 export async function request(url, options = {}, logout) {
-  const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) 
+    || sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   const { skipAuth, logoutOn401 = true, ...requestOptions } = options;
   const method = (requestOptions.method || 'GET').toUpperCase();
   

@@ -1,4 +1,4 @@
-const FETCH_TIMEOUT_MS = 12000;
+const FETCH_TIMEOUT_MS = 15000;
 const COOKIE_TTL_MS = 20 * 60 * 1000;
 const cookieCache = new Map();
 
@@ -26,16 +26,36 @@ function decodeParam(value = '') {
 }
 
 function getCookieHeader(res) {
-  if (res.headers.getSetCookie) {
-    return res.headers.getSetCookie().map(c => c.split(';')[0]).join('; ');
+  // 최신 Node.js runtime (getSetCookie 지원)
+  if (typeof res.headers.getSetCookie === 'function') {
+    const cookies = res.headers.getSetCookie();
+    if (cookies && cookies.length > 0) {
+      return cookies.map(c => c.split(';')[0].trim()).join('; ');
+    }
   }
 
-  const fallbackCookie = res.headers.get('set-cookie');
-  return fallbackCookie ? fallbackCookie.split(/,(?=[^;]+?=)/).map(c => c.split(';')[0]).join('; ') : '';
+  // Fallback: set-cookie 헤더 직접 파싱
+  const raw = res.headers.get('set-cookie');
+  if (!raw) return '';
+
+  // 여러 Set-Cookie가 콤마로 결합되어 올 수 있음 (expires 내 콤마는 제외)
+  const parts = raw.split(/,(?=[^;]+?=)/);
+  return parts.map(c => c.split(';')[0].trim()).filter(Boolean).join('; ');
 }
 
 function buildBoardUrl(targetUrl, referer) {
-  if (referer) return decodeParam(referer);
+  if (referer) {
+    let resolved = decodeParam(referer);
+    // 상대 경로(예: ../bbs/board.php?...)를 targetUrl 기준 절대 URL로 변환
+    if (!/^https?:\/\//i.test(resolved)) {
+      try {
+        resolved = new URL(resolved, targetUrl).toString();
+      } catch {
+        resolved = null;
+      }
+    }
+    if (resolved) return resolved;
+  }
 
   try {
     const parsed = new URL(targetUrl);
@@ -61,29 +81,72 @@ async function getPrimedCookies(boardUrl, headers) {
     return cached.cookies;
   }
 
-  const boardRes = await fetchWithTimeout(boardUrl, { headers, redirect: 'follow' });
-  const cookies = getCookieHeader(boardRes);
+  try {
+    const parsedBoard = new URL(boardUrl);
+    const mainUrl = `${parsedBoard.protocol}//${parsedBoard.hostname}/`;
 
-  if (cookies) {
-    cookieCache.set(boardUrl, {
-      cookies,
-      expiresAt: Date.now() + COOKIE_TTL_MS,
-    });
+    // 1단계: 메인 페이지 방문 → 기본 세션 쿠키 획득 (PHPSESSID, 2a0d...)
+    const mainRes = await fetchWithTimeout(mainUrl, { headers, redirect: 'follow' });
+    const mainCookies = getCookieHeader(mainRes);
+
+    // 2단계: 게시판 페이지 방문 → 게시판 인증 쿠키 획득 (e1192...)
+    const boardHeaders = { ...headers };
+    if (mainCookies) {
+      boardHeaders['Cookie'] = mainCookies;
+    }
+    const boardRes = await fetchWithTimeout(boardUrl, { headers: boardHeaders, redirect: 'follow' });
+    const boardCookies = getCookieHeader(boardRes);
+
+    // 두 쿠키 세트를 병합 (게시판 쿠키 우선)
+    const merged = mergeCookies(mainCookies, boardCookies);
+
+    if (merged) {
+      cookieCache.set(boardUrl, {
+        cookies: merged,
+        expiresAt: Date.now() + COOKIE_TTL_MS,
+      });
+    }
+
+    return merged || boardCookies || mainCookies;
+  } catch (err) {
+    console.error('[Proxy-DS] Cookie priming error:', err.message);
+    return '';
   }
+}
 
-  return cookies;
+function mergeCookies(base, override) {
+  const map = new Map();
+  const parse = (str) => {
+    if (!str) return;
+    str.split(';').forEach(pair => {
+      const trimmed = pair.trim();
+      if (!trimmed) return;
+      const eqIdx = trimmed.indexOf('=');
+      if (eqIdx > 0) {
+        map.set(trimmed.substring(0, eqIdx), trimmed);
+      }
+    });
+  };
+  parse(base);
+  parse(override);
+  return Array.from(map.values()).join('; ');
 }
 
 function createHeaders() {
   return {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,application/pdf,*/*;q=0.8',
-    'Accept-Language': 'ko,en-US;q=0.9,en;q=0.8',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    'Accept-Language': 'ko',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
+    'Sec-CH-UA': '"Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',
+    'Sec-CH-UA-Mobile': '?0',
+    'Sec-CH-UA-Platform': '"macOS"',
     'Sec-Fetch-Dest': 'document',
     'Sec-Fetch-Mode': 'navigate',
     'Sec-Fetch-Site': 'same-origin',
+    'Sec-Fetch-User': '?1',
     'Upgrade-Insecure-Requests': '1',
-    'Connection': 'keep-alive',
   };
 }
 

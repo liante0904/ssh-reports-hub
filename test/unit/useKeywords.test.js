@@ -1,6 +1,5 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useKeywords } from '../../src/hooks/useKeywords';
-import { useReport } from '../../src/context/useReport';
 import { request } from '../../src/utils/api';
 import { CONFIG } from '../../src/constants/config';
 import { DEV_AUTH_ENABLED } from '../../src/utils/devAuth';

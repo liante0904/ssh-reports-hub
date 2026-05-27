@@ -18,40 +18,51 @@ const ROOT = path.resolve(__dirname, '..');
 
 const TESTS = {
   unit: {
-    name: '유닛 테스트 (utils)',
-    script: 'test/unit/utils.test.js',
+    name: '유닛 테스트 (utils + proxy-ds)',
+    scripts: ['test/unit/utils.test.js', 'test/unit/proxy-ds.test.js'],
   },
   integration: {
     name: 'API 통합 테스트',
-    script: 'test/integration/api.test.js',
+    scripts: ['test/integration/api.test.js'],
   },
   e2e: {
     name: 'E2E (admin-status)',
-    script: 'test/admin-status.test.js',
+    scripts: ['test/admin-status.test.js'],
   },
 };
 
-function runTest(key, config) {
+function runScript(script) {
   return new Promise((resolve) => {
-    console.log(`\n${'='.repeat(60)}`);
-    console.log(`  ▶ ${config.name}`);
-    console.log(`${'='.repeat(60)}`);
-
-    const child = spawn('node', [config.script], {
+    const child = spawn('node', [script], {
       cwd: ROOT,
       stdio: 'inherit',
       env: { ...process.env },
     });
 
     child.on('close', (code) => {
-      resolve({ key, name: config.name, code });
+      resolve(code || 0);
     });
 
     child.on('error', (err) => {
       console.error(`  ❌ 실행 실패: ${err.message}`);
-      resolve({ key, name: config.name, code: 1 });
+      resolve(1);
     });
   });
+}
+
+async function runTest(key, config) {
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`  ▶ ${config.name}`);
+  console.log(`${'='.repeat(60)}`);
+
+  for (const script of config.scripts) {
+    const code = await runScript(script);
+    if (code !== 0) {
+      return { key, name: config.name, code };
+    }
+  }
+
+  return { key, name: config.name, code: 0 };
 }
 
 async function main() {

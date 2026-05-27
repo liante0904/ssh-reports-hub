@@ -8,7 +8,9 @@ function TelegramAuth({
   loginWithTelegramApp,
   loginWithDevBypass,
   handleLogout,
-  toggleKeywordOverlay
+  toggleKeywordOverlay,
+  rememberMe,
+  setRememberMe
 }) {
   const botName = import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot';
 
@@ -17,6 +19,14 @@ function TelegramAuth({
       {!telegramUser ? (
         <div className="telegram-auth-box">
           <p className="telegram-desc">텔레그램 로그인</p>
+          <label className="remember-me-label">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            <span>로그인 유지</span>
+          </label>
           {DEV_AUTH_ENABLED ? (
             <>
               <button className="telegram-dev-login-btn" onClick={loginWithDevBypass} disabled={isAuthenticating}>

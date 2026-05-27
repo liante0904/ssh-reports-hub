@@ -7,6 +7,13 @@
 
 ---
 
+## 서버 정보
+
+| 호스트명 | IP | 역할 | SSH 별칭 |
+|---|---|---|---|
+| 배포 서버 (Production) | `132.145.91.78` | 실질 소스 실행 및 배포 서버 | `ssh oci` |
+| 테스트 서버 (Development) | `64.110.82.78` | 개발 및 테스트 서버 (현재) | `ssh oci2` |
+
 ## 현재 스택 (2026-04-21 기준)
 
 ### 인프라 (`~/infra/`)
@@ -19,8 +26,8 @@
   - `ssh_reports_hub` — 비밀번호 회전 완료 (2026-04-17)
 - 시크릿 관리: `~/secrets/{infra,ssh-reports-scraper,ssh-reports-hub}/secrets.json` (chmod 600)
 - **PostgreSQL 비번은 `infra/secrets.json`이 단일 진실 소스** (`POSTGRES_SSH_REPORTS_HUB_PASSWORD`)
-- `.env` 재생성: `python3 ~/secrets/generate_env.py` (전체) / `python3 ~/secrets/generate_env.py scraper` (개별)
-- 비번 변경 절차: `infra/secrets.json` 수정 → `generate_env.py` 실행 → 컨테이너 `down && up`
+- `.env` 재생성: `python3 ~/secrets/generate_env.py "$PWD"` (표준) 또는 alias (호환)
+- 비번 변경 절차: `infra/secrets.json` 수정 → `python3 ~/secrets/generate_env.py "$PWD"` 실행 → 컨테이너 `down && up`
 
 ```
 스크래퍼 (scraper.py)

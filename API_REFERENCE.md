@@ -535,6 +535,17 @@ navigator.share({ title, text })
 | Test 8: `getDirectUrl` | `src/utils/reportLinks.js` | 원본 vs 프록시 결정 |
 | Test 9: `CONFIG` 구조 | `src/constants/config.js` | 전체 API URL 구성 |
 
+### `test/unit/proxy-ds.test.js`
+
+| 테스트 항목 | 대상 소스 | API 연관 |
+|------------|----------|---------|
+| Test 1: `decodeParam` | `netlify/functions/proxy-ds.js` | DS PDF 프록시 URI 디코딩 |
+| Test 2: `buildBoardUrl` | `netlify/functions/proxy-ds.js` | download→board URL 변환 |
+| Test 3: `isLikelyPdf` | `netlify/functions/proxy-ds.js` | PDF 시그니처 검증 |
+| Test 4: `getCookieHeader` | `netlify/functions/proxy-ds.js` | Set-Cookie 헤더 파싱 (getSetCookie + fallback) |
+| Test 5: `mergeCookies` | `netlify/functions/proxy-ds.js` | 메인+게시판 쿠키 병합 |
+| Test 6: `createHeaders` | `netlify/functions/proxy-ds.js` | 브라우저 헤더 회귀 검증 |
+
 ### `test/integration/api.test.js`
 
 | 섹션 | 테스트 대상 |

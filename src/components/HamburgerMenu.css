@@ -145,6 +145,25 @@
   gap: 12px;
 }
 
+.remember-me-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85em;
+  color: #495057;
+  cursor: pointer;
+  user-select: none;
+  width: 100%;
+  justify-content: center;
+}
+
+.remember-me-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #007aff;
+  cursor: pointer;
+}
+
 .telegram-btn-group {
   display: flex;
   flex-direction: column;

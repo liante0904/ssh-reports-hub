@@ -55,6 +55,27 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
   const isAdminConsole = location.pathname.includes('admin-console');
 
+  const renderTelegramBadge = () => {
+    if (telegramUser) {
+      return (
+        <span className="tg-badge tg-badge-on" title={`텔레그램 로그인: ${telegramUser.first_name} (ID:${telegramUser.id})`}>
+          <span className="tg-badge-icon">✈️</span>
+          <span className="tg-badge-name">{telegramUser.first_name}</span>
+        </span>
+      );
+    }
+    return (
+      <span
+        className="tg-badge tg-badge-off"
+        title="텔레그램 로그인이 필요합니다 (클릭 시 메뉴 열기)"
+        onClick={toggleMenuTop}
+      >
+        <span className="tg-badge-icon">✈️</span>
+        <span className="tg-badge-name">로그인</span>
+      </span>
+    );
+  };
+
   const renderAdminConsoleBtn = () => {
     if (!telegramUser?.is_admin) return null;
     const isActive = isAdminConsole && !isSearchActive;
@@ -102,6 +123,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
             🏠 ssh-reports-hub
           </div>
           <div className="header-actions">
+            {renderTelegramBadge()}
             <div className="hamburger-menu" onClick={toggleMenuTop}>
               <div></div>
               <div></div>

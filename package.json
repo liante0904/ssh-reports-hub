@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "node test/run-all.js",
-    "test:unit": "node test/unit/utils.test.js",
+    "test:unit": "node test/unit/utils.test.js && node test/unit/proxy-ds.test.js",
     "test:integration": "node test/integration/api.test.js",
     "test:e2e": "node test/admin-status.test.js",
     "test:coverage": "node test/verify-api-coverage.js",

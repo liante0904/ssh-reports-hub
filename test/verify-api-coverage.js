@@ -9,7 +9,7 @@
  * 위반 시 CI 실패. 어떤 LLM이 와도 이 규칙을 우회할 수 없음.
  */
 
-import { readFileSync, readdirSync, statSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
