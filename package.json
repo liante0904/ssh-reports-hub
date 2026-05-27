@@ -10,7 +10,9 @@
     "setup-pdfjs": "mkdir -p public/lib/pdfjs && curl -L https://github.com/mozilla/pdf.js/releases/download/v5.7.284/pdfjs-5.7.284-dist.zip -o pdfjs.zip && unzip -o pdfjs.zip -d public/lib/pdfjs && rm pdfjs.zip",
     "build": "npm run setup-pdfjs && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node test/admin-status.test.js",
+    "test:all": "echo 'No automated test suite yet. Use: node test/admin-status.test.js'"
   },
   "dependencies": {
     "react": "^19.0.0",

@@ -44,6 +44,9 @@ verify:
 preview:
 	$(NPM) run preview -- --host "$(HOST)" --port "$(PREVIEW_PORT)"
 
+test:
+	$(NPM) run test
+
 tunnel:
 	@echo "Forwarding http://localhost:$(LOCAL_PORT) using ssh $(SSH_TARGET)"
 	@exec ssh -p "$(SSH_PORT)" -N -L "$(LOCAL_PORT):127.0.0.1:$(LOCAL_PORT)" "$(SSH_TARGET)"

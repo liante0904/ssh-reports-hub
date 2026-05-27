@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CONFIG } from '../../constants/config';
 
 function AdminSection({ isAdmin }) {
+  const navigate = useNavigate();
   const vpnAddr = CONFIG.VPN.ADDR;
   
   if (!vpnAddr || !isAdmin) return null;
@@ -17,6 +19,13 @@ function AdminSection({ isAdmin }) {
   return (
     <div className="admin-section">
       <div className="menu-title admin-title">관리자 전용</div>
+      <a
+        className="menu-item admin-link"
+        onClick={() => navigate('/admin-console')}
+        style={{ cursor: 'pointer' }}
+      >
+        <span className="icon">🛠️</span> 관리자 콘솔
+      </a>
       <div className="admin-links-grid">
         {adminLinks.map((link) => (
           <a

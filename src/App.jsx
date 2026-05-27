@@ -5,6 +5,7 @@ import SearchOverlay from './components/SearchOverlay';
 import ReportList from './components/ReportList';
 import BottomNav from './components/BottomNav';
 import FloatingMenu from './components/FloatingMenu';
+import AdminConsole from './components/AdminConsole';
 import { ReportProvider } from './context/ReportContext';
 import { useReport } from './context/useReport';
 import { useAppLayout } from './hooks/useAppLayout';
@@ -91,6 +92,7 @@ function AppContent() {
           <Route path="/industry" element={<ReportList key="industry" onWriterClick={handleWriterSearch} />} />
           <Route path="/favorites" element={<ReportList key="favorites" onWriterClick={handleWriterSearch} />} />
           <Route path="/ai-summary" element={<ReportList key="ai-summary" onWriterClick={handleWriterSearch} />} />
+          <Route path="/admin-console" element={<AdminConsole />} />
         </Routes>
       </main>
       <SearchOverlay />

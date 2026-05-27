@@ -23,6 +23,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     setSortBy,
     boards,
     activeSearch,
+    telegramUser,
   } = useReport();
 
   const {
@@ -52,6 +53,25 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const isFavorites = location.pathname.includes('favorites');
   const isAiSummary = location.pathname.includes('ai-summary');
   const isCompany = location.pathname.startsWith('/company');
+
+  const isAdminConsole = location.pathname.includes('admin-console');
+
+  const renderAdminConsoleBtn = () => {
+    if (!telegramUser?.is_admin) return null;
+    const isActive = isAdminConsole && !isSearchActive;
+    return (
+      <button
+        className={`nav-button ${isActive ? 'active' : ''}`}
+        onClick={() => {
+          if (isTopMenuOpen) toggleMenuTop();
+          if (isMenuOpen) toggleMenu();
+          navigate('/admin-console');
+        }}
+      >
+        🛠️ 콘솔
+      </button>
+    );
+  };
 
   const handleButtonClick = (buttonName) => {
     if (isTopMenuOpen) toggleMenuTop();
@@ -128,6 +148,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
           >
             AI요약
           </button>
+          {renderAdminConsoleBtn()}
           <div className="company-select-wrapper header-nav-filters">
             <CompanySelect
               value={selectedCompanyOrder}
