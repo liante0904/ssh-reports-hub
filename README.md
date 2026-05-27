@@ -73,7 +73,8 @@ npm run dev
 
 ## 📜 사용 가능한 스크립트
 
-- `npm run dev`: 개발 모드로 앱을 실행합니다.
+- `npm run dev`: Netlify Dev 환경에서 앱을 실행합니다. (신규 API 사용)
+- `npm run dev:legacy`: 기존 API 환경으로 앱을 실행합니다.
 - `npm run build`: 프로덕션용으로 앱을 빌드합니다.
 - `npm run lint`: ESLint를 사용하여 코드 스타일을 검사합니다.
 - `npm run preview`: 프로덕션 빌드를 로컬에서 미리 봅니다.
@@ -84,4 +85,4 @@ npm run dev
 - `VITE_REPORT_API_URL`: 레포트 조회용 API 주소
 - `VITE_TABLE_NAME`: 레포트 테이블명
 
-레포트 조회는 `https://ssh-oci.duckdns.org/ords/admin` 기준으로 맞춰져 있으며, `VITE_REPORT_API_URL`이 우선 적용됩니다. `VITE_ORACLE_REST_API`는 호환용 잔재로만 남아 있고, 새 설정에서는 사용하지 않는 쪽이 맞습니다.
+레포트 조회는 기본적으로 `https://ssh-oci.duckdns.org/pub/api`를 사용하며, `.env` 파일을 통해 변경 가능합니다.

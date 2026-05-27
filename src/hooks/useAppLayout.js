@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useReport } from '../context/ReportContext';
+import { useReport } from '../context/useReport';
 
 export function useAppLayout() {
   const { isMenuOpen, setIsMenuOpen, isTopMenuOpen, setIsTopMenuOpen } = useReport();

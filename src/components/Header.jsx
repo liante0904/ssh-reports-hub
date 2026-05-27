@@ -2,7 +2,8 @@ import React, { useState, useEffect, forwardRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import HamburgerMenu from './HamburgerMenu';
 import CompanySelect from './CompanySelect';
-import { useReport } from '../context/ReportContext';
+import BoardSelect from './BoardSelect';
+import { useReport } from '../context/useReport';
 import './Header.css';
 
 const Header = forwardRef(({ isNavVisible }, ref) => {
@@ -20,7 +21,9 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     isMenuOpen, 
     toggleMenu, 
     handleSearch,
-    setSortBy
+    setSortBy,
+    boards,
+    activeSearch
   } = useReport();
 
   useEffect(() => {
@@ -45,7 +48,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     if (isMenuOpen) toggleMenu();
     
     if (buttonName !== 'search') {
-      handleSearch({ query: '', category: '' });
+      handleSearch({ query: '', category: '', board: null });
       setIsSearchActive(false);
     } else {
       setIsSearchActive(true);
@@ -88,13 +91,23 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
     if (selectedValue) {
       setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
-      handleSearch({ query: selectedValue, category: 'company' });
+      handleSearch({ query: selectedValue, category: 'company', board: null });
     } else {
       setSearchParams({}, { replace: true });
-      handleSearch({ query: '', category: 'company' });
+      handleSearch({ query: '', category: 'company', board: null });
     }
 
     navigate({ pathname: '/' });
+  };
+
+  const handleBoardClick = (boardOrder) => {
+    const newBoard = activeSearch.board === boardOrder ? null : boardOrder;
+    handleSearch({ ...activeSearch, board: newBoard });
+  };
+
+  const handleBoardChange = (e) => {
+    const selectedValue = e.target.value;
+    handleBoardClick(selectedValue === '' ? null : Number(selectedValue));
   };
 
   useEffect(() => {
@@ -112,7 +125,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     if (isTopMenuOpen) toggleMenuTop();
     if (isMenuOpen) toggleMenu();
     setIsSearchActive(false);
-    handleSearch({ query: '', category: '' });
+    handleSearch({ query: '', category: '', board: null });
     setQuery('');
     setSearchParams({}, { replace: true });
     setSortBy('time');
@@ -141,6 +154,36 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
             <div></div>
           </div>
         </div>
+
+        {!isMobile && (
+          <div className="header-filter-row">
+            <CompanySelect
+              value={query}
+              onChange={handleCompanyChange}
+              className="header-company-select"
+            />
+
+            {boards.length > 0 && isRecent && activeSearch.category === 'company' && (
+              <BoardSelect
+                value={activeSearch.board}
+                boards={boards}
+                onChange={handleBoardChange}
+                className="header-board-select"
+              />
+            )}
+          </div>
+        )}
+
+        {isMobile && boards.length > 0 && isRecent && activeSearch.category === 'company' && (
+          <div className="header-board-row">
+            <BoardSelect
+              value={activeSearch.board}
+              boards={boards}
+              onChange={handleBoardChange}
+              className="header-board-select-mobile"
+            />
+          </div>
+        )}
 
         <div className="header-nav">
           <button
@@ -173,15 +216,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
           >
             ★
           </button>
-          {!isMobile && (
-            <div className="company-select-wrapper">
-              <CompanySelect
-                value={query}
-                onChange={handleCompanyChange}
-                className="nav-button company-select"
-              />
-            </div>
-          )}
         </div>
       </header>
 

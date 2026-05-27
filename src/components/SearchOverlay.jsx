@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useReport } from '../context/ReportContext';
+import { useReport } from '../context/useReport';
 import './SearchOverlay.css';
 import CompanySelect from './CompanySelect';
 
@@ -28,7 +28,7 @@ function SearchOverlay() {
         setCategory(pCategory || 'title');
         
         // 검색 자동 실행
-        onSearch({ query: pQuery, category: pCategory || 'title' });
+        onSearch({ query: pQuery, category: pCategory || 'title', board: null });
         setSearchParams({ q: pQuery, category: pCategory || 'title' });
 
         // 사용했으니 비워줌
@@ -70,7 +70,7 @@ function SearchOverlay() {
     }
 
     setSearchParams({ q: trimmedQuery, category });
-    onSearch({ query: trimmedQuery, category });
+    onSearch({ query: trimmedQuery, category, board: null });
   }, [query, category, onSearch, setSearchParams, showToast]);
 
   const handleKeyDown = useCallback(
@@ -98,9 +98,8 @@ function SearchOverlay() {
       setQuery(selectedValue);
       if (selectedValue) {
         setSearchParams({ q: selectedValue, category: 'company' }, { replace: true });
-        onSearch({ query: selectedValue, category: 'company' });
-      } else {
-        setSearchParams({}, { replace: true });
+        onSearch({ query: selectedValue, category: 'company', board: null });
+      } else {        setSearchParams({}, { replace: true });
       }
     },
     [onSearch, setSearchParams]

@@ -39,6 +39,10 @@ export function useReportFetch(searchQuery, pathname, sortBy) {
       params.append(searchQuery.category, searchQuery.query);
     }
 
+    if (searchQuery.board !== null && searchQuery.board !== undefined) {
+      params.append('board', searchQuery.board);
+    }
+
     return `${apiUrl}?${params.toString()}`;
   }, [offset, searchQuery, pathname, sortBy]);
 

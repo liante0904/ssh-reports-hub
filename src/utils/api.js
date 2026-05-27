@@ -22,10 +22,26 @@ export async function request(url, options = {}, logout) {
   }
 
   // 타임아웃 처리 (기본 10초)
-  const timeoutSignal = AbortSignal.timeout(options.timeout || 10000);
-  const signal = options.signal 
-    ? AbortSignal.any([options.signal, timeoutSignal])
-    : timeoutSignal;
+  let signal = options.signal;
+  
+  if (AbortSignal.timeout && AbortSignal.any) {
+    const timeoutSignal = AbortSignal.timeout(options.timeout || 10000);
+    signal = options.signal 
+      ? AbortSignal.any([options.signal, timeoutSignal])
+      : timeoutSignal;
+  } else {
+    // 대체 로직: AbortSignal.timeout/any가 없는 경우
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), options.timeout || 10000);
+    
+    if (options.signal) {
+      options.signal.addEventListener('abort', () => {
+        clearTimeout(timeoutId);
+        controller.abort();
+      });
+    }
+    signal = controller.signal;
+  }
 
   const mergedOptions = {
     ...options,

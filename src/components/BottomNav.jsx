@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useReport } from '../context/ReportContext';
+import { useReport } from '../context/useReport';
 import './BottomNav.css';
 
 function BottomNav({ isNavVisible, toggleFloatingNav, onHomeClick }) {
