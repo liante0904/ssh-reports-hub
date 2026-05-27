@@ -26,6 +26,13 @@ src/
   components/           ← UI 컴포넌트
 ```
 
+## 서버 정보
+
+| 호스트명 | IP | 역할 | SSH 별칭 |
+|---|---|---|---|
+| 배포 서버 (Production) | `132.145.91.78` | 실질 소스 실행 및 배포 서버 | `ssh oci` |
+| 테스트 서버 (Development) | `64.110.82.78` | 개발 및 테스트 서버 (현재) | `ssh oci2` |
+
 ## 아키텍처
 ```
 React 19 + Vite → Netlify (SPA)

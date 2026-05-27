@@ -37,10 +37,15 @@ GET {BASE}/external/api/search/?{params}
 | `sort` | `"company"` | - | 증권사별 정렬 |
 | `title` | string | - | 제목 검색 |
 | `writer` | string | - | 작성자 검색 |
+| `tag` | string | - | 태그 검색 |
+| `sector` | string | - | 산업(섹터) 검색 |
+| `stock` | string | - | 종목명 검색 |
 | `company` | string | - | 증권사 order 번호 필터 |
 | `board` | number | - | 게시판 번호 필터 |
 | `mkt_tp` | `"global"` | - | 글로벌 마켓만 필터 |
 | `has_summary` | `"true"` | - | AI 요약 존재 필터 |
+| `outlook` | `"true"` | - | 전망 리포트만 필터 |
+| `outlook_year` | number | - | 특정 연도 전망 필터 (e.g. 2026) |
 | `report_id` | number | - | 단일 리포트 조회 (share 함수에서 사용) |
 
 **Response**:

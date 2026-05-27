@@ -190,8 +190,6 @@ function extractTestEndpoints() {
       /\/admin\/logs\b/g,
       /\/admin\/reports\/[^/\s]+\/summarize/g,
       /\/health\b/g,
-      /\/ords\/admin\/data_main_daily_send\/search/g,
-      /\/ords\/admin\/data_main_daily_send\/industry/g,
       /\/\.netlify\/functions\/proxy-ds/g,
       /\/\.netlify\/functions\/proxy\b/g,
       /\/\.netlify\/functions\/share\b/g,
@@ -209,7 +207,7 @@ function extractTestEndpoints() {
 
 function isApiUrl(url) {
   return url.includes('external/api') || url.includes('/admin/') ||
-         url.includes('/health') || url.includes('/ords/') ||
+         url.includes('/health') ||
          url.includes('.netlify/functions/') || url.includes('/keywords') ||
          url.includes('/favorites') || url.includes('/share');
 }
