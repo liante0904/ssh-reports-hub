@@ -12,15 +12,7 @@ import { createDevTelegramUser, persistTelegramUser } from '../utils/devAuth';
 import './HamburgerMenu.css';
 
 function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChange, handleHeaderClick }) {
-  const { logout } = useReport();
-  const [telegramUser, setTelegramUser] = useState(() => {
-    const saved = localStorage.getItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
-    try {
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
+  const { telegramUser, setTelegramUser, logout } = useReport();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const {
@@ -127,7 +119,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
               toggleKeywordOverlay={toggleKeywordOverlay}
             />
 
-            <AdminSection />
+            <AdminSection isAdmin={telegramUser?.is_admin} />
           </div>
         </div>
       )}

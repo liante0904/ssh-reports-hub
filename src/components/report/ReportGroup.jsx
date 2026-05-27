@@ -17,7 +17,13 @@ function ReportGroup({
   onOpenShareMenu, 
   onWriterClick,
   showSortOptions,
-  setSortBy
+  setSortBy,
+  isAdmin,
+  onTriggerSummary,
+  summaryRequestedIds,
+  summaryCompletedIds,
+  isAiSummary,
+  hasSummaryContent
 }) {
   const isTimeSort = sortBy === 'time' || isFavoritesPage || Array.isArray(items);
 
@@ -54,6 +60,7 @@ function ReportGroup({
           <div className="report-wrapper">
             {(Array.isArray(items) ? items : Object.values(items).flat())
               .filter(r => !isFavoritesPage || favorites[r.id])
+              .filter(r => !isAiSummary || hasSummaryContent(r))
               .map(report => (
                 <ReportItem 
                   key={report.id}
@@ -65,6 +72,10 @@ function ReportGroup({
                   onOpenShareMenu={onOpenShareMenu}
                   showFirmTag={true}
                   onWriterClick={onWriterClick}
+                  isAdmin={isAdmin}
+                  onTriggerSummary={onTriggerSummary}
+                  summaryRequestedIds={summaryRequestedIds}
+                  summaryCompletedIds={summaryCompletedIds}
                 />
               ))
             }
@@ -80,7 +91,9 @@ function ReportGroup({
                 {firm}
               </div>
               <div className={`report-wrapper ${firmToggles[date]?.[firm] ? 'collapsed' : ''}`}>
-                {Array.isArray(firmReports) ? firmReports.map(report => (
+                {Array.isArray(firmReports) ? firmReports
+                  .filter(r => !isAiSummary || hasSummaryContent(r))
+                  .map(report => (
                   <ReportItem 
                     key={report.id}
                     report={report}
@@ -91,6 +104,10 @@ function ReportGroup({
                     onOpenShareMenu={onOpenShareMenu}
                     showFirmTag={false}
                     onWriterClick={onWriterClick}
+                    isAdmin={isAdmin}
+                    onTriggerSummary={onTriggerSummary}
+                    summaryRequestedIds={summaryRequestedIds}
+                    summaryCompletedIds={summaryCompletedIds}
                   />
                 )) : null}
               </div>

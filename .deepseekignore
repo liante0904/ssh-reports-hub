@@ -11,5 +11,8 @@ deno.lock
 .venv/
 .env
 .env.*
+<<<<<<< HEAD
 secrets/
 ~/secrets/
+=======
+>>>>>>> e700fe9 (feat: add is_admin column support - backend returns is_admin, frontend conditionally renders admin section)

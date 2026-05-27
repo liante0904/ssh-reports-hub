@@ -17,6 +17,16 @@ export function ReportProvider({ children }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTopMenuOpen, setIsTopMenuOpen] = useState(false);
 
+  // 텔레그램 사용자 상태 (Context로 전역화)
+  const [telegramUser, setTelegramUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [sortBy, setSortBy] = useState('time');
   const [viewerReport, setViewerReport] = useState(null);
   // 회사 코드는 DB/필터 매핑과 1:1로 맞아야 하므로 고정 순서를 유지한다.
@@ -97,6 +107,7 @@ export function ReportProvider({ children }) {
   const logout = useCallback(() => {
     localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
+    setTelegramUser(null);
     window.location.reload();
   }, []);
 
@@ -130,6 +141,8 @@ export function ReportProvider({ children }) {
     theme,
     setTheme,
     toggleTheme,
+    telegramUser,
+    setTelegramUser,
     logout
   };
 
