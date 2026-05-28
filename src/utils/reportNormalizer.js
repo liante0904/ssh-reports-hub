@@ -21,6 +21,7 @@ export function normalizeReportItem(item) {
     tags: item.tags || [],
     stock_names: item.stock_names || [],
     sector: item.sector || '',
+    pdf_archive: item.pdf_archive || null,
     firm,
     date: formatDate(item.reg_dt),
     // 명칭 명확화를 위한 추가 필드 (하위 호환성 유지)

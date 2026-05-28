@@ -10,7 +10,7 @@
   /* 홈 바가 있는 기기 대응: 최소 12px 확보, 시스템 값이 있으면 합산 */
   padding-bottom: calc(10px + env(safe-area-inset-bottom, 12px));
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease-in-out;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateY(0);
   z-index: 100;
 }

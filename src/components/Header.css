@@ -17,7 +17,7 @@ header {
   gap: 1px;
   width: 100%;
   z-index: 100;
-  transition: transform 0.3s ease-in-out;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (display-mode: standalone) {

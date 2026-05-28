@@ -273,9 +273,32 @@ function ReportList({ onWriterClick }) {
   const isFavoritesPage = location.pathname.includes('favorites');
   const isAiSummary = location.pathname.includes('ai-summary');
   const isRecent = location.pathname === '/';
+  const isIndustryPage = location.pathname.includes('industry');
+
+  // 산업 페이지: page_count 정보가 있는 리포트는 10페이지 이상만 표시
+  // page_count 정보가 없으면 (pdf_archive가 null) 필터링하지 않음
+  const filterIndustryByPageCount = (report) => {
+    const pageCount = report.pdf_archive?.page_count;
+    if (pageCount == null) return true;  // 페이지 정보 없음 → 통과
+    return pageCount >= 10;              // 페이지 정보 있음 → 10페이지 이상만
+  };
+
+  // 산업 페이지 필터링: displayReports의 각 date별 아이템에 page_count 필터 적용
+  const applyIndustryFilter = (reportsObj) => {
+    if (!isIndustryPage) return reportsObj;
+    const filtered = {};
+    for (const [date, items] of Object.entries(reportsObj)) {
+      const arr = Array.isArray(items) ? items : Object.values(items).flat();
+      const kept = arr.filter(filterIndustryByPageCount);
+      if (kept.length > 0) filtered[date] = kept;
+    }
+    return filtered;
+  };
 
   // 즐겨찾기 페이지: 서버 JOIN 데이터 우선, fallback으로 useReportFetch 데이터 사용
-  const displayReports = isFavoritesPage && favoriteReports ? favoriteReports : reports;
+  const displayReports = applyIndustryFilter(
+    isFavoritesPage && favoriteReports ? favoriteReports : reports
+  );
   const sortedDates = Object.keys(displayReports).sort((a, b) => b.localeCompare(a));
 
   const hasSummaryContent = (report) => {
