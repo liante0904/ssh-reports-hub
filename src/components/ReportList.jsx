@@ -275,22 +275,26 @@ function ReportList({ onWriterClick }) {
   const isRecent = location.pathname === '/';
   const isIndustryPage = location.pathname.includes('industry');
 
-  // 산업 페이지: page_count 정보가 있는 리포트는 10페이지 이상만 표시
-  // page_count 정보가 없으면 (pdf_archive가 null) 필터링하지 않음
-  const filterIndustryByPageCount = (report) => {
-    const pageCount = report.pdf_archive?.page_count;
-    if (pageCount == null) return true;  // 페이지 정보 없음 → 통과
-    return pageCount >= 10;              // 페이지 정보 있음 → 10페이지 이상만
-  };
-
   // 산업 페이지 필터링: displayReports의 각 date별 아이템에 page_count 필터 적용
   const applyIndustryFilter = (reportsObj) => {
     if (!isIndustryPage) return reportsObj;
     const filtered = {};
+    let totalBefore = 0, totalAfter = 0, filteredOut = 0, noInfo = 0;
     for (const [date, items] of Object.entries(reportsObj)) {
       const arr = Array.isArray(items) ? items : Object.values(items).flat();
-      const kept = arr.filter(filterIndustryByPageCount);
+      totalBefore += arr.length;
+      const kept = arr.filter(r => {
+        const pc = r.pdf_archive?.page_count;
+        if (pc == null) { noInfo++; return true; }
+        if (pc >= 10) return true;
+        filteredOut++;
+        return false;
+      });
+      totalAfter += kept.length;
       if (kept.length > 0) filtered[date] = kept;
+    }
+    if (totalBefore > 0) {
+      console.log(`[산업필터] 전체 ${totalBefore}개 → 표시 ${totalAfter}개 (필터링: ${filteredOut}개, 페이지정보없음: ${noInfo}개)`);
     }
     return filtered;
   };
