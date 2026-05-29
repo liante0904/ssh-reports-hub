@@ -69,7 +69,11 @@ function normalizeEndpoint(call) {
 
   // FastAPI 엔드포인트
   if (u.includes('REPORT_API_URL') || u.includes('buildApiUrl()') || u.includes('buildReportFetchUrl')) {
+    // industry 경로인지 확인
     return { path: '/external/api/search', method: 'GET', note: '리포트 검색 (reportFetch)' };
+  }
+  if (u.includes('/industry')) {
+    return { path: '/external/api/industry', method: 'GET', note: '산업 리포트 조회' };
   }
   if (u.includes('BOARDS_URL')) {
     return { path: '/external/api/boards', method: 'GET', note: '게시판 목록' };
@@ -178,6 +182,7 @@ function extractTestEndpoints() {
     //    주요 API 경로 패턴을 직접 찾음
     const pathPatterns = [
       /\/external\/api\/search/g,
+      /\/external\/api\/industry/g,
       /\/external\/api\/companies/g,
       /\/external\/api\/boards/g,
       /\/external\/auth\/telegram/g,

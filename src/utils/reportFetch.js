@@ -5,8 +5,11 @@ function buildReportRoute(pathname, baseUrl) {
   if (pathname.includes('global')) {
     params.append('mkt_tp', 'global');
   }
-  // industry, search 등 모두 동일한 /search 엔드포인트 사용
-  // (external_api.py의 /search가 통합 검색)
+  // 산업 페이지 → 전용 /industry 엔드포인트 사용
+  if (pathname.includes('industry')) {
+    return { apiUrl: `${apiUrl}/industry`, params };
+  }
+  // 그 외(최근, 검색, outlook, ai-summary 등) → 통합 /search 엔드포인트
 
   return { apiUrl: `${apiUrl}/search`, params };
 }

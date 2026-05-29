@@ -98,7 +98,47 @@ async function runTests() {
   }
 
   // ────────────────────────────────────────────
-  // Section 2: Public Search API
+  // Section 2.1: Industry API
+  // ────────────────────────────────────────────
+  console.log('\n─── [Section 2.1] Industry API ───');
+
+  const industryRes = await assertHttp200(
+    `${BASE_URL}/external/api/industry?limit=5&offset=0`,
+    'GET /external/api/industry (산업 리포트 5건)'
+  );
+
+  if (industryRes) {
+    try {
+      const data = await industryRes.json();
+      assert(Array.isArray(data.items), 'industry 응답: items는 배열', `length=${data.items?.length || 0}`);
+      assert(typeof data.hasMore === 'boolean', 'industry 응답: hasMore는 boolean');
+      assert(typeof data.count === 'number', 'industry 응답: count는 number', `count=${data.count}`);
+
+      if (data.items?.length > 0) {
+        const item = data.items[0];
+        assert(typeof item.report_id === 'number', 'industry 아이템: report_id 있음');
+        assert(typeof item.firm_nm === 'string', 'industry 아이템: firm_nm 있음');
+        assert(typeof item.article_title === 'string', 'industry 아이템: article_title 있음');
+
+        // page_count 검증: 있으면 10 이상이어야 함
+        const archive = item.pdf_archive;
+        if (archive && archive.page_count !== null && archive.page_count !== undefined) {
+          assert(archive.page_count >= 10,
+            'industry page_count >= 10', `page_count=${archive.page_count}`);
+        }
+        // page_count가 없는 리포트는 통과 (필터링 안 함)
+        if (!archive || archive.page_count == null) {
+          console.log(`  ℹ️ INFO: page_count 정보 없는 리포트 통과 (report_id=${item.report_id})`);
+        }
+      }
+    } catch (e) {
+      console.log(`  ❌ FAIL: industry 응답 파싱 실패 (${e.message})`);
+      failed++;
+    }
+  }
+
+  // ────────────────────────────────────────────
+  // Section 2: Public Search API (existing)
   // ────────────────────────────────────────────
   console.log('\n─── [Section 2] Public API ───');
 

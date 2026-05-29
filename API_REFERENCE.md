@@ -106,7 +106,36 @@ GET {BASE}/external/api/search/?{params}
 
 ---
 
-### 1.2 증권사(Company) 목록
+### 1.2 산업(Industry) 리포트 조회
+
+```
+GET {BASE}/external/api/industry?{params}
+```
+
+| Param | Type | 필수 | 설명 |
+|-------|------|------|------|
+| `limit` | number | - | 페이지 크기 (기본: 100, 최대: 100) |
+| `offset` | number | - | 페이지 오프셋 |
+| `company` | string | - | 증권사 order 번호 필터 |
+| `board` | number | - | 게시판 번호 필터 |
+| `writer` | string | - | 작성자 검색 |
+| `title` | string | - | 제목 검색 |
+| `mkt_tp` | `"global"`\|`"domestic"` | - | 마켓 타입 필터 |
+
+**Response**: `GET /search`와 동일한 형식. `pdf_archive.page_count >= 10` 필터가 서버에서 자동 적용됨 (page_count 정보가 없으면 통과).
+
+**특징**:
+- `INDUSTRY_REPORT_BOARD_FILTERS` 기반으로 증권사별 산업분석 게시판만 조회
+- 종목코드((071050) 등)가 포함된 기업분석 리포트 자동 제외
+- `page_count >= 10` 서버사이드 필터 적용 (아카이브 정보 없는 리포트는 그대로 표시)
+
+**테스트**: `test/integration/api.test.js` Section 2.1
+**호출 위치**:
+- `src/utils/reportFetch.js` → `/industry` 경로에서 `/external/api/industry`로 분기
+
+---
+
+### 1.3 증권사(Company) 목록
 
 ```
 GET {BASE}/external/api/companies
