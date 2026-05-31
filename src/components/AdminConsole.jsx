@@ -114,6 +114,7 @@ function AdminConsole() {
   const [logLines, setLogLines] = useState([]);
   const [refreshIntervalMs, setRefreshIntervalMs] = useState(60000);
   const [manualRefreshKey, setManualRefreshKey] = useState(0);
+  const [firmHealth, setFirmHealth] = useState(null);
 
   const REFRESH_OPTIONS = [
     { label: '30초', value: 30000 },
@@ -183,6 +184,14 @@ function AdminConsole() {
           count: h.count,
         }));
         setArchiveHistory(hist);
+
+        // Firm Health
+        try {
+          const healthRes = await fetch(`${baseUrl}/admin/firm-health`, {
+            headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+          });
+          if (healthRes.ok) setFirmHealth(await healthRes.json());
+        } catch (_) {}
 
         // 요약
         const totalArchived = hist.reduce((sum, d) => sum + d.count, 0);
@@ -507,6 +516,54 @@ function AdminConsole() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* ===== Firm Health ===== */}
+      <div className="section-card">
+        <div className="section-title">
+          🩺 증권사 건강검진 (마지막 레포트)
+          {firmHealth && (
+            <span className="badge" style={{ marginLeft: 8 }}>
+              {firmHealth.stale_count > 0 ? `🛑 ${firmHealth.stale_count} STALE` : ''}
+              {firmHealth.warn_count > 0 ? ` ⚠️ ${firmHealth.warn_count} WARN` : ''}
+              {firmHealth.stale_count === 0 && firmHealth.warn_count === 0 ? '✅ All OK' : ''}
+            </span>
+          )}
+        </div>
+        {firmHealth ? (
+          <div className="firm-health-table">
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #333', color: '#888' }}>
+                  <th style={{ textAlign: 'left', padding: '4px 8px' }}>증권사</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px' }}>전체</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px' }}>마지막일자</th>
+                  <th style={{ textAlign: 'right', padding: '4px 8px' }}>Days</th>
+                  <th style={{ textAlign: 'center', padding: '4px 8px' }}>상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                {firmHealth.firms.map((f) => {
+                  const statusColor = f.status === 'STALE' ? '#ff3b30' : f.status === 'WARN' ? '#ff9500' : f.status === 'FUTURE' ? '#007aff' : '#34c759';
+                  const statusBg = f.status === 'STALE' ? 'rgba(255,59,48,0.12)' : f.status === 'WARN' ? 'rgba(255,149,0,0.12)' : 'rgba(52,199,89,0.08)';
+                  return (
+                    <tr key={f.sec_firm_order} style={{ borderBottom: '1px solid #1a1a2e', background: f.status !== 'OK' ? statusBg : 'transparent' }}>
+                      <td style={{ padding: '3px 8px', fontWeight: f.status === 'STALE' ? 600 : 400 }}>{f.firm_nm}</td>
+                      <td style={{ textAlign: 'right', padding: '3px 8px', color: '#888' }}>{f.total.toLocaleString()}</td>
+                      <td style={{ textAlign: 'right', padding: '3px 8px', fontFamily: 'monospace' }}>{f.last_reg_dt || '-'}</td>
+                      <td style={{ textAlign: 'right', padding: '3px 8px', color: statusColor, fontWeight: 600 }}>{f.days_ago >= 0 ? `${f.days_ago}d` : '?'}</td>
+                      <td style={{ textAlign: 'center', padding: '3px 8px' }}>
+                        <span style={{ color: statusColor, fontWeight: 600, fontSize: '11px' }}>{f.status}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ padding: 16, color: '#888', textAlign: 'center' }}>로딩 중...</div>
+        )}
       </div>
 
       {/* ===== Reprocess ===== */}
