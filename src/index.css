@@ -42,8 +42,6 @@ body {
   /* background-color: var(--background-color); */ /* 기본 배경은 각 컨테이너에서 설정하거나 하단에서 덮어씌움 */
   color: var(--text-color);
   transition: background-color 0.3s, color 0.3s;
-  -webkit-user-select: none;
-  user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 

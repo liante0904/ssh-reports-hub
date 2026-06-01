@@ -535,6 +535,7 @@ function AdminConsole() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #333', color: '#888' }}>
+                  <th style={{ textAlign: 'left', padding: '4px 8px', width: '30px' }}>#</th>
                   <th style={{ textAlign: 'left', padding: '4px 8px' }}>증권사</th>
                   <th style={{ textAlign: 'right', padding: '4px 8px' }}>전체</th>
                   <th style={{ textAlign: 'right', padding: '4px 8px' }}>마지막일자</th>
@@ -548,6 +549,7 @@ function AdminConsole() {
                   const statusBg = f.status === 'STALE' ? 'rgba(255,59,48,0.12)' : f.status === 'WARN' ? 'rgba(255,149,0,0.12)' : 'rgba(52,199,89,0.08)';
                   return (
                     <tr key={f.sec_firm_order} style={{ borderBottom: '1px solid #1a1a2e', background: f.status !== 'OK' ? statusBg : 'transparent' }}>
+                      <td style={{ padding: '3px 8px', color: '#666', fontSize: '11px' }}>{f.sec_firm_order}</td>
                       <td style={{ padding: '3px 8px', fontWeight: f.status === 'STALE' ? 600 : 400 }}>{f.firm_nm}</td>
                       <td style={{ textAlign: 'right', padding: '3px 8px', color: '#888' }}>{f.total.toLocaleString()}</td>
                       <td style={{ textAlign: 'right', padding: '3px 8px', fontFamily: 'monospace' }}>{f.last_reg_dt || '-'}</td>
