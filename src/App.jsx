@@ -6,6 +6,7 @@ import ReportList from './components/ReportList';
 import BottomNav from './components/BottomNav';
 import FloatingMenu from './components/FloatingMenu';
 import AdminConsole from './components/AdminConsole';
+import FnGuideList from './components/FnGuideList';
 import { ReportProvider } from './context/ReportContext';
 import { useReport } from './context/useReport';
 import { useAppLayout } from './hooks/useAppLayout';
@@ -93,6 +94,7 @@ function AppContent() {
           <Route path="/favorites" element={<ReportList key="favorites" onWriterClick={handleWriterSearch} />} />
           <Route path="/outlook" element={<ReportList key="outlook" onWriterClick={handleWriterSearch} />} />
           <Route path="/ai-summary" element={<ReportList key="ai-summary" onWriterClick={handleWriterSearch} />} />
+          <Route path="/fnguide" element={<FnGuideList />} />
           <Route path="/admin-console" element={<AdminConsole />} />
         </Routes>
       </main>

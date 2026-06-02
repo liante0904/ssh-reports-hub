@@ -76,6 +76,9 @@ function FloatingMenu({ isFloatingNavVisible }) {
               <div className="menu-item" onClick={() => { navigate('/ai-summary'); toggleMenu(); }}>
                 <span className="icon">🤖</span> AI요약
               </div>
+              <div className="menu-item" onClick={() => { navigate('/fnguide'); toggleMenu(); }}>
+                <span className="icon">📄</span> 요약
+              </div>
             </div>
           </div>
         </div>
