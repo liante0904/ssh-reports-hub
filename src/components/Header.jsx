@@ -52,6 +52,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const isFavorites = location.pathname.includes('favorites');
   const isOutlook = location.pathname.includes('outlook');
   const isAiSummary = location.pathname.includes('ai-summary');
+  const isFnGuide = location.pathname.includes('fnguide');
   const isCompany = location.pathname.startsWith('/company');
 
   const isAdminConsole = location.pathname.includes('admin-console');
@@ -175,6 +176,12 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
             onClick={() => handleButtonClick('ai_summary')}
           >
             AI요약
+          </button>
+          <button
+            className={`nav-button ${isFnGuide && !isSearchActive ? 'active' : ''}`}
+            onClick={() => handleButtonClick('fnguide')}
+          >
+            요약
           </button>
           {renderAdminConsoleBtn()}
           <div className="company-select-wrapper header-nav-filters">

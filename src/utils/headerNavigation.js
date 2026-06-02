@@ -7,6 +7,7 @@ export const HEADER_PATHS = {
   favorites: '/favorites',
   outlook: '/outlook',
   ai_summary: '/ai-summary',
+  fnguide: '/fnguide',
   search: '/',
 };
 

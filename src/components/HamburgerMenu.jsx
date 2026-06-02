@@ -112,6 +112,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
             <a className="menu-item" onClick={() => handleHeaderClick('industry')}><span className="icon">🏭</span> 산업 레포트</a>
             <a className="menu-item" onClick={() => handleHeaderClick('outlook')}><span className="icon">🔮</span> 전망 레포트</a>
             <a className="menu-item" onClick={() => handleHeaderClick('ai_summary')}><span className="icon">🤖</span> AI요약</a>
+            <a className="menu-item" onClick={() => handleHeaderClick('fnguide')}><span className="icon">📄</span> 요약</a>
 
             <div className="menu-item-select">
               <CompanySelect value={selectedCompany} onChange={handleSelectChange} className="company-select" />
