@@ -8,6 +8,7 @@ function FloatingMenu({ isFloatingNavVisible }) {
     isMenuOpen: isOpen, 
     toggleMenu, 
     toggleSearch, 
+    toggleSearchNew,
     theme, 
     toggleTheme
   } = useReport();
@@ -31,6 +32,21 @@ function FloatingMenu({ isFloatingNavVisible }) {
           </button>
           <button className="floating-button search-fab" onClick={toggleSearch} title="검색">
             🔍
+          </button>
+          <button className="floating-button search-new-fab" onClick={toggleSearchNew} title="검색(신규)" style={{ position: 'relative' }}>
+            🔎
+            <span style={{ 
+              fontSize: '8px', 
+              position: 'absolute', 
+              top: '4px', 
+              right: '4px', 
+              backgroundColor: '#ff3b30', 
+              color: 'white', 
+              borderRadius: '3px', 
+              padding: '1px 2px', 
+              fontWeight: 'bold',
+              lineHeight: '1'
+            }}>N</span>
           </button>
           <button className="floating-button refresh-fab" onClick={handleRefresh} title="새로고침">
             🔄
@@ -80,7 +96,7 @@ function FloatingMenu({ isFloatingNavVisible }) {
                 <span className="icon">🤖</span> AI요약
               </div>
               <div className="menu-item" onClick={() => { navigate('/fnguide'); toggleMenu(); }}>
-                <span className="icon">📄</span> 요약
+                <span className="icon">📄</span> 종목요약
               </div>
             </div>
           </div>

@@ -106,7 +106,7 @@ function FnGuideList() {
   return (
     <div className="fnguide-container">
       <div className="fnguide-header-panel">
-        <h1 className="fnguide-page-title">📁 FnGuide 리포트 요약본</h1>
+        <h1 className="fnguide-page-title">📁 FnGuide 종목요약 리포트</h1>
         
         {/* 검색 폼 */}
         <form className="fnguide-search-form" onSubmit={handleSearchSubmit}>
