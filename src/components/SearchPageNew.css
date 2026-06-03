@@ -37,30 +37,26 @@
 
 .search-page-header p {
   margin: 0;
-  color: color-mix(in srgb, var(--text-color) 65%, transparent);
+  color: var(--text-muted);
   font-size: 0.95rem;
   line-height: 1.6;
 }
 
 /* 프리미엄 글래스모피즘 필터 카드 */
 .filter-panel-card {
-  background: color-mix(in srgb, var(--card-background-color) 85%, transparent);
-  border: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
-  border-radius: 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
   padding: 26px;
-  box-shadow: 
-    0 10px 40px color-mix(in srgb, var(--card-shadow-color) 25%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: var(--glass-shadow);
   margin-bottom: 28px;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  transition: box-shadow 0.3s ease;
+  transition: var(--transition-smooth);
 }
 
 .filter-panel-card:hover {
-  box-shadow: 
-    0 14px 50px color-mix(in srgb, var(--card-shadow-color) 35%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: var(--glass-shadow), 0 12px 40px color-mix(in srgb, var(--primary-color) 8%, transparent);
 }
 
 .filter-grid {
@@ -82,7 +78,7 @@
 
 .filter-item.company-box {
   grid-column: span 1;
-  transition: all 0.3s ease;
+  transition: var(--transition-smooth);
 }
 
 .filter-item.company-box.has-boards {
@@ -108,7 +104,7 @@
 .filter-item.route-box,
 .filter-item.sort-box {
   grid-column: span 2;
-  border-top: 1px dashed color-mix(in srgb, var(--text-color) 8%, transparent);
+  border-top: 1px dashed var(--glass-border);
   padding-top: 16px;
 }
 
@@ -117,7 +113,7 @@
   font-weight: 800;
   letter-spacing: 0.3px;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--text-color) 80%, transparent);
+  color: var(--text-color);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -127,27 +123,23 @@
 .text-search-fields {
   display: flex;
   align-items: center;
-  border: 1px solid color-mix(in srgb, var(--text-color) 16%, transparent);
-  border-radius: 10px;
-  background: var(--background-color, #fff);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-muted);
   overflow: hidden;
   height: 48px;
   position: relative;
-  transition: border-color 0.25s, box-shadow 0.25s;
-}
-
-[data-theme='dark'] .text-search-fields {
-  background: color-mix(in srgb, var(--card-background-color) 70%, #000);
+  transition: var(--transition-smooth);
 }
 
 .text-search-fields:focus-within {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 20%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 15%, transparent);
 }
 
 .search-category-select {
   border: 0;
-  border-right: 1px solid color-mix(in srgb, var(--text-color) 14%, transparent);
+  border-right: 1px solid var(--glass-border);
   background: transparent;
   color: var(--text-color);
   font-weight: 700;
@@ -170,24 +162,24 @@
 }
 
 .search-text-input::placeholder {
-  color: color-mix(in srgb, var(--text-color) 40%, transparent);
+  color: var(--text-muted);
 }
 
 .clear-search-btn {
   position: absolute;
   right: 14px;
-  background: color-mix(in srgb, var(--text-color) 8%, transparent);
+  background: var(--secondary-background-color);
   border: 0;
   border-radius: 50%;
   width: 20px;
   height: 20px;
-  color: color-mix(in srgb, var(--text-color) 50%, transparent);
+  color: var(--text-muted);
   font-size: 0.75rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: var(--transition-smooth);
 }
 
 .clear-search-btn:hover {
@@ -198,18 +190,14 @@
 /* 그리드 선택 트리거 버튼 디자인 갱신 (CompanySelect, BoardSelect) */
 .search-page-new .grid-trigger-btn {
   height: 48px;
-  border: 1px solid color-mix(in srgb, var(--text-color) 16%, transparent) !important;
-  border-radius: 10px !important;
-  background: var(--background-color, #fff) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--radius-md) !important;
+  background: var(--bg-muted) !important;
   color: var(--text-color) !important;
   font-size: 0.95rem !important;
   font-weight: 700 !important;
-  transition: all 0.25s !important;
+  transition: var(--transition-smooth) !important;
   box-shadow: none !important;
-}
-
-[data-theme='dark'] .search-page-new .grid-trigger-btn {
-  background: color-mix(in srgb, var(--card-background-color) 70%, #000) !important;
 }
 
 .search-page-new .grid-trigger-btn:hover,
@@ -226,9 +214,9 @@
 }
 
 .filter-chip-item {
-  border: 1px solid color-mix(in srgb, var(--text-color) 14%, transparent);
-  border-radius: 30px;
-  background: color-mix(in srgb, var(--text-color) 4%, transparent);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  background: var(--secondary-background-color);
   color: var(--text-color);
   font-size: 0.9rem;
   font-weight: 700;
@@ -237,7 +225,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-smooth);
 }
 
 .filter-chip-item:hover {
@@ -268,8 +256,8 @@
 }
 
 .btn-filter-reset {
-  border: 1px solid color-mix(in srgb, var(--text-color) 18%, transparent);
-  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--text-color);
   font-weight: 700;
@@ -279,12 +267,12 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.25s;
+  transition: var(--transition-smooth);
 }
 
 .btn-filter-reset:hover {
-  background: color-mix(in srgb, var(--text-color) 6%, transparent);
-  border-color: color-mix(in srgb, var(--text-color) 35%, transparent);
+  background: var(--secondary-background-color);
+  border-color: var(--primary-color);
 }
 
 /* 결과 섹션 뷰포트 장식 */
@@ -295,7 +283,7 @@
 .results-header {
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 2px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+  border-bottom: 2px solid var(--glass-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -313,7 +301,7 @@
   color: var(--primary-color);
   font-weight: 800;
   padding: 3px 10px;
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   font-size: 0.9rem;
   margin-left: 8px;
   border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent);
@@ -326,7 +314,7 @@
 .search-state-msg {
   padding: 60px 20px;
   text-align: center;
-  color: color-mix(in srgb, var(--text-color) 50%, transparent);
+  color: var(--text-muted);
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: -0.2px;
@@ -338,9 +326,9 @@
   align-items: center;
   gap: 16px;
   padding: 80px 20px;
-  background: color-mix(in srgb, var(--card-background-color) 40%, transparent);
-  border: 1px dashed color-mix(in srgb, var(--text-color) 12%, transparent);
-  border-radius: 16px;
+  background: var(--glass-bg);
+  border: 1px dashed var(--glass-border);
+  border-radius: var(--radius-lg);
 }
 
 .empty-icon {

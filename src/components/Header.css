@@ -1,7 +1,7 @@
 /* 헤더 스타일 */
 header {
-  background: #007aff;
-  color: white;
+  background: var(--glass-bg);
+  color: var(--text-color);
   padding: 15px 0;
   padding-top: calc(15px + env(safe-area-inset-top, 0px));
   text-align: left;
@@ -10,14 +10,16 @@ header {
   top: 0;
   left: 0;
   right: 0;
-  border-radius: 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
   gap: 1px;
   width: 100%;
   z-index: 100;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-smooth);
 }
 
 @media (display-mode: standalone) {
@@ -44,11 +46,16 @@ header.nav-hidden {
 
 /* 제목 스타일 */
 .title {
-  font-weight: bold;
-  color: white;
+  font-weight: 800;
+  color: var(--primary-color);
   cursor: pointer;
   margin: 0;
   padding: 6px 0;
+  transition: var(--transition-smooth);
+}
+
+.title:hover {
+  transform: scale(1.02);
 }
 
 /* 햄버거 메뉴 스타일 */
@@ -68,9 +75,9 @@ header.nav-hidden {
 .hamburger-menu div {
   width: 30px;
   height: 3px;
-  background: white;
-  border-radius: 1px;
-  transition: all 0.3s ease;
+  background: var(--text-color);
+  border-radius: var(--radius-sm);
+  transition: var(--transition-smooth);
 }
 
 /* 두 번째 줄 네비게이션 스타일 */
@@ -99,12 +106,13 @@ header.nav-hidden {
 .nav-button {
   background-color: transparent;
   border: none;
-  color: white;
-  font-size: 1.1em;
+  color: var(--text-muted);
+  font-size: 0.95em;
+  font-weight: 700;
   cursor: pointer;
   padding: 6px 12px;
-  border-radius: 6px;
-  transition: all 0.3s ease;
+  border-radius: var(--radius-md);
+  transition: var(--transition-smooth);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,14 +122,16 @@ header.nav-hidden {
 }
 
 .nav-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--secondary-background-color);
+  color: var(--primary-color);
   transform: translateY(-1px);
 }
 
 .nav-button.active {
-  font-weight: bold;
-  background-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-weight: 800;
+  color: var(--primary-color);
+  background-color: var(--secondary-background-color);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--primary-color) 10%, transparent);
 }
 
 .header-actions {
@@ -139,12 +149,13 @@ header.nav-hidden {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 0;
+  background: var(--secondary-background-color);
+  border: 1px solid var(--glass-border);
   padding: 4px 10px;
-  border-radius: 12px;
+  border-radius: var(--radius-full);
   font-size: 0.8em;
-  color: white;
+  font-weight: 700;
+  color: var(--text-color);
   white-space: nowrap;
   max-width: 120px;
   flex-shrink: 1;
@@ -154,6 +165,7 @@ header.nav-hidden {
 
 .tg-badge-icon {
   font-size: 0.9em;
+  color: #0088cc; /* 텔레그램 브랜드 블루 유지 */
   flex-shrink: 0;
 }
 
@@ -165,11 +177,12 @@ header.nav-hidden {
 
 /* 미로그인 상태 배지 */
 .tg-badge-off {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px dashed rgba(255, 255, 255, 0.4);
+  background: var(--bg-muted);
+  border: 1px dashed var(--glass-border);
+  color: var(--text-muted);
   cursor: pointer;
-  opacity: 0.75;
-  transition: opacity 0.2s, background 0.2s;
+  opacity: 0.85;
+  transition: var(--transition-smooth);
 }
 
 .tg-badge-off:disabled {
@@ -179,7 +192,9 @@ header.nav-hidden {
 
 .tg-badge-off:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--secondary-background-color);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 .company-select-wrapper {

@@ -10,13 +10,14 @@
 
 .share-menu-floating {
   position: absolute;
-  background-color: white;
+  background-color: var(--glass-bg);
   width: 260px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 16px 4px;
-  /* 네이버 특유의 부드럽고 넓은 그림자 */
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.16);
-  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   z-index: 2001;
 }
 
@@ -46,39 +47,41 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  transition: var(--transition-smooth);
 }
 
 .share-option-compact:active {
   opacity: 0.6;
 }
 
-/* 네이버 뉴스 실측 컬러 */
+/* 카카오, 텔레그램 고유 컬러 유지 */
 .icon-compact.kakao {
   background-color: #FEE500;
 }
 
 .icon-compact.telegram {
-  background-color: #2AABEE; /* 텔레그램 고유색 유지 */
+  background-color: #2AABEE;
 }
 
 .icon-compact.link, .icon-compact.more {
-  background-color: #F4F4F4;
+  background-color: var(--secondary-background-color);
 }
 
 /* 아이콘 내부 이미지/SVG 컬러 */
 .icon-compact.kakao img {
-  width: 22px; /* 비율 조정 */
+  width: 22px;
   height: 22px;
 }
 
 .icon-compact.link svg, .icon-compact.more svg {
-  color: #666666;
+  color: var(--text-color);
 }
 
 .share-option-compact span {
-  font-size: 11px; /* 네이버 스타일 소형 폰트 */
-  color: #333333;
+  font-size: 11px;
+  color: var(--text-color);
   letter-spacing: -0.3px;
+  font-weight: 600;
 }
 
 .share-menu-arrow {
@@ -88,9 +91,9 @@
   transform: translateX(-50%) rotate(45deg);
   width: 10px;
   height: 10px;
-  background-color: white;
-  border-left: 1px solid rgba(0,0,0,0.05);
-  border-top: 1px solid rgba(0,0,0,0.05);
+  background-color: var(--glass-bg);
+  border-left: 1px solid var(--glass-border);
+  border-top: 1px solid var(--glass-border);
 }
 
 .share-toast {
@@ -98,10 +101,15 @@
   bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(51, 51, 51, 0.9);
-  color: white;
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-color);
   padding: 10px 20px;
-  border-radius: 4px; /* 네이버는 토스트가 약간 각진 느낌 */
+  border-radius: var(--radius-full);
   font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: 3000;
 }

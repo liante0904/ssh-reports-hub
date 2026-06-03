@@ -5,10 +5,10 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.4); /* index.css의 반투명 스타일 참조 */
+  background: rgba(0, 0, 0, 0.4);
   z-index: 101;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: var(--transition-smooth);
   display: none;
 }
 
@@ -25,9 +25,12 @@
   width: 300px;
   max-width: 90vw;
   height: var(--app-height, 100vh);
-  background: #ffffff; /* index.css의 report 배경과 동일 */
-  box-shadow: -8px 0 16px rgba(0, 0, 0, 0.15); /* index.css의 box-shadow 참조 */
-  border-radius: 12px 0 0 12px; /* index.css의 report와 유사한 둥근 모서리 */
+  background: var(--glass-bg);
+  border-left: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
   flex-direction: column;
   padding: 20px;
@@ -36,8 +39,8 @@
   z-index: 102;
   opacity: 0;
   transform: translateX(100%);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  box-sizing: border-box; /* 패딩이 너비에 포함되도록 설정 */
+  transition: var(--transition-smooth);
+  box-sizing: border-box;
 }
 
 .menu-panel.open {
@@ -49,24 +52,24 @@
 .menu-title {
   font-size: 1.2em;
   font-weight: bold;
-  color: #007aff; /* index.css의 menu-title 색상 */
+  color: var(--primary-color);
   margin-bottom: 10px;
   padding: 10px 0;
-  border-bottom: 1px solid #d1d1d6; /* index.css의 report 보더 참조 */
+  border-bottom: 1px solid var(--glass-border);
 }
 
 /* 메뉴 아이템 스타일 */
 .menu-item {
-  color: #007aff; /* index.css의 menu-item 색상 */
+  color: var(--primary-color);
   font-weight: bold;
   text-decoration: none;
   font-size: 1.1em;
   margin: 10px 0;
   padding: 10px 15px;
-  border-radius: 15px; /* index.css의 menu-item 둥근 모서리 */
-  background-color: #f0f0f5; /* index.css의 menu-item 배경 */
+  border-radius: var(--radius-md);
+  background-color: var(--secondary-background-color);
   text-align: center;
-  transition: background-color 0.3s ease, transform 0.2s ease; /* index.css의 전환 */
+  transition: var(--transition-smooth);
   width: 100%;
   box-sizing: border-box;
   display: flex;
@@ -75,18 +78,18 @@
 }
 
 .menu-item:hover {
-  background-color: #e0e0e5; /* index.css의 menu-item 호버 */
-  transform: translateY(-2px); /* index.css의 floating-button 스타일 참조 */
+  background-color: color-mix(in srgb, var(--primary-color) 8%, var(--secondary-background-color));
+  transform: translateY(-1px);
 }
 
 .menu-item:active {
-  transform: scale(0.98); /* index.css의 floating-button 스타일 참조 */
+  transform: scale(0.98);
 }
 
 /* 아이콘 스타일 */
 .menu-item .icon {
   margin-right: 8px;
-  font-size: 20px; /* index.css의 nav-button span 크기 참조 */
+  font-size: 20px;
   vertical-align: middle;
 }
 
@@ -133,9 +136,9 @@
 .telegram-section {
   margin: 15px 0;
   padding: 15px;
-  background-color: #f0f9ff;
-  border-radius: 15px;
-  border: 1px solid #bae6fd;
+  background-color: var(--secondary-background-color);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
 }
 
 .telegram-auth-box {
@@ -150,7 +153,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.85em;
-  color: #495057;
+  color: var(--text-muted);
   cursor: pointer;
   user-select: none;
   width: 100%;
@@ -160,7 +163,7 @@
 .remember-me-label input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: #007aff;
+  accent-color: var(--primary-color);
   cursor: pointer;
 }
 
@@ -173,7 +176,7 @@
 
 .telegram-desc {
   font-size: 0.85em;
-  color: #0369a1;
+  color: var(--primary-color);
   margin: 0;
   text-align: center;
   font-weight: 500;
@@ -195,7 +198,7 @@
 .telegram-custom-login-btn, .telegram-app-login-btn {
   border: none;
   padding: 12px 15px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-weight: bold;
   font-size: 0.95em;
   cursor: pointer;
@@ -203,7 +206,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.2s;
+  transition: var(--transition-smooth);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   width: 100%;
   box-sizing: border-box;
@@ -238,22 +241,22 @@
 }
 
 .telegram-app-login-btn {
-  background-color: #ffffff;
+  background-color: var(--glass-bg);
   color: #0088cc;
   border: 1px solid #0088cc;
 }
 
 .telegram-app-login-btn:hover {
-  background-color: #f0f9ff;
+  background-color: var(--secondary-background-color);
   transform: translateY(-1px);
 }
 
 .open-keyword-overlay-btn {
-  background-color: #f0f0f5;
-  color: #007aff;
-  border: 1px solid #d1d1d6;
+  background-color: var(--secondary-background-color);
+  color: var(--primary-color);
+  border: 1px solid var(--glass-border);
   padding: 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-weight: bold;
   font-size: 0.95em;
   cursor: pointer;
@@ -261,13 +264,13 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.2s;
+  transition: var(--transition-smooth);
   width: 100%;
 }
 
 .open-keyword-overlay-btn:hover {
-  background-color: #e5e5ea;
-  border-color: #007aff;
+  background-color: color-mix(in srgb, var(--primary-color) 8%, var(--secondary-background-color));
+  border-color: var(--primary-color);
 }
 
 .open-keyword-overlay-btn .icon {
@@ -281,7 +284,7 @@
 
 .keyword-overlay-desc {
   font-size: 0.9em;
-  color: #666;
+  color: var(--text-muted);
   margin: 10px 0 15px 0;
   line-height: 1.4;
 }
@@ -296,30 +299,33 @@
 .keyword-input-wrapper input {
   flex: 1;
   padding: 12px 15px;
-  border: 2px solid #e5e5ea;
-  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-muted);
+  color: var(--text-color);
   font-size: 1em;
   outline: none;
-  transition: border-color 0.2s;
+  transition: var(--transition-smooth);
 }
 
 .keyword-input-wrapper input:focus {
-  border-color: #007aff;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 15%, transparent);
 }
 
 .keyword-add-btn {
-  background-color: #007aff;
+  background-color: var(--primary-color);
   color: white;
   border: none;
   padding: 0 20px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: var(--transition-smooth);
 }
 
 .keyword-add-btn:hover {
-  background-color: #0056b3;
+  filter: brightness(0.92);
 }
 
 .keyword-management-container {
@@ -331,10 +337,10 @@
 }
 
 .count-badge {
-  background-color: #007aff15;
-  color: #007aff;
+  background-color: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  color: var(--primary-color);
   padding: 6px 12px;
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   font-size: 0.9em;
   font-weight: 600;
 }
@@ -348,18 +354,18 @@
 
 .delete-all-btn {
   background: none;
-  border: 1px solid #ff3b30;
-  color: #ff3b30;
+  border: 1px solid var(--danger-color);
+  color: var(--danger-color);
   padding: 6px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 0.85em;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: var(--transition-smooth);
 }
 
 .delete-all-btn:hover {
-  background-color: #ff3b30;
+  background-color: var(--danger-color);
   color: white;
 }
 
@@ -377,15 +383,18 @@
 }
 
 .undo-bar {
-  background-color: #323232;
-  color: white;
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-color);
   padding: 12px 20px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   width: 100%;
   max-width: 500px;
   pointer-events: auto;
@@ -402,7 +411,7 @@
 .undo-btn {
   background: none;
   border: none;
-  color: #007aff;
+  color: var(--primary-color);
   font-weight: bold;
   font-size: 0.95em;
   cursor: pointer;
@@ -464,23 +473,25 @@
 }
 
 .keyword-large-tag {
-  background-color: #f2f2f7;
-  border-radius: 15px;
+  background-color: var(--secondary-background-color);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
   padding: 12px 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: all 0.2s;
+  transition: var(--transition-smooth);
   min-width: 0; /* 텍스트 넘침 방지 */
 }
 
 .keyword-large-tag:hover {
-  background-color: #e5e5ea;
+  background-color: color-mix(in srgb, var(--primary-color) 6%, var(--secondary-background-color));
+  border-color: color-mix(in srgb, var(--primary-color) 30%, transparent);
 }
 
 .keyword-text {
   font-weight: 600;
-  color: #1c1c1e;
+  color: var(--text-color);
   font-size: 1em;
   /* 말줄임표 대신 줄바꿈 허용하여 텍스트 최대한 노출 */
   word-break: break-all;
@@ -505,18 +516,18 @@
 .keyword-delete-btn {
   background: none;
   border: none;
-  color: #ff3b30;
+  color: var(--danger-color);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 4px;
   border-radius: 50%;
-  transition: background-color 0.2s;
+  transition: var(--transition-smooth);
 }
 
 .keyword-delete-btn:hover {
-  background-color: #ff3b3015;
+  background-color: color-mix(in srgb, var(--danger-color) 12%, transparent);
 }
 
 .keyword-empty-state {
