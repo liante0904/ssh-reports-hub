@@ -1,0 +1,329 @@
+/* 통합 검색 및 필터 설정 오버레이 (신규) */
+.search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+  box-sizing: border-box;
+  padding: 16px;
+  transition: opacity 0.25s ease;
+}
+
+/* 다크 테마 배경 보정 */
+[data-theme='dark'] .search-overlay {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+/* 필터 판넬 컨테이너 */
+.search-container {
+  background: var(--bg-card, #ffffff);
+  color: var(--text-primary, #1c1c1e);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+  transform: scale(0.96);
+  opacity: 0;
+}
+
+.search-overlay.visible .search-container {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* 다크 테마 컨테이너 보정 */
+[data-theme='dark'] .search-container {
+  background: #1e1e24;
+  color: #f2f2f7;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 헤더 타이틀 */
+.search-header-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-bottom: 1.5px solid var(--border-color, #e5e5ea);
+  padding-bottom: 14px;
+}
+
+[data-theme='dark'] .search-header-title {
+  border-bottom-color: #2c2c2e;
+}
+
+.search-close-top {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--text-secondary, #8e8e93);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.search-close-top:hover {
+  background-color: var(--bg-hover, #f2f2f7);
+  color: var(--text-primary, #1c1c1e);
+}
+
+[data-theme='dark'] .search-close-top:hover {
+  background-color: #2c2c2e;
+  color: #ffffff;
+}
+
+/* 개별 필터 영역 */
+.filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary, #8e8e93);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 텍스트 검색 입력 로우 */
+.text-search-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.search-category {
+  height: 44px;
+  padding: 0 16px;
+  font-size: 0.95rem;
+  border: 1.5px solid var(--border-color, #e5e5ea);
+  border-radius: 10px;
+  background-color: var(--bg-input, #f2f2f7);
+  color: var(--text-primary, #1c1c1e);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  min-width: 100px;
+}
+
+[data-theme='dark'] .search-category {
+  background-color: #2c2c2e;
+  border-color: #3a3a3c;
+  color: #f2f2f7;
+}
+
+.search-category:focus {
+  border-color: var(--theme-color, #007aff);
+}
+
+.search-input {
+  flex: 1;
+  height: 44px;
+  padding: 0 16px;
+  font-size: 0.95rem;
+  border: 1.5px solid var(--border-color, #e5e5ea);
+  border-radius: 10px;
+  background-color: var(--bg-input, #f2f2f7);
+  color: var(--text-primary, #1c1c1e);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+[data-theme='dark'] .search-input {
+  background-color: #2c2c2e;
+  border-color: #3a3a3c;
+  color: #f2f2f7;
+}
+
+.search-input:focus {
+  border-color: var(--theme-color, #007aff);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+}
+
+/* 증권사 선택 로우 */
+.company-select-row {
+  width: 100%;
+}
+
+.company-select-full {
+  width: 100%;
+}
+
+.company-select-full .grid-trigger-btn {
+  width: 100% !important;
+  height: 44px !important;
+  justify-content: center !important;
+}
+
+/* 칩 그룹 공통 */
+.chip-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.sort-group {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.chip-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-color, #e5e5ea);
+  background-color: var(--bg-card, #ffffff);
+  color: var(--text-primary, #1c1c1e);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+[data-theme='dark'] .chip-item {
+  border-color: #2c2c2e;
+  background-color: #1e1e24;
+  color: #f2f2f7;
+}
+
+.chip-item:hover {
+  background-color: var(--bg-hover, #f2f2f7);
+}
+
+[data-theme='dark'] .chip-item:hover {
+  background-color: #2c2c2e;
+}
+
+/* 칩 아이템 활성화 상태 */
+.chip-item.active {
+  background-color: var(--theme-color, #007aff);
+  border-color: var(--theme-color, #007aff);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.25);
+  font-weight: 600;
+}
+
+[data-theme='dark'] .chip-item.active {
+  background-color: #0a84ff;
+  border-color: #0a84ff;
+  box-shadow: 0 4px 10px rgba(10, 132, 255, 0.35);
+}
+
+.chip-icon {
+  font-size: 1rem;
+}
+
+/* 하단 액션 로우 */
+.search-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  border-top: 1.5px solid var(--border-color, #e5e5ea);
+  padding-top: 20px;
+}
+
+[data-theme='dark'] .search-actions {
+  border-top-color: #2c2c2e;
+}
+
+.btn-reset,
+.btn-submit {
+  flex: 1;
+  height: 46px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+}
+
+.btn-reset {
+  background-color: var(--bg-hover, #f2f2f7);
+  color: var(--text-secondary, #8e8e93);
+  border: 1.5px solid var(--border-color, #e5e5ea);
+}
+
+[data-theme='dark'] .btn-reset {
+  background-color: #2c2c2e;
+  color: #8e8e93;
+  border-color: #3a3a3c;
+}
+
+.btn-reset:hover {
+  background-color: var(--border-color, #e5e5ea);
+  color: var(--text-primary, #1c1c1e);
+}
+
+[data-theme='dark'] .btn-reset:hover {
+  background-color: #3a3a3c;
+  color: #ffffff;
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, #007aff, #0056b3);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+}
+
+[data-theme='dark'] .btn-submit {
+  background: linear-gradient(135deg, #0a84ff, #0056b3);
+  box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
+}
+
+.btn-submit:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 16px rgba(0, 122, 255, 0.3);
+}
+
+.btn-submit:active,
+.btn-reset:active {
+  transform: scale(0.98);
+}
+
+/* 모바일 전용 UI 세밀화 */
+@media screen and (max-width: 580px) {
+  .search-container {
+    max-height: 95vh;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .chip-group {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sort-group {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

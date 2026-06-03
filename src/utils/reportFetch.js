@@ -23,11 +23,12 @@ export function buildReportFetchUrl({ pathname, offset, sortBy, searchQuery, bas
     params.append('sort', 'company');
   }
 
-  if (searchQuery?.query && searchQuery?.category) {
-    const searchValue = searchQuery.category === 'company'
-      ? (searchQuery.companyOrder ?? searchQuery.query)
-      : searchQuery.query;
-    params.append(searchQuery.category, searchValue);
+  if (searchQuery?.query && searchQuery?.category && searchQuery.category !== 'company') {
+    params.append(searchQuery.category, searchQuery.query);
+  }
+
+  if (searchQuery?.companyOrder) {
+    params.append('company', searchQuery.companyOrder);
   }
 
   if (searchQuery?.board !== null && searchQuery?.board !== undefined) {
