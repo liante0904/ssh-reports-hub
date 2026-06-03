@@ -1,21 +1,24 @@
 /* 플로팅 메뉴 */
 .floating-menu {
   position: fixed;
-  bottom: 80px; /* 버튼들과의 간격을 위해 약간 조정 */
-  right: 90px; /* 버튼(56px) + 여백을 고려하여 왼쪽으로 이동 */
+  bottom: 80px; 
+  right: 90px; 
   display: none;
   flex-direction: column;
-  background: #ffffff;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  border-radius: 16px;
-  max-width: 200px; /* 너비 더 축소 */
-  min-width: 150px; /* 너비 더 축소 */
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--radius-lg);
+  max-width: 200px; 
+  min-width: 155px; 
   max-height: 70vh;
   overflow-y: auto;
   z-index: 1000;
   opacity: 0;
   transform: translateX(10px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: var(--transition-smooth);
 }
 
 .floating-menu.open {
@@ -27,21 +30,21 @@
 .floating-menu-content {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* 간격 축소 */
-  padding: 10px; /* 패딩 축소 */
+  gap: 8px; 
+  padding: 12px; 
 }
 
 .floating-menu .menu-item {
-  background: linear-gradient(135deg, #007aff 0%, #005bb5 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 75%, #000) 100%);
   color: white;
-  height: 44px; /* 높이 고정으로 통일감 부여 */
-  padding: 0 15px;
-  border-radius: 10px;
+  height: 42px; 
+  padding: 0 16px;
+  border-radius: var(--radius-md);
   text-align: center;
   text-decoration: none;
-  font-size: 15px;
-  font-weight: 500;
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  font-size: 0.92rem;
+  font-weight: 700;
+  transition: var(--transition-smooth);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -55,9 +58,9 @@
 
 /* 호버 효과 */
 .floating-menu .menu-item:hover {
-  background: linear-gradient(135deg, #005bb5 0%, #003f7f 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 85%, #000) 0%, color-mix(in srgb, var(--primary-color) 60%, #000) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary-color) 35%, transparent);
 }
 
 /* 활성 상태 (터치/클릭 시) */
@@ -71,15 +74,16 @@
 }
 
 /* 각 항목에 지연 효과 적용 */
-.floating-menu .menu-item:nth-child(1) { animation-delay: 0.1s; }
-.floating-menu .menu-item:nth-child(2) { animation-delay: 0.15s; }
-.floating-menu .menu-item:nth-child(3) { animation-delay: 0.2s; }
-.floating-menu .menu-item:nth-child(5) { animation-delay: 0.25s; }
+.floating-menu .menu-item:nth-child(1) { animation-delay: 0.08s; }
+.floating-menu .menu-item:nth-child(2) { animation-delay: 0.12s; }
+.floating-menu .menu-item:nth-child(3) { animation-delay: 0.16s; }
+.floating-menu .menu-item:nth-child(4) { animation-delay: 0.2s; }
+.floating-menu .menu-item:nth-child(5) { animation-delay: 0.24s; }
 
 /* 추가된 스타일 */
 .menu-divider {
   height: 1px;
-  background-color: #e5e5ea;
+  background-color: color-mix(in srgb, var(--text-color) 12%, transparent);
   margin: 4px 0;
 }
 
@@ -106,12 +110,12 @@
 .floating-company-select {
   width: 100%;
   height: 100%;
-  padding: 0 25px 0 40px !important; /* 아이콘과 화살표 공간 확보 */
+  padding: 0 25px 0 40px !important; 
   background: transparent !important;
   border: none !important;
   color: white !important;
-  font-size: 15px !important;
-  font-weight: 500 !important;
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
   cursor: pointer;
   appearance: none;
   text-align: center;
@@ -123,25 +127,17 @@
   content: '▼';
   position: absolute;
   right: 12px;
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.85);
   pointer-events: none;
   z-index: 2;
-}
-
-[data-theme='dark'] .floating-menu {
-  background-color: #1c1c1e;
-}
-
-[data-theme='dark'] .menu-divider {
-  background-color: #38383a;
 }
 
 /* 슬라이드 인 애니메이션 */
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -161,7 +157,7 @@
 }
 
 .floating-button {
-  background-color: #007aff;
+  background-color: var(--primary-color);
   color: white;
   border: none;
   border-radius: 50%;
@@ -171,14 +167,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--primary-color) 35%, transparent);
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
+  transition: var(--transition-smooth);
 }
 
 .floating-button:hover {
-  background-color: #005bb5;
-  transform: scale(1.1);
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--primary-color) 50%, transparent);
 }
 
 .floating-button:active {
@@ -187,7 +183,7 @@
 
 /* 오버레이 스타일 */
 .floating-menu-overlay {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.35);
   transition: opacity 0.3s ease;
 }
 
@@ -196,7 +192,7 @@
   .floating-menu {
     right: 20px;
     bottom: 140px;
-    max-width: 160px; /* 더 축소 */
+    max-width: 160px; 
     transform: translateY(20px);
   }
 
@@ -205,7 +201,7 @@
   }
 
   .floating-menu .menu-item {
-    height: 48px; /* 모바일에서 터치 영역 확대 */
+    height: 46px; 
     font-size: 14px;
   }
 

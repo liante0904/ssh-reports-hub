@@ -41,7 +41,7 @@
   display: inline-block;
   padding: 3px 8px;
   background: rgba(255, 255, 255, 0.12);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 11px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.7);
@@ -66,8 +66,8 @@
   display: grid;
   place-items: center;
   padding: 0;
-  border-radius: 8px;
-  transition: background 0.15s, color 0.15s;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
 }
 
 .pdf-viewer-share-btn:hover,
@@ -96,7 +96,7 @@
   padding: 0;
   line-height: 0;
   flex: 0 0 44px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 .pdf-viewer-close svg {
