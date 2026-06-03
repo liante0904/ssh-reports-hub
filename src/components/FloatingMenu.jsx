@@ -33,7 +33,7 @@ function FloatingMenu({ isFloatingNavVisible }) {
           <button className="floating-button search-fab" onClick={toggleSearch} title="검색">
             🔍
           </button>
-          <button className="floating-button search-new-fab" onClick={toggleSearchNew} title="검색(신규)" style={{ position: 'relative' }}>
+          <button className="floating-button search-new-fab" onClick={() => navigate('/search-new')} title="검색(신규)" style={{ position: 'relative' }}>
             🔎
             <span style={{ 
               fontSize: '8px', 

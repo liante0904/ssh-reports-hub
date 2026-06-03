@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import SearchOverlay from './components/SearchOverlay';
-import SearchOverlayNew from './components/SearchOverlayNew';
+import SearchPageNew from './components/SearchPageNew';
 import HomeDashboard from './components/HomeDashboard';
 import ReportList from './components/ReportList';
 import BottomNav from './components/BottomNav';
@@ -97,10 +97,10 @@ function AppContent() {
           <Route path="/ai-summary" element={<ReportList key="ai-summary" onWriterClick={handleWriterSearch} />} />
           <Route path="/fnguide" element={<FnGuideList />} />
           <Route path="/admin-console" element={<AdminConsole />} />
+          <Route path="/search-new" element={<SearchPageNew onWriterClick={handleWriterSearch} />} />
         </Routes>
       </main>
       <SearchOverlay />
-      <SearchOverlayNew />
       <BottomNav 
         isNavVisible={isNavVisible} 
         toggleFloatingNav={toggleFloatingNav}

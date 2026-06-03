@@ -4,7 +4,7 @@ import { request } from '../utils/api';
 import { buildReportFetchUrl } from '../utils/reportFetch';
 import { normalizeReportItem } from '../utils/reportNormalizer';
 
-export function useReportFetch(searchQuery, pathname, outlookYear) {
+export function useReportFetch(searchQuery, pathname, outlookYear, sortBy) {
   const [reports, setReports] = useState({});
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -17,10 +17,11 @@ export function useReportFetch(searchQuery, pathname, outlookYear) {
   const buildApiUrl = useCallback(() => buildReportFetchUrl({
     pathname,
     offset,
+    sortBy,
     searchQuery,
     outlookYear,
     baseUrl: CONFIG.API.REPORT_API_URL,
-  }), [offset, searchQuery, pathname, outlookYear]);
+  }), [offset, searchQuery, pathname, outlookYear, sortBy]);
 
   const mergeReports = useCallback((prev, newItems) => {
     const updated = { ...prev };
@@ -80,7 +81,7 @@ export function useReportFetch(searchQuery, pathname, outlookYear) {
     setOffset(0);
     setHasMore(true);
     hasMoreRef.current = true;
-  }, [searchQuery, pathname, outlookYear]);
+  }, [searchQuery, pathname, outlookYear, sortBy]);
 
   useEffect(() => {
     if (offset === 0) {

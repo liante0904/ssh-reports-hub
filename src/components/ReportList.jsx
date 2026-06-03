@@ -24,7 +24,7 @@ function ReportList({ onWriterClick }) {
     hasMore, 
     offset, 
     fetchReports 
-  } = useReportFetch(searchQuery, location.pathname, outlookYear);
+  } = useReportFetch(searchQuery, location.pathname, outlookYear, sortBy);
 
   const [dateToggles, setDateToggles] = useState({});
   const [firmToggles, setFirmToggles] = useState({});
