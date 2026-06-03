@@ -14,13 +14,13 @@
 
 /* Header panel & Search Form */
 .fnguide-header-panel {
-  background: var(--card-background-color);
+  background: var(--glass-bg);
   padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px var(--card-shadow-color);
-  margin-bottom: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
 }
 
 .fnguide-page-title {
@@ -56,13 +56,13 @@
   width: 100%;
   padding: 12px 40px 12px 38px;
   font-size: 0.95rem;
-  border-radius: 12px;
-  border: 1px solid var(--secondary-background-color);
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--text-color) 16%, transparent);
   background: var(--background-color);
   color: var(--text-color);
   outline: none;
   box-sizing: border-box;
-  transition: all 0.3s ease;
+  transition: var(--transition-smooth);
 }
 
 .fnguide-search-input:focus {
@@ -89,14 +89,14 @@
 .fnguide-provider-input {
   padding: 12px;
   font-size: 0.95rem;
-  border-radius: 12px;
-  border: 1px solid var(--secondary-background-color);
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--text-color) 16%, transparent);
   background: var(--background-color);
   color: var(--text-color);
   outline: none;
   width: 100%;
   box-sizing: border-box;
-  transition: all 0.3s ease;
+  transition: var(--transition-smooth);
 }
 
 .fnguide-provider-input:focus {
@@ -108,12 +108,12 @@
   background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+  transition: var(--transition-smooth);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary-color) 25%, transparent);
 }
 
 .fnguide-search-submit:hover {
@@ -149,14 +149,14 @@
 .date-chip {
   flex-shrink: 0;
   padding: 8px 14px;
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   background: var(--background-color);
-  border: 1px solid var(--secondary-background-color);
+  border: 1px solid color-mix(in srgb, var(--text-color) 14%, transparent);
   color: var(--text-color);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition-smooth);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -164,13 +164,15 @@
 
 .date-chip:hover {
   background: var(--secondary-background-color);
+  transform: translateY(-1px);
 }
 
 .date-chip.active {
   background: var(--primary-color);
   color: white;
   border-color: var(--primary-color);
-  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.25);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary-color) 30%, transparent);
+  transform: translateY(-1px);
 }
 
 .chip-count {
@@ -198,19 +200,21 @@
 
 /* Premium Card Design */
 .fnguide-card {
-  background: var(--card-background-color);
-  border-radius: 20px;
+  background: var(--glass-bg);
+  border-radius: var(--radius-lg);
   padding: 20px;
-  box-shadow: 0 6px 18px var(--card-shadow-color);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: var(--transition-smooth);
   position: relative;
   overflow: hidden;
 }
 
 .fnguide-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px var(--card-shadow-color);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--card-shadow-color) 45%, transparent);
 }
 
 /* Card Top Meta Badges */
