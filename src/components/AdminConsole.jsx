@@ -191,7 +191,9 @@ function AdminConsole() {
             headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
           });
           if (healthRes.ok) setFirmHealth(await healthRes.json());
-        } catch (_) {}
+        } catch {
+          // ignore
+        }
 
         // 요약
         const totalArchived = hist.reduce((sum, d) => sum + d.count, 0);
