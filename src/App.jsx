@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import SearchOverlay from './components/SearchOverlay';
+import SearchOverlayNew from './components/SearchOverlayNew';
 import HomeDashboard from './components/HomeDashboard';
 import ReportList from './components/ReportList';
 import BottomNav from './components/BottomNav';
@@ -99,6 +100,7 @@ function AppContent() {
         </Routes>
       </main>
       <SearchOverlay />
+      <SearchOverlayNew />
       <BottomNav 
         isNavVisible={isNavVisible} 
         toggleFloatingNav={toggleFloatingNav}
