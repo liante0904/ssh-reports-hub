@@ -327,6 +327,48 @@ assert(CONFIG.STORAGE_KEYS.AUTH_TOKEN === 'auth_token', 'STORAGE_KEYS.AUTH_TOKEN
 assert(CONFIG.STORAGE_KEYS.TELEGRAM_USER === 'telegram_user', 'STORAGE_KEYS.TELEGRAM_USER');
 assert(CONFIG.STORAGE_KEYS.THEME === 'theme', 'STORAGE_KEYS.THEME');
 
+// ─── Test 10: normalizeReportPreview (components/HomeDashboard.jsx 내 로직 검증) ───
+console.log('\n─── [Test 10] normalizeReportPreview (HomeDashboard.jsx) ───');
+
+function formatPreviewDate(rawDate) {
+  if (!rawDate) return '';
+  const value = String(rawDate);
+  if (/^\d{8}$/.test(value)) {
+    return `${value.slice(4, 6)}.${value.slice(6, 8)}`;
+  }
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return match ? `${match[2]}.${match[3]}` : value;
+}
+
+function normalizeReportPreview(item) {
+  const report = normalizeReportItem(item);
+  if (!report) return null;
+  return {
+    id: report.id,
+    title: report.title,
+    meta: [report.firm, report.writer].filter(Boolean).join(' · '),
+    date: formatPreviewDate(report.date),
+    rawReport: report,
+  };
+}
+
+const previewItem = {
+  report_id: 98765,
+  article_title: '프리뷰 리포트',
+  writer: '이순신',
+  firm_nm: '키움증권',
+  reg_dt: '20240505',
+};
+
+const previewResult = normalizeReportPreview(previewItem);
+assert(previewResult !== null, '정상 프리뷰 아이템이 null이 아님');
+assertEqual(previewResult.id, 98765, 'id = report_id');
+assertEqual(previewResult.title, '프리뷰 리포트', 'title = article_title');
+assertEqual(previewResult.meta, '키움증권 · 이순신', 'meta 생성 (증권사 · 작성자)');
+assertEqual(previewResult.date, '05.05', 'date 포맷 변환 (MM.DD)');
+assert(previewResult.rawReport !== undefined && previewResult.rawReport !== null, 'rawReport 객체 존재');
+assertEqual(previewResult.rawReport.id, 98765, 'rawReport의 id 일치');
+
 // ─── 결과 요약 ───
 console.log('\n════════════════════════════════════════════');
 console.log(`  결과: ${passed} 통과, ${failed} 실패 (총 ${passed + failed}개)`);

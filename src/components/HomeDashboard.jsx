@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CONFIG } from '../constants/config';
 import { request } from '../utils/api';
 import { normalizeReportItem } from '../utils/reportNormalizer';
+import { getDirectUrl } from '../utils/reportLinks';
 import './HomeDashboard.css';
 
 const PREVIEW_LIMIT = 5;
@@ -61,6 +62,7 @@ function normalizeReportPreview(item) {
     title: report.title,
     meta: [report.firm, report.writer].filter(Boolean).join(' · '),
     date: formatPreviewDate(report.date),
+    rawReport: report,
   };
 }
 
@@ -190,20 +192,42 @@ function HomeDashboard() {
               ) : sections[section.key].items.length === 0 ? (
                 <div className="home-preview-state">표시할 항목이 없습니다.</div>
               ) : (
-                sections[section.key].items.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className="home-preview-row"
-                    onClick={() => navigate(section.path)}
-                  >
-                    <span className="home-preview-main">
-                      <span className="home-preview-title">{item.title}</span>
-                      {item.meta && <span className="home-preview-meta">{item.meta}</span>}
-                    </span>
-                    {item.date && <span className="home-preview-date">{item.date}</span>}
-                  </button>
-                ))
+                sections[section.key].items.map((item) => {
+                  const isFnGuide = section.key === 'fnguide';
+                  if (isFnGuide) {
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className="home-preview-row"
+                        onClick={() => navigate(section.path)}
+                      >
+                        <span className="home-preview-main">
+                          <span className="home-preview-title">{item.title}</span>
+                          {item.meta && <span className="home-preview-meta">{item.meta}</span>}
+                        </span>
+                        {item.date && <span className="home-preview-date">{item.date}</span>}
+                      </button>
+                    );
+                  }
+
+                  const directUrl = getDirectUrl(item.rawReport);
+                  return (
+                    <a
+                      key={item.id}
+                      href={directUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="home-preview-row"
+                    >
+                      <span className="home-preview-main">
+                        <span className="home-preview-title">{item.title}</span>
+                        {item.meta && <span className="home-preview-meta">{item.meta}</span>}
+                      </span>
+                      {item.date && <span className="home-preview-date">{item.date}</span>}
+                    </a>
+                  );
+                })
               )}
             </div>
           </article>
