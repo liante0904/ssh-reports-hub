@@ -8,7 +8,6 @@ function FloatingMenu({ isFloatingNavVisible }) {
     isMenuOpen: isOpen, 
     toggleMenu, 
     toggleSearch, 
-    toggleSearchNew,
     theme, 
     toggleTheme
   } = useReport();

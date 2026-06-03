@@ -28,6 +28,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const {
     clearSearchState,
     handleCompanyChange,
+    handleBoardChange,
     handleSearchButtonClick,
     selectedCompanyOrder,
   } = useHeaderSearchState({
@@ -115,6 +116,9 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
         selectedCompany={selectedCompanyOrder}
         handleCompanyChange={handleCompanyChange}
         handleHeaderClick={handleButtonClick}
+        boards={boards}
+        selectedBoard={activeSearch.board}
+        handleBoardChange={handleBoardChange}
       />
     </>
   );

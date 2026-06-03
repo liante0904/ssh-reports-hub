@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import CompanySelect from './CompanySelect';
+import BoardSelect from './BoardSelect';
 import ShareMenu from './ShareMenu';
 import ReportGroup from './report/ReportGroup';
 import { useReport } from '../context/useReport';
 import { useReportFetch } from '../hooks/useReportFetch';
 import { CONFIG } from '../constants/config';
 import { request } from '../utils/api';
-import { prefetchPdf } from '../utils/reportLinks';
 import { buildShareMenuData } from '../utils/shareMenuData';
 import './SearchPageNew.css';
 
@@ -20,6 +20,8 @@ function SearchPageNew({ onWriterClick }) {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [category, setCategory] = useState('title');
   const [selectedCompany, setSelectedCompany] = useState('');
+  const [boards, setBoards] = useState([]);
+  const [selectedBoard, setSelectedBoard] = useState('');
   const [selectedRoute, setSelectedRoute] = useState('recent');
   const [selectedSort, setSelectedSort] = useState('time');
 
@@ -31,6 +33,33 @@ function SearchPageNew({ onWriterClick }) {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
+  // 증권사 선택 시 게시판 fetch
+  useEffect(() => {
+    if (!selectedCompany) {
+      setBoards([]);
+      setSelectedBoard('');
+      return;
+    }
+
+    const controller = new AbortController();
+    const fetchBoards = async () => {
+      try {
+        const data = await request(`${CONFIG.API.BOARDS_URL}?company=${selectedCompany}`, {
+          signal: controller.signal
+        });
+        setBoards(Array.isArray(data) ? data.filter(b => b.report_count > 0) : []);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Failed to fetch boards:', error);
+          setBoards([]);
+        }
+      }
+    };
+
+    fetchBoards();
+    return () => controller.abort();
+  }, [selectedCompany]);
+
   // 검색 쿼리 빌드
   const searchQuery = useMemo(() => {
     const trimmed = debouncedQuery.trim();
@@ -39,9 +68,9 @@ function SearchPageNew({ onWriterClick }) {
       query: isCompanyOnly ? selectedCompany : trimmed,
       category: isCompanyOnly ? 'company' : (trimmed ? category : ''),
       companyOrder: selectedCompany || null,
-      board: null,
+      board: selectedBoard ? Number(selectedBoard) : null,
     };
-  }, [debouncedQuery, category, selectedCompany]);
+  }, [debouncedQuery, category, selectedCompany, selectedBoard]);
 
   // useReportFetch를 활용하여 실시간 검색 결과 fetch
   const fetchPathname = `/${selectedRoute}`;
@@ -156,6 +185,7 @@ function SearchPageNew({ onWriterClick }) {
     setSearchTerm('');
     setCategory('title');
     setSelectedCompany('');
+    setSelectedBoard('');
     setSelectedRoute('recent');
     setSelectedSort('time');
   };
@@ -205,12 +235,13 @@ function SearchPageNew({ onWriterClick }) {
     <div className="search-page-new">
       <section className="search-page-header">
         <h1>통합 검색 및 필터</h1>
-        <p>상단에서 조건을 필터링하면 하단의 검색 결과가 실시간으로 갱신됩니다.</p>
+        <p>조건을 선택하는 즉시 실시간으로 최적화된 리포트를 분석합니다.</p>
       </section>
 
-      {/* 필터 제어판 */}
+      {/* 프리미엄 필터 제어판 */}
       <section className="filter-panel-card">
         <div className="filter-grid">
+          
           <div className="filter-item text-search-box">
             <label className="filter-label">🔍 텍스트 검색</label>
             <div className="text-search-fields">
@@ -238,7 +269,7 @@ function SearchPageNew({ onWriterClick }) {
             </div>
           </div>
 
-          <div className="filter-item company-box">
+          <div className={`filter-item company-box ${selectedCompany ? 'has-boards' : ''}`}>
             <label className="filter-label">🗂️ 증권사 필터</label>
             <CompanySelect
               value={selectedCompany}
@@ -246,6 +277,18 @@ function SearchPageNew({ onWriterClick }) {
               className="search-company-select"
             />
           </div>
+
+          {selectedCompany && (
+            <div className="filter-item board-box">
+              <label className="filter-label">📋 게시판 필터</label>
+              <BoardSelect
+                value={selectedBoard}
+                boards={boards}
+                onChange={(e) => setSelectedBoard(e.target.value)}
+                className="search-board-select"
+              />
+            </div>
+          )}
 
           <div className="filter-item route-box">
             <label className="filter-label">🏷️ 조회 대상 분류</label>
@@ -306,11 +349,11 @@ function SearchPageNew({ onWriterClick }) {
 
         <div className="results-list-container">
           {offset === 0 && isLoading ? (
-            <div className="search-state-msg">검색 조건에 맞춰 리포트를 불러오는 중...</div>
+            <div className="search-state-msg">검색 조건에 맞춰 리포트를 분석 중입니다...</div>
           ) : filteredSortedDates.length === 0 && !isLoading ? (
             <div className="search-state-msg empty-msg">
               <span className="empty-icon">📂</span>
-              <p>검색 조건에 일치하는 리포트가 없습니다.<br/>텍스트 검색어를 변경하거나 증권사/조회 대상 필터를 조정해 보세요.</p>
+              <p>조건에 일치하는 리포트 데이터가 존재하지 않습니다.<br/>상단 필터 설정을 변경해 보세요.</p>
             </div>
           ) : (
             <InfiniteScroll
@@ -320,7 +363,7 @@ function SearchPageNew({ onWriterClick }) {
               scrollThreshold={0.7}
               loader={<div className="search-state-msg">더 불러오는 중...</div>}
             >
-              {filteredSortedDates.map((date, index) => (
+              {filteredSortedDates.map((date) => (
                 <ReportGroup 
                   key={date}
                   date={date}

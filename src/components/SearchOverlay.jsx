@@ -11,6 +11,7 @@ import {
 } from '../utils/searchSelection';
 import './SearchOverlay.css';
 import CompanySelect from './CompanySelect';
+import BoardSelect from './BoardSelect';
 
 function SearchOverlay() {
   const { 
@@ -18,7 +19,8 @@ function SearchOverlay() {
     toggleSearch, 
     handleSearch: onSearch, 
     pendingSearch,
-    setPendingSearch
+    setPendingSearch,
+    boards
   } = useReport();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('title');
@@ -119,6 +121,25 @@ function SearchOverlay() {
     },
     [navigate, onSearch, setSearchParams]
   );
+  
+  const handleBoardChange = useCallback(
+    (e) => {
+      const boardOrder = e.target.value;
+      if (selectedCompanyOrder) {
+        const nextSearch = {
+          query: selectedCompanyOrder,
+          category: 'company',
+          companyOrder: selectedCompanyOrder,
+          board: boardOrder ? Number(boardOrder) : null,
+        };
+        const nextParams = buildSearchParams(nextSearch);
+        setSearchParams(nextParams, { replace: true });
+        onSearch(nextSearch);
+        navigate({ pathname: '/recent', search: `?${nextParams.toString()}` });
+      }
+    },
+    [selectedCompanyOrder, navigate, onSearch, setSearchParams]
+  );
 
   if (!isSearchOpen) {
     return null;
@@ -143,7 +164,17 @@ function SearchOverlay() {
           </select>
 
           {category === 'company' ? (
-            <CompanySelect value={selectedCompanyOrder} onChange={handleCompanyChange} className="company-select" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+              <CompanySelect value={selectedCompanyOrder} onChange={handleCompanyChange} className="company-select" />
+              {selectedCompanyOrder && (
+                <BoardSelect
+                  value={pendingSearch.board}
+                  boards={boards}
+                  onChange={handleBoardChange}
+                  className="board-select-overlay"
+                />
+              )}
+            </div>
           ) : (
             <input
               type="text"

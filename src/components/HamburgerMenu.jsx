@@ -1,6 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import CompanySelect from './CompanySelect';
+import BoardSelect from './BoardSelect';
 import TelegramAuth from './menu/TelegramAuth';
 import KeywordOverlay from './menu/KeywordOverlay';
 import AdminSection from './menu/AdminSection';
@@ -9,7 +10,16 @@ import { useTelegramAuth } from '../hooks/useTelegramAuth';
 import { useReport } from '../context/useReport';
 import './HamburgerMenu.css';
 
-function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChange, handleHeaderClick }) {
+function HamburgerMenu({
+  isOpen,
+  toggleMenu,
+  selectedCompany,
+  handleCompanyChange,
+  handleHeaderClick,
+  boards = [],
+  selectedBoard,
+  handleBoardChange,
+}) {
   const { telegramUser, logout } = useReport();
   const {
     isAuthenticating,
@@ -54,6 +64,19 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
             <div className="menu-item-select">
               <CompanySelect value={selectedCompany} onChange={handleSelectChange} className="company-select" />
             </div>
+            {selectedCompany && boards.length > 0 && (
+              <div className="menu-item-select" style={{ marginTop: '8px' }}>
+                <BoardSelect
+                  value={selectedBoard}
+                  boards={boards}
+                  onChange={(e) => {
+                    handleBoardChange(e);
+                    toggleMenu();
+                  }}
+                  className="board-select"
+                />
+              </div>
+            )}
 
             <div className="menu-title">알림 & 즐겨찾기</div>
             <TelegramAuth
