@@ -3,15 +3,13 @@ import { useReport } from '../context/useReport';
 import './BottomNav.css';
 
 function BottomNav({ isNavVisible, toggleFloatingNav, onHomeClick }) {
-  const { toggleSearch, toggleSearchNew } = useReport();
+  const { setIsMenuOpen, setIsTopMenuOpen } = useReport();
   const navigate = useNavigate();
 
   const handleSearchClick = () => {
-    toggleSearch();
-  };
-
-  const handleSearchNewClick = () => {
-    toggleSearchNew();
+    setIsMenuOpen(false);
+    setIsTopMenuOpen(false);
+    navigate('/search-new');
   };
 
   return (
@@ -22,23 +20,8 @@ function BottomNav({ isNavVisible, toggleFloatingNav, onHomeClick }) {
       }} title="홈">
         <span>🏠</span>
       </button>
-      <button className="nav-button" onClick={handleSearchClick} title="기존 검색">
+      <button className="nav-button" onClick={handleSearchClick} title="검색 및 필터">
         <span>🔍</span>
-      </button>
-      <button className="nav-button" onClick={handleSearchNewClick} title="신규 검색 및 필터" style={{ position: 'relative' }}>
-        <span>🔎</span>
-        <span style={{ 
-          fontSize: '9px', 
-          position: 'absolute', 
-          top: '6px', 
-          right: '6px', 
-          backgroundColor: '#ff3b30', 
-          color: 'white', 
-          borderRadius: '4px', 
-          padding: '1px 3px', 
-          fontWeight: 'bold',
-          lineHeight: '1'
-        }}>N</span>
       </button>
       <button className="nav-button" onClick={() => navigate('/favorites')} title="즐겨찾기">
         <span>⭐</span>

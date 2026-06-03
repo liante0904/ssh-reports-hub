@@ -13,7 +13,6 @@ export function ReportProvider({ children }) {
   const [activeSearch, setActiveSearch] = useState(createEmptySearchSelection());
   const [stagedSearch, setStagedSearch] = useState(createEmptySearchSelection());
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
-  const [isSearchNewOpen, setIsSearchNewOpen] = useState(false);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTopMenuOpen, setIsTopMenuOpen] = useState(false);
@@ -106,7 +105,6 @@ export function ReportProvider({ children }) {
   }, [activeSearch.category, activeSearch.query, activeSearch.companyOrder]);
 
   const toggleSearch = useCallback(() => setIsSearchOverlayOpen(prev => !prev), []);
-  const toggleSearchNew = useCallback(() => setIsSearchNewOpen(prev => !prev), []);
   const toggleMenu = useCallback(() => setIsMenuOpen(prev => !prev), []);
   const toggleMenuTop = useCallback(() => setIsTopMenuOpen(prev => !prev), []);
 
@@ -132,9 +130,6 @@ export function ReportProvider({ children }) {
     setIsSearchOpen: setIsSearchOverlayOpen,
     isSearchOverlayOpen,
     toggleSearch,
-    isSearchNewOpen,
-    setIsSearchNewOpen,
-    toggleSearchNew,
     isMenuOpen,
     setIsMenuOpen,
     toggleMenu,
