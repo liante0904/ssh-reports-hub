@@ -15,6 +15,12 @@ const HOME_SECTIONS = [
     path: '/fnguide',
   },
   {
+    key: 'recent',
+    title: '최근 레포트',
+    description: '실시간으로 수집되는 최신 증권사 리포트',
+    path: '/recent',
+  },
+  {
     key: 'industry',
     title: '산업레포트',
     description: '업종과 테마 흐름을 빠르게 확인하는 산업 리포트',
@@ -25,7 +31,6 @@ const HOME_SECTIONS = [
     title: '글로벌',
     description: '해외 시장과 글로벌 기업 관련 최신 리포트',
     path: '/global',
-    wide: true,
   },
 ];
 
@@ -63,6 +68,7 @@ function HomeDashboard() {
   const navigate = useNavigate();
   const [sections, setSections] = useState(() => ({
     fnguide: { items: [], isLoading: true, error: '' },
+    recent: { items: [], isLoading: true, error: '' },
     industry: { items: [], isLoading: true, error: '' },
     global: { items: [], isLoading: true, error: '' },
   }));
@@ -91,6 +97,23 @@ function HomeDashboard() {
       } catch (error) {
         if (error.name === 'AbortError') return;
         setSectionState('fnguide', { items: [], isLoading: false, error: '종목요약을 불러오지 못했습니다.' });
+      }
+    };
+
+    const loadRecent = async () => {
+      try {
+        const data = await request(
+          `${CONFIG.API.REPORT_API_URL}/search?limit=${PREVIEW_LIMIT}&offset=0`,
+          { signal: controller.signal }
+        );
+        setSectionState('recent', {
+          items: Array.isArray(data?.items) ? data.items.map(normalizeReportPreview).filter(Boolean) : [],
+          isLoading: false,
+          error: '',
+        });
+      } catch (error) {
+        if (error.name === 'AbortError') return;
+        setSectionState('recent', { items: [], isLoading: false, error: '최근 레포트를 불러오지 못했습니다.' });
       }
     };
 
@@ -129,6 +152,7 @@ function HomeDashboard() {
     };
 
     loadFnGuide();
+    loadRecent();
     loadIndustry();
     loadGlobal();
 
@@ -139,7 +163,7 @@ function HomeDashboard() {
     <div className="home-dashboard">
       <section className="home-dashboard-header">
         <h1>리포트 홈</h1>
-        <p>종목요약, 산업레포트, 글로벌 리포트를 먼저 확인하세요.</p>
+        <p>종목요약, 최근 레포트, 산업레포트, 글로벌 리포트를 먼저 확인하세요.</p>
       </section>
 
       <section className="home-section-grid" aria-label="주요 리포트 섹션">
