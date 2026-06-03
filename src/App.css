@@ -36,13 +36,13 @@
 .card {
   padding: 2em;
   background-color: var(--card-background-color);
-  box-shadow: 0 2px 5px var(--card-shadow-color);
-  border-radius: 8px;
-  transition: background-color 0.3s, box-shadow 0.3s;
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-md);
+  transition: var(--transition-smooth);
 }
 
 .read-the-docs {
-  color: #888;
+  color: var(--text-muted);
 }
 
 
@@ -51,3 +51,4 @@
   /* 바텀 네비게이션 높이 + 하단 세이프 영역 고려한 충분한 여백 확보 */
   padding-bottom: calc(85px + env(safe-area-inset-bottom, 20px));
 }
+

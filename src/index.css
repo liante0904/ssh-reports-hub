@@ -1,29 +1,62 @@
-
 :root {
-  --background-color: #f0f0f5;
-  --text-color: #213547;
-  --primary-color: #007aff;
-  --secondary-background-color: #e0e0e5;
-  --bg-muted: #f1f1f1;
-  --card-background-color: #ffffff;
-  --card-shadow-color: rgba(0, 0, 0, 0.2);
-  --loading-background-color: rgba(255, 255, 255, 0.8);
-  --loading-text-color: #555;
-  --loading-border-color: #ddd;
+  /* HSL 기반 글로벌 테마 컬러 */
+  --primary-color: hsl(210, 100%, 50%);         /* 생동감 넘치는 블루 (#007aff) */
+  --primary-glow: hsla(210, 100%, 50%, 0.15);
+  
+  --success-color: hsl(145, 80%, 42%);          /* 정돈된 그린 */
+  --warning-color: hsl(35, 100%, 52%);          /* 정돈된 오렌지 */
+  --danger-color: hsl(355, 85%, 55%);           /* 정돈된 레드 */
+
+  /* 라이트 모드 컬러 */
+  --background-color: hsl(240, 20%, 96%);       /* 은은한 밝은 그레이-블루 */
+  --secondary-background-color: hsl(240, 12%, 90%);
+  --bg-muted: hsl(240, 10%, 94%);
+  
+  --card-background-color: hsla(0, 0%, 100%, 0.85);
+  --card-shadow-color: rgba(15, 23, 42, 0.08);
+  --text-color: hsl(210, 35%, 20%);
+  --text-muted: hsl(210, 15%, 50%);
+  
+  /* 글래스모피즘 토큰 */
+  --glass-bg: hsla(0, 0%, 100%, 0.8);
+  --glass-border: hsla(0, 0%, 0%, 0.08);
+  --glass-shadow: 0 8px 30px hsla(210, 25%, 15%, 0.08);
+
+  /* 둥글기 규격화 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* 스페이싱 규격화 */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* 트랜지션 타이밍 일원화 */
+  --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+
   --app-height: 100dvh;
 }
 
 html[data-theme='dark'] {
-  --background-color: #1a1a1a;
-  --text-color: rgba(255, 255, 255, 0.87);
-  --primary-color: #007aff;
-  --secondary-background-color: #333333;
-  --bg-muted: #2a2a2a;
-  --card-background-color: #2a2a2a;
-  --card-shadow-color: rgba(0, 0, 0, 0.5);
-  --loading-background-color: rgba(0, 0, 0, 0.8);
-  --loading-text-color: #eee;
-  --loading-border-color: #444;
+  /* 다크 모드 컬러 (우주적 깊이의 다크 네이비 레이어) */
+  --background-color: hsl(230, 25%, 8%);        /* 아주 깊은 다크 블루 */
+  --secondary-background-color: hsl(230, 20%, 14%);
+  --bg-muted: hsl(230, 18%, 12%);
+  
+  --card-background-color: hsla(230, 20%, 15%, 0.75);
+  --card-shadow-color: rgba(0, 0, 0, 0.4);
+  --text-color: hsl(210, 40%, 93%);
+  --text-muted: hsl(210, 15%, 65%);
+
+  /* 글래스모피즘 토큰 */
+  --glass-bg: hsla(230, 20%, 12%, 0.75);
+  --glass-border: hsla(210, 40%, 100%, 0.08);
+  --glass-shadow: 0 10px 40px hsla(0, 0%, 0%, 0.5);
 }
 
 html, body {
@@ -32,14 +65,13 @@ html, body {
   box-sizing: border-box;
   width: 100%;
   min-height: 100%;
-  background-color: #007aff; /* 바텀바와 동일한 색상으로 설정하여 새로고침 시 흰색 방지 */
-  overscroll-behavior: none; /* 상하단 바운스 시 흰색 배경 방지 */
+  background-color: var(--primary-color);
+  overscroll-behavior-y: none; /* 상하단 바운스 시 흰색 배경 방지 */
 }
 
 body { 
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 1em; 
-  /* background-color: var(--background-color); */ /* 기본 배경은 각 컨테이너에서 설정하거나 하단에서 덮어씌움 */
   color: var(--text-color);
   transition: background-color 0.3s, color 0.3s;
   -webkit-tap-highlight-color: transparent;
@@ -53,10 +85,27 @@ body {
 }
 
 .home-logo {
-  position: absolute; top: 50%; left: 20px; transform: translateY(-50%);
-  cursor: pointer; width: 40px; height: 40px; border-radius: 50%; background-color: white; 
-  display: flex; align-items: center; justify-content: center; font-size: 1.2em; color: #007aff; 
-  font-weight: bold; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  position: absolute; 
+  top: 50%; 
+  left: 20px; 
+  transform: translateY(-50%);
+  cursor: pointer; 
+  width: 40px; 
+  height: 40px; 
+  border-radius: 50%; 
+  background-color: white; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 1.2em; 
+  color: var(--primary-color); 
+  font-weight: bold; 
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: var(--transition-smooth);
+}
+
+.home-logo:hover {
+  transform: translateY(-50%) scale(1.05);
 }
 
 /* 모바일 화면 (1024px 미만)에서만 표시 */
@@ -73,52 +122,71 @@ body {
 }
 
 .menu-item {
-  color: var(--primary-color); font-weight: bold; text-decoration: none; font-size: 1.1em; margin: 10px 0;
-  padding: 10px 15px; border-radius: 15px; background-color: var(--background-color); text-align: center;
-  transition: background-color 0.3s;
-  width: 100%; box-sizing: border-box; 
+  color: var(--primary-color); 
+  font-weight: bold; 
+  text-decoration: none; 
+  font-size: 1.1em; 
+  margin: 10px 0;
+  padding: 10px 15px; 
+  border-radius: var(--radius-md); 
+  background-color: var(--background-color); 
+  text-align: center;
+  transition: var(--transition-smooth);
+  width: 100%; 
+  box-sizing: border-box; 
+  display: block;
 }
+
 .menu-item:hover {
   background-color: var(--secondary-background-color);
+  transform: translateY(-1px);
 }
+
 .menu-title {
-  font-size: 1.2em; font-weight: bold; color: var(--primary-color); margin-bottom: 10px;
+  font-size: 1.2em; 
+  font-weight: bold; 
+  color: var(--primary-color); 
+  margin-bottom: 10px;
 }
+
 .main-content {
   flex-grow: 1;
-  /* 브라우저 기본 스크롤 사용을 위해 overflow 제거 */
-  /* 헤더 높이가 계산되기 전 기본 여백 확보 (Layout Shift 방지) */
   padding-top: calc(var(--header-height, 110px) + 20px); 
 }
 
 @media (min-width: 1024px) {
   .main-content {
-    padding-top: calc(var(--header-height, 130px) + 30px); /* 데스크탑은 좀 더 넓게 */
+    padding-top: calc(var(--header-height, 130px) + 30px);
   }
 }
 
 .report-list-wrapper {
   position: relative;
-  min-height: 100vh; /* 콘텐츠가 너무 작아도 스크롤이 유지되도록 */
+  min-height: 100vh;
 }
 
+/* 글래스모피즘 로딩 오버레이 */
 .loading-overlay {
   position: fixed;
-  top: 50%; /* 기본: 중앙 정렬 */
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 20px;
-  background-color: var(--primary-color);
-  color: white;
-  border-radius: 30px;
-  font-weight: bold;
-  font-size: 0.9em;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  gap: 12px;
+  padding: 12px 24px;
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-color);
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.92em;
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: 2000;
   white-space: nowrap;
+  animation: searchPageFadeIn 0.3s ease-out;
 }
 
 /* 모바일에서 검색 로딩 시에만 상단으로 이동 */
@@ -129,22 +197,26 @@ body {
   }
 }
 
-/* 토스트 메시지 기본 스타일 */
+/* 글래스모피즘 토스트 메시지 */
 .toast-container {
   position: fixed;
   bottom: 30px;
   left: 50%;
   transform: translateX(-50%) translateY(100px);
-  background-color: #333;
-  color: white;
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-color);
   padding: 12px 24px;
-  border-radius: 25px;
+  border-radius: var(--radius-full);
   font-size: 0.9em;
+  font-weight: 700;
   z-index: 3000;
-  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   opacity: 0;
   pointer-events: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .toast-container.visible {
@@ -152,36 +224,23 @@ body {
   opacity: 1;
 }
 
-/* 회전하는 스피너 추가 */
+/* 회전하는 스피너 */
 .loading-overlay::before {
   content: '';
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  border: 2.5px solid color-mix(in srgb, var(--text-color) 20%, transparent);
+  border-top-color: var(--primary-color);
   border-radius: 50%;
-  animation: loading-spin 0.8s infinite linear;
+  animation: loading-spin 0.75s infinite linear;
 }
 
 @keyframes loading-spin {
   to { transform: rotate(360deg); }
 }
 
-/* 기존 바 애니메이션 제거 */
-@keyframes loading-bar {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
 .container {
-  /* 바텀 네비게이션과 겹치지 않도록 충분한 하단 여백 추가 */
   padding-bottom: calc(90px + env(safe-area-inset-bottom, 20px));
-}
-/* .container { padding: 15px; } */
-
-
-@media (min-width: 768px) { 
-  .container { max-width: 800px; margin: auto;  }
 }
 
 .loading {
@@ -190,47 +249,47 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  padding: 20px;
-  font-size: 1.2em;
-  font-weight: bold;
-  color: #555;
-  background-color: rgba(255, 255, 255, 0.8);
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 24px;
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--text-color);
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: 1000;
 }
 
-
-
-
-/* 기본 컨테이너 스타일 */
+/* 공통 컨테이너 스타일 */
 .container {
   width: 100%;
-  padding: 15px; /* 내부 여백 */
+  padding: 16px;
   box-sizing: border-box;
 }
 
 /* 데스크탑 화면 (최소 너비 1024px 이상일 때) */
 @media (min-width: 1024px) {
   .container {
-    max-width: 1200px; /* 데스크탑 최대 너비 */
-    margin: auto; /* 가운데 정렬 */
+    max-width: 1200px;
+    margin: auto;
   }
 }
 
 /* 모바일 화면 (최대 너비 1023px 이하일 때) */
 @media (max-width: 1023px) {
   .container {
-    max-width: 800px; /* 모바일에서도 데스크탑처럼 마진 생성 */
-    margin: auto; /* 가운데 정렬 */
-    padding: 10px; /* 모바일에서 약간의 여백 추가 */
+    max-width: 800px;
+    margin: auto;
+    padding: 12px;
   }
 }
 
 /* 화면 크기가 768px 이하일 때 */
 @media (max-width: 767px) {
   .container {
-    max-width: 600px; /* 더 작은 화면에서는 최대 너비를 줄임 */
+    max-width: 600px;
     margin: auto;
     padding: 10px;
   }
