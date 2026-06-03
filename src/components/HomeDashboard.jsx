@@ -1,30 +1,139 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CONFIG } from '../constants/config';
+import { request } from '../utils/api';
+import { normalizeReportItem } from '../utils/reportNormalizer';
 import './HomeDashboard.css';
+
+const PREVIEW_LIMIT = 5;
 
 const HOME_SECTIONS = [
   {
+    key: 'fnguide',
     title: '종목요약',
     description: 'FnGuide에서 수집한 종목별 요약 리포트',
     path: '/fnguide',
-    action: '종목요약 보기',
   },
   {
+    key: 'industry',
     title: '산업레포트',
     description: '업종과 테마 흐름을 빠르게 확인하는 산업 리포트',
     path: '/industry',
-    action: '산업레포트 보기',
   },
   {
+    key: 'global',
     title: '글로벌',
     description: '해외 시장과 글로벌 기업 관련 최신 리포트',
     path: '/global',
-    action: '글로벌 보기',
     wide: true,
   },
 ];
 
+function formatPreviewDate(rawDate) {
+  if (!rawDate) return '';
+  const value = String(rawDate);
+  if (/^\d{8}$/.test(value)) {
+    return `${value.slice(4, 6)}.${value.slice(6, 8)}`;
+  }
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return match ? `${match[2]}.${match[3]}` : value;
+}
+
+function normalizeFnGuideItem(item) {
+  return {
+    id: item.summary_id,
+    title: item.report_title || '제목 없음',
+    meta: [item.company_name, item.provider].filter(Boolean).join(' · '),
+    date: formatPreviewDate(item.report_date),
+  };
+}
+
+function normalizeReportPreview(item) {
+  const report = normalizeReportItem(item);
+  if (!report) return null;
+  return {
+    id: report.id,
+    title: report.title,
+    meta: [report.firm, report.writer].filter(Boolean).join(' · '),
+    date: formatPreviewDate(report.date),
+  };
+}
+
 function HomeDashboard() {
   const navigate = useNavigate();
+  const [sections, setSections] = useState(() => ({
+    fnguide: { items: [], isLoading: true, error: '' },
+    industry: { items: [], isLoading: true, error: '' },
+    global: { items: [], isLoading: true, error: '' },
+  }));
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const setSectionState = (key, nextState) => {
+      setSections((prev) => ({
+        ...prev,
+        [key]: { ...prev[key], ...nextState },
+      }));
+    };
+
+    const loadFnGuide = async () => {
+      try {
+        const data = await request(
+          `${CONFIG.API.BASE_URL}/api/fnguide/report-summaries?limit=${PREVIEW_LIMIT}&offset=0`,
+          { signal: controller.signal, logoutOn401: false }
+        );
+        setSectionState('fnguide', {
+          items: Array.isArray(data) ? data.map(normalizeFnGuideItem) : [],
+          isLoading: false,
+          error: '',
+        });
+      } catch (error) {
+        if (error.name === 'AbortError') return;
+        setSectionState('fnguide', { items: [], isLoading: false, error: '종목요약을 불러오지 못했습니다.' });
+      }
+    };
+
+    const loadIndustry = async () => {
+      try {
+        const data = await request(
+          `${CONFIG.API.REPORT_API_URL}/industry?limit=${PREVIEW_LIMIT}&offset=0`,
+          { signal: controller.signal }
+        );
+        setSectionState('industry', {
+          items: Array.isArray(data?.items) ? data.items.map(normalizeReportPreview).filter(Boolean) : [],
+          isLoading: false,
+          error: '',
+        });
+      } catch (error) {
+        if (error.name === 'AbortError') return;
+        setSectionState('industry', { items: [], isLoading: false, error: '산업레포트를 불러오지 못했습니다.' });
+      }
+    };
+
+    const loadGlobal = async () => {
+      try {
+        const data = await request(
+          `${CONFIG.API.REPORT_API_URL}/search?limit=${PREVIEW_LIMIT}&offset=0&mkt_tp=global`,
+          { signal: controller.signal }
+        );
+        setSectionState('global', {
+          items: Array.isArray(data?.items) ? data.items.map(normalizeReportPreview).filter(Boolean) : [],
+          isLoading: false,
+          error: '',
+        });
+      } catch (error) {
+        if (error.name === 'AbortError') return;
+        setSectionState('global', { items: [], isLoading: false, error: '글로벌 리포트를 불러오지 못했습니다.' });
+      }
+    };
+
+    loadFnGuide();
+    loadIndustry();
+    loadGlobal();
+
+    return () => controller.abort();
+  }, []);
 
   return (
     <div className="home-dashboard">
@@ -39,13 +148,40 @@ function HomeDashboard() {
             key={section.path}
             className={`home-section-card ${section.wide ? 'wide' : ''}`}
           >
-            <div>
-              <h2>{section.title}</h2>
-              <p>{section.description}</p>
+            <div className="home-section-heading">
+              <div>
+                <h2>{section.title}</h2>
+                <p>{section.description}</p>
+              </div>
+              <button type="button" onClick={() => navigate(section.path)}>
+                더보기
+              </button>
             </div>
-            <button type="button" onClick={() => navigate(section.path)}>
-              {section.action}
-            </button>
+
+            <div className="home-preview-list">
+              {sections[section.key].isLoading ? (
+                <div className="home-preview-state">불러오는 중...</div>
+              ) : sections[section.key].error ? (
+                <div className="home-preview-state">{sections[section.key].error}</div>
+              ) : sections[section.key].items.length === 0 ? (
+                <div className="home-preview-state">표시할 항목이 없습니다.</div>
+              ) : (
+                sections[section.key].items.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className="home-preview-row"
+                    onClick={() => navigate(section.path)}
+                  >
+                    <span className="home-preview-main">
+                      <span className="home-preview-title">{item.title}</span>
+                      {item.meta && <span className="home-preview-meta">{item.meta}</span>}
+                    </span>
+                    {item.date && <span className="home-preview-date">{item.date}</span>}
+                  </button>
+                ))
+              )}
+            </div>
           </article>
         ))}
       </section>

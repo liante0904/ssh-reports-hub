@@ -6,6 +6,7 @@
  *   - /external/api/search/
  *   - /external/api/companies
  *   - /external/api/boards
+ *   - /api/fnguide/report-summaries
  *   - /keywords, /keywords/sync
  *   - /favorites
  *   - /admin/metrics
@@ -133,6 +134,34 @@ async function runTests() {
       }
     } catch (e) {
       console.log(`  ❌ FAIL: industry 응답 파싱 실패 (${e.message})`);
+      failed++;
+    }
+  }
+
+  // ────────────────────────────────────────────
+  // Section 2.2: FnGuide Summary API
+  // ────────────────────────────────────────────
+  console.log('\n─── [Section 2.2] FnGuide Summary API ───');
+
+  const fnguideRes = await assertHttpOk(
+    `${BASE_URL}/api/fnguide/report-summaries?limit=3&offset=0`,
+    'GET /api/fnguide/report-summaries (종목요약 3건)'
+  );
+
+  assert(fnguideRes.status === 200 || fnguideRes.status === 401,
+    '/api/fnguide/report-summaries 응답이 200 또는 401', `HTTP ${fnguideRes.status}`);
+
+  if (fnguideRes.res && fnguideRes.status === 200) {
+    try {
+      const data = await fnguideRes.res.json();
+      assert(Array.isArray(data), 'fnguide report-summaries 응답: 배열', `length=${data.length}`);
+      if (data.length > 0) {
+        const item = data[0];
+        assert(item.summary_id !== undefined, 'fnguide 아이템: summary_id 있음');
+        assert(typeof item.report_title === 'string', 'fnguide 아이템: report_title 있음');
+      }
+    } catch (e) {
+      console.log(`  ❌ FAIL: fnguide report-summaries 응답 파싱 실패 (${e.message})`);
       failed++;
     }
   }

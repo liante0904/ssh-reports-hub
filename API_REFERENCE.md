@@ -101,6 +101,7 @@ GET {BASE}/external/api/search/?{params}
 **테스트**: `test/integration/api.test.js` Section 2, 4
 **호출 위치**:
 - `src/hooks/useReportFetch.js` → `buildReportFetchUrl()` → `/external/api/search`
+- `src/components/HomeDashboard.jsx` → 글로벌 섹션 프리뷰: `/external/api/search?mkt_tp=global`
 - `src/utils/reportFetch.js` → URL 빌드 로직
 - `netlify/functions/share.js` → `buildReportSearchUrl()` → 단일 리포트 조회
 
@@ -132,10 +133,55 @@ GET {BASE}/external/api/industry?{params}
 **테스트**: `test/integration/api.test.js` Section 2.1
 **호출 위치**:
 - `src/utils/reportFetch.js` → `/industry` 경로에서 `/external/api/industry`로 분기
+- `src/components/HomeDashboard.jsx` → 산업레포트 섹션 프리뷰
 
 ---
 
-### 1.3 증권사(Company) 목록
+### 1.3 FnGuide 종목요약 조회
+
+```
+GET {BASE}/api/fnguide/report-summaries?{params}
+```
+
+> 이 엔드포인트는 `VITE_API_PATH` prefix(`/external/api`)를 사용하지 않고 `VITE_API_URL`에 직접 붙는다.
+
+| Param | Type | 필수 | 설명 |
+|-------|------|------|------|
+| `q` | string | - | 회사명, 제목, 요약 본문 검색 |
+| `provider` | string | - | 증권사/제공자 필터 |
+| `report_date` | string | - | 특정 리포트 일자 필터 |
+| `limit` | number | - | 페이지 크기 |
+| `offset` | number | - | 페이지 오프셋 |
+
+**Response**:
+```json
+[
+  {
+    "summary_id": 1,
+    "report_date": "2026-06-03",
+    "provider": "삼성증권",
+    "author": "홍길동",
+    "company_name": "삼성전자",
+    "company_code": "005930",
+    "report_title": "리포트 제목",
+    "summary_text": "요약 본문",
+    "opinion": "BUY",
+    "target_price": "90000",
+    "prev_close": "75000",
+    "pdf_url": "https://...",
+    "article_url": "https://..."
+  }
+]
+```
+
+**테스트**: `test/integration/api.test.js` Section 2.2
+**호출 위치**:
+- `src/components/FnGuideList.jsx` → 종목요약 목록 조회
+- `src/components/HomeDashboard.jsx` → 종목요약 섹션 프리뷰
+
+---
+
+### 1.4 증권사(Company) 목록
 
 ```
 GET {BASE}/external/api/companies
@@ -155,7 +201,7 @@ GET {BASE}/external/api/companies
 
 ---
 
-### 1.3 게시판(Board) 목록
+### 1.5 게시판(Board) 목록
 
 ```
 GET {BASE}/external/api/boards?company={sec_firm_order}
@@ -623,6 +669,9 @@ navigator.share({ title, text })
 | 소스 파일 | HTTP | 엔드포인트 |
 |----------|------|-----------|
 | `src/hooks/useReportFetch.js:58` | GET | `/external/api/search?offset=&sort=&title=&writer=&company=&board=&mkt_tp=&has_summary=` |
+| `src/components/HomeDashboard.jsx` | GET | `/api/fnguide/report-summaries?limit=&offset=` |
+| `src/components/HomeDashboard.jsx` | GET | `/external/api/industry?limit=&offset=` |
+| `src/components/HomeDashboard.jsx` | GET | `/external/api/search?limit=&offset=&mkt_tp=global` |
 | `src/context/ReportContext.jsx:80` | GET | `/external/api/boards?company={order}` |
 | `src/hooks/useKeywords.js:34` | GET | `/keywords` |
 | `src/hooks/useKeywords.js:51` | POST | `/keywords/sync` |

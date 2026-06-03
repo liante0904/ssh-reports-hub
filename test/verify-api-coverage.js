@@ -68,12 +68,14 @@ function normalizeEndpoint(call) {
   const u = call.url;
 
   // FastAPI 엔드포인트
-  if (u.includes('REPORT_API_URL') || u.includes('buildApiUrl()') || u.includes('buildReportFetchUrl')) {
-    // industry 경로인지 확인
-    return { path: '/external/api/search', method: 'GET', note: '리포트 검색 (reportFetch)' };
-  }
   if (u.includes('/industry')) {
     return { path: '/external/api/industry', method: 'GET', note: '산업 리포트 조회' };
+  }
+  if (u.includes('/api/fnguide/report-summaries')) {
+    return { path: '/api/fnguide/report-summaries', method: 'GET', note: 'FnGuide 종목요약 조회' };
+  }
+  if (u.includes('REPORT_API_URL') || u.includes('buildApiUrl()') || u.includes('buildReportFetchUrl')) {
+    return { path: '/external/api/search', method: 'GET', note: '리포트 검색 (reportFetch)' };
   }
   if (u.includes('BOARDS_URL')) {
     return { path: '/external/api/boards', method: 'GET', note: '게시판 목록' };
@@ -183,6 +185,7 @@ function extractTestEndpoints() {
     const pathPatterns = [
       /\/external\/api\/search/g,
       /\/external\/api\/industry/g,
+      /\/api\/fnguide\/report-summaries/g,
       /\/external\/api\/companies/g,
       /\/external\/api\/boards/g,
       /\/external\/auth\/telegram/g,
@@ -213,6 +216,7 @@ function extractTestEndpoints() {
 function isApiUrl(url) {
   return url.includes('external/api') || url.includes('/admin/') ||
          url.includes('/health') ||
+         url.includes('/api/fnguide/') ||
          url.includes('.netlify/functions/') || url.includes('/keywords') ||
          url.includes('/favorites') || url.includes('/share');
 }
