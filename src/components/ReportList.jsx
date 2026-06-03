@@ -272,7 +272,7 @@ function ReportList({ onWriterClick }) {
   const isSearchActive = !!(searchQuery.query || searchQuery.category === 'company');
   const isFavoritesPage = location.pathname.includes('favorites');
   const isAiSummary = location.pathname.includes('ai-summary');
-  const isRecent = location.pathname === '/';
+  const isRecent = location.pathname === '/recent';
 
   // 즐겨찾기 페이지: 서버 JOIN 데이터 우선, fallback으로 useReportFetch 데이터 사용
   const displayReports = isFavoritesPage && favoriteReports ? favoriteReports : reports;

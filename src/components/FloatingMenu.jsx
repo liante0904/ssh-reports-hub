@@ -64,6 +64,9 @@ function FloatingMenu({ isFloatingNavVisible }) {
               <div className="menu-item" onClick={() => { navigate('/'); toggleMenu(); }}>
                 <span className="icon">🏠</span> 홈
               </div>
+              <div className="menu-item" onClick={() => { navigate('/recent'); toggleMenu(); }}>
+                <span className="icon">🕘</span> 최근
+              </div>
               <div className="menu-item" onClick={() => { navigate('/global'); toggleMenu(); }}>
                 <span className="icon">🌍</span> 글로벌
               </div>

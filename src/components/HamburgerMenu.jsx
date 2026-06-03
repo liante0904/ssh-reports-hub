@@ -107,6 +107,7 @@ function HamburgerMenu({ isOpen, toggleMenu, selectedCompany, handleCompanyChang
         <div className={`menu-overlay ${isOpen ? 'open' : ''}`} onClick={toggleMenu}>
           <div className={`menu-panel ${isOpen ? 'open' : ''}`} onClick={(e) => e.stopPropagation()}>
             <div className="menu-title">메뉴</div>
+            <a className="menu-item" onClick={() => handleHeaderClick('home')}><span className="icon">🏠</span> 홈</a>
             <a className="menu-item" onClick={() => handleHeaderClick('recent')}><span className="icon">🏠</span> 최근 레포트</a>
             <a className="menu-item" onClick={() => handleHeaderClick('global')}><span className="icon">🌍</span> 글로벌 레포트</a>
             <a className="menu-item" onClick={() => handleHeaderClick('industry')}><span className="icon">🏭</span> 산업 레포트</a>

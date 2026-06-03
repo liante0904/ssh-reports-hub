@@ -1,14 +1,15 @@
 import { createClearedSearch } from './searchSelection';
 
 export const HEADER_PATHS = {
-  recent: '/',
+  home: '/',
+  recent: '/recent',
   global: '/global',
   industry: '/industry',
   favorites: '/favorites',
   outlook: '/outlook',
   ai_summary: '/ai-summary',
   fnguide: '/fnguide',
-  search: '/',
+  search: '/recent',
 };
 
 export function resetHeaderSearch({ setIsSearchActive, handleSearch, setQuery, setSearchParams, setSortBy }) {

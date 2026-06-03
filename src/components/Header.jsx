@@ -31,7 +31,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     handleBoardChange,
     handleCompanyChange,
     handleSearchButtonClick,
-    handleTitleClick,
     isSearchActive,
     selectedCompanyOrder,
     showBoardSelect,
@@ -46,7 +45,8 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     toggleSearch,
   });
 
-  const isRecent = location.pathname === '/';
+  const isHome = location.pathname === '/';
+  const isRecent = location.pathname === '/recent';
   const isGlobal = location.pathname.includes('global');
   const isIndustry = location.pathname.includes('industry');
   const isFavorites = location.pathname.includes('favorites');
@@ -121,7 +121,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     <>
       <header ref={ref} className={!isNavVisible ? 'nav-hidden' : ''}>
         <div className="header-top">
-          <div className="title" onClick={handleTitleClick}>
+          <div className="title" onClick={() => handleButtonClick('home')}>
             🏠 ssh-reports-hub
           </div>
           <div className="header-actions">
@@ -135,6 +135,12 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
         </div>
 
         <div className="header-nav">
+          <button
+            className={`nav-button ${isHome && !isSearchActive && !isCompany && !isFavorites ? 'active' : ''}`}
+            onClick={() => handleButtonClick('home')}
+          >
+            홈
+          </button>
           <button
             className={`nav-button ${isRecent && !isSearchActive && !isCompany && !isFavorites ? 'active' : ''}`}
             onClick={() => handleButtonClick('recent')}

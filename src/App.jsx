@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import SearchOverlay from './components/SearchOverlay';
+import HomeDashboard from './components/HomeDashboard';
 import ReportList from './components/ReportList';
 import BottomNav from './components/BottomNav';
 import FloatingMenu from './components/FloatingMenu';
@@ -32,8 +33,6 @@ function AppContent() {
     headerRef,
     toggleFloatingNav
   } = useAppLayout();
-
-  const location = useLocation();
 
   // 글로벌 워밍업: 앱 시작 시 서버(Lambda) 미리 깨우기
   useEffect(() => {
@@ -88,7 +87,8 @@ function AppContent() {
         }}
       >
         <Routes>
-          <Route path="/" element={<ReportList key={location.pathname === '/' ? 'recent' : location.pathname} onWriterClick={handleWriterSearch} />} />
+          <Route path="/" element={<HomeDashboard />} />
+          <Route path="/recent" element={<ReportList key="recent" onWriterClick={handleWriterSearch} />} />
           <Route path="/global" element={<ReportList key="global" onWriterClick={handleWriterSearch} />} />
           <Route path="/industry" element={<ReportList key="industry" onWriterClick={handleWriterSearch} />} />
           <Route path="/favorites" element={<ReportList key="favorites" onWriterClick={handleWriterSearch} />} />

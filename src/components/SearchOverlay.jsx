@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useReport } from '../context/useReport';
 import { resolveSearchOverlayState } from '../utils/searchOverlay';
 import {
@@ -24,6 +24,7 @@ function SearchOverlay() {
   const [category, setCategory] = useState('title');
   const [toast, setToast] = useState({ visible: false, message: '' });
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const inputRef = useRef(null);
   const selectedCompanyOrder = getSelectedCompanyOrder(pendingSearch, '');
 
@@ -71,11 +72,13 @@ function SearchOverlay() {
       return;
     }
 
-    setSearchParams(buildSearchParams({ query: trimmedQuery, category }));
+    const nextParams = buildSearchParams({ query: trimmedQuery, category });
+    setSearchParams(nextParams);
     onSearch(category === 'company'
       ? createCompanySearch(trimmedQuery)
       : createTextSearch(trimmedQuery, category));
-  }, [query, category, onSearch, setSearchParams, showToast]);
+    navigate({ pathname: '/recent', search: `?${nextParams.toString()}` });
+  }, [query, category, navigate, onSearch, setSearchParams, showToast]);
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -105,14 +108,16 @@ function SearchOverlay() {
       setQuery(selectedValue);
       if (selectedValue) {
         const nextSearch = createCompanySearch(selectedValue);
-        setSearchParams(buildSearchParams(nextSearch), { replace: true });
+        const nextParams = buildSearchParams(nextSearch);
+        setSearchParams(nextParams, { replace: true });
         onSearch(nextSearch);
+        navigate({ pathname: '/recent', search: `?${nextParams.toString()}` });
       } else {
         setSearchParams({}, { replace: true });
         onSearch(createClearedSearch());
       }
     },
-    [onSearch, setSearchParams]
+    [navigate, onSearch, setSearchParams]
   );
 
   if (!isSearchOpen) {

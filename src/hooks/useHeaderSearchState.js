@@ -37,7 +37,7 @@ export function useHeaderSearchState({
     setSearchParams({}, { replace: true });
     setSortBy('time');
     if (navigateHome) {
-      navigate({ pathname: '/' });
+      navigate({ pathname: '/recent' });
     }
   }, [handleSearch, navigate, setSearchParams, setSortBy]);
 
@@ -55,14 +55,14 @@ export function useHeaderSearchState({
 
     if (selectedValue) {
       const nextSearch = createCompanySearch(selectedValue);
+      const nextParams = buildSearchParams(nextSearch);
       handleSearch(nextSearch);
-      syncSearchParams(nextSearch);
+      setSearchParams(nextParams, { replace: true });
+      navigate({ pathname: '/recent', search: `?${nextParams.toString()}` });
     } else {
       clearSearchState();
     }
-
-    navigate({ pathname: '/' });
-  }, [clearSearchState, handleSearch, navigate, setSortBy, syncSearchParams]);
+  }, [clearSearchState, handleSearch, navigate, setSearchParams, setSortBy]);
 
   const handleBoardChange = useCallback((e) => {
     const selectedValue = e.target.value;

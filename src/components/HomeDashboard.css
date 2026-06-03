@@ -1,0 +1,101 @@
+.home-dashboard {
+  width: min(1180px, calc(100% - 30px));
+  margin: 0 auto;
+  padding-bottom: calc(90px + env(safe-area-inset-bottom, 20px));
+  color: var(--text-color);
+}
+
+.home-dashboard-header {
+  margin-bottom: 18px;
+}
+
+.home-dashboard-header h1 {
+  margin: 0 0 8px;
+  font-size: 1.7rem;
+  letter-spacing: 0;
+}
+
+.home-dashboard-header p {
+  margin: 0;
+  color: color-mix(in srgb, var(--text-color) 72%, transparent);
+  line-height: 1.5;
+}
+
+.home-section-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.home-section-card {
+  min-height: 180px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
+  border-radius: 8px;
+  background: var(--card-background-color);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--card-shadow-color) 35%, transparent);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.home-section-card.wide {
+  grid-column: 1 / -1;
+  min-height: 150px;
+}
+
+.home-section-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+  letter-spacing: 0;
+}
+
+.home-section-card p {
+  margin: 0;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--text-color) 72%, transparent);
+}
+
+.home-section-card button,
+.home-secondary-actions button {
+  align-self: flex-start;
+  border: 0;
+  border-radius: 6px;
+  background: var(--primary-color);
+  color: #fff;
+  font-weight: 700;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.home-section-card button:hover,
+.home-secondary-actions button:hover {
+  filter: brightness(0.94);
+}
+
+.home-secondary-actions {
+  margin-top: 14px;
+}
+
+.home-secondary-actions button {
+  background: var(--secondary-background-color);
+  color: var(--text-color);
+}
+
+@media (max-width: 720px) {
+  .home-dashboard {
+    width: min(100% - 24px, 520px);
+  }
+
+  .home-section-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-section-card,
+  .home-section-card.wide {
+    grid-column: auto;
+    min-height: 160px;
+  }
+}
