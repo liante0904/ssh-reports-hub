@@ -140,6 +140,7 @@ header.nav-hidden {
   align-items: center;
   gap: 5px;
   background: rgba(255, 255, 255, 0.2);
+  border: 0;
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 0.8em;
@@ -148,6 +149,7 @@ header.nav-hidden {
   max-width: 120px;
   flex-shrink: 1;
   min-width: 0;
+  font-family: inherit;
 }
 
 .tg-badge-icon {
@@ -168,6 +170,11 @@ header.nav-hidden {
   cursor: pointer;
   opacity: 0.75;
   transition: opacity 0.2s, background 0.2s;
+}
+
+.tg-badge-off:disabled {
+  cursor: wait;
+  opacity: 0.55;
 }
 
 .tg-badge-off:hover {

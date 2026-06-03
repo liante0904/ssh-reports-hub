@@ -6,6 +6,7 @@
  *   - /external/api/search/
  *   - /external/api/companies
  *   - /external/api/boards
+ *   - /external/auth/telegram
  *   - /api/fnguide/report-summaries
  *   - /keywords, /keywords/sync
  *   - /favorites
@@ -243,6 +244,12 @@ async function runTests() {
   // ────────────────────────────────────────────
   console.log('\n─── [Section 2.5] 인증 필요 API ───');
 
+  {
+    const telegramAuthRes = await assertHttpOk(`${BASE_URL}/external/auth/telegram`, 'POST /external/auth/telegram',
+      { method: 'POST', body: JSON.stringify({}) });
+    assert([400, 401, 422].includes(telegramAuthRes.status),
+      '/external/auth/telegram 더미 요청 응답이 400/401/422', `HTTP ${telegramAuthRes.status}`);
+  }
   {
     const kwRes = await assertHttpOk(`${BASE_URL}/keywords`, 'GET /keywords');
     assert(kwRes.status === 200 || kwRes.status === 401,

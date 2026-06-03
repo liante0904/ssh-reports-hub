@@ -1,16 +1,14 @@
 import React, { forwardRef } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import HamburgerMenu from './HamburgerMenu';
-import CompanySelect from './CompanySelect';
-import BoardSelect from './BoardSelect';
 import { useReport } from '../context/useReport';
 import { HEADER_PATHS } from '../utils/headerNavigation';
 import { useHeaderSearchState } from '../hooks/useHeaderSearchState';
+import { useTelegramAuth } from '../hooks/useTelegramAuth';
 import './Header.css';
 
 const Header = forwardRef(({ isNavVisible }, ref) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const {
@@ -25,15 +23,13 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     activeSearch,
     telegramUser,
   } = useReport();
+  const { isAuthenticating, loginWithTelegram } = useTelegramAuth();
 
   const {
     clearSearchState,
-    handleBoardChange,
     handleCompanyChange,
     handleSearchButtonClick,
-    isSearchActive,
     selectedCompanyOrder,
-    showBoardSelect,
   } = useHeaderSearchState({
     activeSearch,
     boards,
@@ -45,52 +41,30 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     toggleSearch,
   });
 
-  const isHome = location.pathname === '/';
-  const isRecent = location.pathname === '/recent';
-  const isGlobal = location.pathname.includes('global');
-  const isIndustry = location.pathname.includes('industry');
-  const isFavorites = location.pathname.includes('favorites');
-  const isOutlook = location.pathname.includes('outlook');
-  const isAiSummary = location.pathname.includes('ai-summary');
-  const isFnGuide = location.pathname.includes('fnguide');
-  const isCompany = location.pathname.startsWith('/company');
-
-  const isAdminConsole = location.pathname.includes('admin-console');
-
   const renderTelegramBadge = () => {
     if (telegramUser) {
       return (
-        <span className="tg-badge tg-badge-on" title={`텔레그램 로그인: ${telegramUser.first_name} (ID:${telegramUser.id})`}>
+        <button
+          type="button"
+          className="tg-badge tg-badge-on"
+          title={`텔레그램 로그인: ${telegramUser.first_name} (ID:${telegramUser.id})`}
+          onClick={toggleMenuTop}
+        >
           <span className="tg-badge-icon">✈️</span>
           <span className="tg-badge-name">{telegramUser.first_name}</span>
-        </span>
+        </button>
       );
     }
     return (
-      <span
+      <button
+        type="button"
         className="tg-badge tg-badge-off"
-        title="텔레그램 로그인이 필요합니다 (클릭 시 메뉴 열기)"
-        onClick={toggleMenuTop}
+        title="텔레그램 브라우저 로그인"
+        onClick={loginWithTelegram}
+        disabled={isAuthenticating}
       >
         <span className="tg-badge-icon">✈️</span>
-        <span className="tg-badge-name">로그인</span>
-      </span>
-    );
-  };
-
-  const renderAdminConsoleBtn = () => {
-    if (!telegramUser?.is_admin) return null;
-    const isActive = isAdminConsole && !isSearchActive;
-    return (
-      <button
-        className={`nav-button ${isActive ? 'active' : ''}`}
-        onClick={() => {
-          if (isTopMenuOpen) toggleMenuTop();
-          if (isMenuOpen) toggleMenu();
-          navigate('/admin-console');
-        }}
-      >
-        🛠️ 콘솔
+        <span className="tg-badge-name">{isAuthenticating ? '인증 중' : '로그인'}</span>
       </button>
     );
   };
@@ -131,79 +105,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
               <div></div>
               <div></div>
             </div>
-          </div>
-        </div>
-
-        <div className="header-nav">
-          <button
-            className={`nav-button ${isHome && !isSearchActive && !isCompany && !isFavorites ? 'active' : ''}`}
-            onClick={() => handleButtonClick('home')}
-          >
-            홈
-          </button>
-          <button
-            className={`nav-button ${isRecent && !isSearchActive && !isCompany && !isFavorites ? 'active' : ''}`}
-            onClick={() => handleButtonClick('recent')}
-          >
-            최근
-          </button>
-          <button
-            className={`nav-button ${isGlobal && !isSearchActive ? 'active' : ''}`}
-            onClick={() => handleButtonClick('global')}
-          >
-            글로벌
-          </button>
-          <button
-            className={`nav-button ${isIndustry && !isSearchActive ? 'active' : ''}`}
-            onClick={() => handleButtonClick('industry')}
-          >
-            산업
-          </button>
-          <button
-            className={`nav-button ${isSearchActive ? 'active' : ''}`}
-            onClick={() => handleButtonClick('search')}
-          >
-            검색
-          </button>
-          <button
-            className={`nav-button ${isFavorites && !isSearchActive ? 'active' : ''}`}
-            onClick={() => handleButtonClick('favorites')}
-          >
-            ★
-          </button>
-          <button
-            className={`nav-button ${isOutlook && !isSearchActive ? 'active' : ''}`}
-            onClick={() => handleButtonClick('outlook')}
-          >
-            🔮 전망
-          </button>
-          <button
-            className={`nav-button ${isAiSummary && !isSearchActive ? 'active' : ''}`}
-            onClick={() => handleButtonClick('ai_summary')}
-          >
-            AI요약
-          </button>
-          <button
-            className={`nav-button ${isFnGuide && !isSearchActive ? 'active' : ''}`}
-            onClick={() => handleButtonClick('fnguide')}
-          >
-            요약
-          </button>
-          {renderAdminConsoleBtn()}
-          <div className="company-select-wrapper header-nav-filters">
-            <CompanySelect
-              value={selectedCompanyOrder}
-              onChange={handleCompanyChange}
-              className="company-select"
-            />
-            {showBoardSelect && (
-              <BoardSelect
-                value={activeSearch.board}
-                boards={boards}
-                onChange={handleBoardChange}
-                className="board-select"
-              />
-            )}
           </div>
         </div>
       </header>

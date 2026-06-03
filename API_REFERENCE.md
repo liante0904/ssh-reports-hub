@@ -259,9 +259,9 @@ Authorization: none (skipAuth)
 
 > `access_token` / `token` / `auth_token` / `jwt` 중 먼저 발견된 필드가 `auth_token`으로 localStorage에 저장됨.
 
-**테스트**: ❌ 자동화 테스트 없음 (Telegram Widget 의존)
+**테스트**: `test/integration/api.test.js` Section 2.5 (더미 POST로 엔드포인트 존재 확인)
 **호출 위치**:
-- `src/components/HamburgerMenu.jsx` line 53: `request(\`${baseUrl}/external/auth/telegram\`, { method: 'POST', skipAuth: true })`
+- `src/hooks/useTelegramAuth.js`: `request(\`${CONFIG.API.BASE_URL}/external/auth/telegram\`, { method: 'POST', skipAuth: true })`
 
 ---
 
@@ -675,7 +675,7 @@ navigator.share({ title, text })
 | `src/context/ReportContext.jsx:80` | GET | `/external/api/boards?company={order}` |
 | `src/hooks/useKeywords.js:34` | GET | `/keywords` |
 | `src/hooks/useKeywords.js:51` | POST | `/keywords/sync` |
-| `src/components/HamburgerMenu.jsx:53` | POST | `/external/auth/telegram` |
+| `src/hooks/useTelegramAuth.js` | POST | `/external/auth/telegram` |
 | `src/components/ReportList.jsx:54,87,103,132` | GET | `/favorites` |
 | `src/components/ReportList.jsx:83` | POST | `/favorites/{id}` (초기 업로드) |
 | `src/components/ReportList.jsx:218` | POST/DELETE | `/favorites/{id}` (토글) |
