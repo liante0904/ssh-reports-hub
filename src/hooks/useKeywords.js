@@ -130,10 +130,5 @@ export const useKeywords = (telegramUser) => {
     handleUndoDelete,
     toggleKeywordOverlay,
     setKeywords,
-    // 추가: 키워드 요약정보
-    keywordSummaryItems: [
-      { label: '키워드', value: keywords.length, icon: '🏷️' },
-      ...(lastDeleted ? [{ label: '최근 삭제', value: lastDeleted.data.length, icon: '🗑️' }] : []),
-    ],
   };
 };
