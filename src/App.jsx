@@ -97,7 +97,7 @@ function AppContent() {
           <Route path="/ai-summary" element={<ReportList key="ai-summary" onWriterClick={handleWriterSearch} />} />
           <Route path="/fnguide" element={<FnGuideList />} />
           <Route path="/admin-console" element={<AdminConsole />} />
-          <Route path="/search-new" element={<SearchPageNew onWriterClick={handleWriterSearch} />} />
+          <Route path="/search-new" element={<SearchPageNew />} />
         </Routes>
       </main>
       <SearchOverlay />

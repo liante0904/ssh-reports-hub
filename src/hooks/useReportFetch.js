@@ -59,7 +59,8 @@ export function useReportFetch(searchQuery, pathname, outlookYear, sortBy) {
     try {
       const data = await request(buildApiUrl(), { signal: controller.signal });
       if (data) {
-        const { items, hasMore: apiHasMore } = data;
+        const items = Array.isArray(data.items) ? data.items : [];
+        const apiHasMore = Boolean(data.hasMore);
         setReports((prev) => mergeReports(isInitial ? {} : prev, items));
         setOffset((prev) => (isInitial ? items.length : prev + items.length));
         setHasMore(apiHasMore);

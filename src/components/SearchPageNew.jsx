@@ -11,7 +11,7 @@ import { request } from '../utils/api';
 import { buildShareMenuData } from '../utils/shareMenuData';
 import './SearchPageNew.css';
 
-function SearchPageNew({ onWriterClick }) {
+function SearchPageNew() {
   const { telegramUser } = useReport();
   const isAdmin = telegramUser?.is_admin === true;
 
@@ -190,13 +190,16 @@ function SearchPageNew({ onWriterClick }) {
     setSelectedSort('time');
   };
 
+  const handleCompanyChange = useCallback((e) => {
+    setSelectedCompany(e.target.value);
+    setSelectedBoard('');
+  }, []);
+
   const handleLocalWriterClick = useCallback((writer) => {
     setCategory('writer');
     setSearchTerm(writer);
-    if (onWriterClick) {
-      onWriterClick(writer);
-    }
-  }, [onWriterClick]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   const isAiSummary = selectedRoute === 'ai-summary';
   const hasSummaryContent = (report) => {
@@ -273,7 +276,7 @@ function SearchPageNew({ onWriterClick }) {
             <label className="filter-label">🗂️ 증권사 필터</label>
             <CompanySelect
               value={selectedCompany}
-              onChange={(e) => setSelectedCompany(e.target.value)}
+              onChange={handleCompanyChange}
               className="search-company-select"
             />
           </div>
@@ -373,9 +376,9 @@ function SearchPageNew({ onWriterClick }) {
                   sortBy={selectedSort}
                   isFavoritesPage={false}
                   favorites={favorites}
-                  firmToggles={firmToggles}
+                  collapsedFirms={firmToggles}
                   onToggleFirm={toggleFirm}
-                  summaryToggles={summaryToggles}
+                  expandedSummaries={summaryToggles}
                   onToggleSummary={toggleSummary}
                   onToggleFavorite={toggleFavorite}
                   onOpenShareMenu={handleOpenShareMenu}
