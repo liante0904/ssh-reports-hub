@@ -351,7 +351,7 @@ function ReportList({ onWriterClick }) {
     <div className="report-list-wrapper">
       <div className="container" id="report-container">
         {/* 메뉴 요약정보 추가 */}
-        <MenuSummary 
+        <MenuSummary
           menuName={
             isFavoritesPage ? '즐겨찾기' :
             isAiSummary ? 'AI 요약' :

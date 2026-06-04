@@ -107,7 +107,7 @@ function FnGuideList() {
   return (
     <div className="fnguide-container">
       <div className="fnguide-header-panel">
-        <MenuSummary 
+        <MenuSummary
           menuName="FnGuide 종목요약 레포트"
           summaryItems={[
             { label: '전체', value: dates.length, icon: '📅' },
