@@ -2,6 +2,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   margin-bottom: 12px;
 }
 
@@ -54,6 +55,8 @@
   position: relative;
   display: flex;
   align-items: center;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .company-group { margin-bottom: 20px; }
@@ -62,6 +65,8 @@
   position: relative;
   display: flex;
   align-items: center;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .date-title::before, .company-title::before {
@@ -104,7 +109,7 @@
   transform: translateY(-2px);
 }
 
-.report { 
+.report {
   border: 1px solid var(--glass-border); 
   border-radius: var(--radius-lg); 
   padding: 14px 18px; 
@@ -120,6 +125,7 @@
   gap: 12px;
   position: relative;
   z-index: 2;
+  min-width: 0;
 }
 
 .report-container-item:hover .report {
@@ -157,10 +163,12 @@
 
 .report-title {
   flex: 1;
+  min-width: 0;
   line-height: 1.4;
   text-decoration: none; 
   color: var(--primary-color); 
   font-weight: bold;
+  overflow-wrap: anywhere;
 }
 
 .report-title:hover {
@@ -171,6 +179,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  gap: 12px;
   margin-top: 10px;
 }
 
@@ -199,6 +208,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .firm-tag {
@@ -426,6 +436,7 @@
 
 .report-content {
   flex: 1;
+  min-width: 0;
 }
 
 .favorite-button {
@@ -538,6 +549,50 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .date-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sort-options {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding: 0 0 2px;
+  }
+
+  .date-title {
+    font-size: 1.22em;
+  }
+
+  .company-title {
+    font-size: 1.08em;
+  }
+
+  .report {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 13px 14px;
+  }
+
+  .report-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .report-actions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 14px;
+  }
+
+  .summary-inner {
+    margin: 0 6px 8px;
+    padding: 12px;
+  }
 }
 
 .year-chip:hover {

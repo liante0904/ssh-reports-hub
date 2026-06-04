@@ -1,9 +1,10 @@
 /* FnGuideList container */
 .fnguide-container {
   padding: 16px;
-  max-width: 800px;
+  width: min(100%, 800px);
   margin: 0 auto 80px auto;
   box-sizing: border-box;
+  overflow-x: clip;
   animation: fadeIn 0.4s ease-out;
 }
 
@@ -21,6 +22,7 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
+  box-sizing: border-box;
 }
 
 .fnguide-page-title {
@@ -210,6 +212,7 @@
   transition: var(--transition-smooth);
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .fnguide-card:hover {
@@ -248,6 +251,7 @@ html[data-theme='dark'] .card-author-badge {
 .card-company-section {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 8px;
 }
@@ -256,6 +260,8 @@ html[data-theme='dark'] .card-author-badge {
   font-size: 1.15rem;
   font-weight: 800;
   color: var(--primary-color);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .card-company-code {
@@ -275,6 +281,7 @@ html[data-theme='dark'] .card-author-badge {
   line-height: 1.4;
   margin: 0 0 12px 0;
   color: var(--text-color);
+  overflow-wrap: anywhere;
 }
 
 /* Summary Text Block */
@@ -284,6 +291,7 @@ html[data-theme='dark'] .card-author-badge {
   color: var(--text-color);
   opacity: 0.95;
   margin-bottom: 16px;
+  overflow-wrap: anywhere;
 }
 
 .card-summary-text p {
@@ -323,6 +331,7 @@ html[data-theme='dark'] .card-author-badge {
   border-radius: 14px;
   margin-bottom: 16px;
   border: 1px solid rgba(0, 0, 0, 0.02);
+  min-width: 0;
 }
 
 html[data-theme='dark'] .card-financial-grid {
@@ -347,6 +356,9 @@ html[data-theme='dark'] .card-financial-grid {
   font-size: 0.95rem;
   font-weight: 800;
   color: var(--text-color);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .cell-value.opinion {
@@ -378,6 +390,8 @@ html[data-theme='dark'] .card-financial-grid {
   font-weight: 700;
   transition: all 0.2s ease;
   border: 1px solid rgba(255, 59, 48, 0.15);
+  justify-content: center;
+  max-width: 100%;
 }
 
 .pdf-action-btn:hover {
@@ -433,4 +447,53 @@ html[data-theme='dark'] .card-financial-grid {
   color: white;
   border-color: var(--primary-color);
   box-shadow: 0 6px 16px rgba(0, 122, 255, 0.3);
+}
+
+@media (max-width: 640px) {
+  .fnguide-container {
+    padding: 10px;
+    margin-bottom: calc(96px + env(safe-area-inset-bottom, 20px));
+  }
+
+  .fnguide-header-panel,
+  .fnguide-card {
+    padding: 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .fnguide-page-title {
+    font-size: 1.35rem;
+  }
+
+  .date-chip {
+    padding: 8px 12px;
+  }
+
+  .card-financial-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .grid-cell {
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--text-color) 8%, transparent);
+  }
+
+  .grid-cell:last-child {
+    border-bottom: 0;
+  }
+
+  .cell-value {
+    text-align: left;
+  }
+
+  .card-actions {
+    justify-content: stretch;
+  }
+
+  .pdf-action-btn {
+    width: 100%;
+  }
 }

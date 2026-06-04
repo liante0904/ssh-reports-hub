@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import './MenuSummary.css';
 
 /**
@@ -9,24 +9,26 @@ import './MenuSummary.css';
  * @param {string} variant - 스타일 변형 ('default' | 'compact')
  */
 function MenuSummary({ menuName, description = '', summaryItems = [], variant = 'default' }) {
+  const titleId = useId();
+
   return (
-    <div className={`menu-summary ${variant}`}>
-      <div className="menu-summary-heading">
-        <h2 className="menu-summary-title">{menuName}</h2>
+    <section className={`menu-summary ${variant}`} aria-labelledby={titleId}>
+      <header className="menu-summary-heading">
+        <h2 id={titleId} className="menu-summary-title">{menuName}</h2>
         {description && <p className="menu-summary-description">{description}</p>}
-      </div>
+      </header>
       {summaryItems.length > 0 && (
-        <div className="menu-summary-items">
+        <ul className="menu-summary-items" aria-label={`${menuName} 요약`}>
           {summaryItems.map((item, index) => (
-            <span key={index} className="menu-summary-item">
+            <li key={index} className="menu-summary-item">
               {item.icon && <span className="menu-summary-icon">{item.icon}</span>}
               <span className="menu-summary-label">{item.label}</span>
               <span className="menu-summary-value">{item.value}</span>
-            </span>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
-    </div>
+    </section>
   );
 }
 
