@@ -31,5 +31,10 @@ export function useGridOverlay() {
     setSearchTerm,
     toggleOverlay,
     closeOverlay,
+    // 추가: 그리드 요약정보
+    gridSummaryItems: [
+      { label: '상태', value: isOpen ? '열림' : '닫힘', icon: isOpen ? '🔓' : '🔒' },
+      ...(searchTerm ? [{ label: '검색', value: searchTerm, icon: '🔍' }] : []),
+    ],
   };
 }

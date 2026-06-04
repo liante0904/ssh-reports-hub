@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CONFIG } from '../constants/config';
 import { request } from '../utils/api';
+import MenuSummary from './MenuSummary';
 import './FnGuideList.css';
 
 function FnGuideList() {
@@ -106,7 +107,15 @@ function FnGuideList() {
   return (
     <div className="fnguide-container">
       <div className="fnguide-header-panel">
-        <h1 className="fnguide-page-title">📁 FnGuide 종목요약 리포트</h1>
+        <MenuSummary 
+          menuName="FnGuide 종목요약 레포트"
+          summaryItems={[
+            { label: '전체', value: dates.length, icon: '📅' },
+            ...(selectedDate ? [{ label: '선택일', value: selectedDate, icon: '📌' }] : []),
+            ...(searchQuery ? [{ label: '검색', value: searchQuery, icon: '🔍' }] : []),
+            ...(providerFilter ? [{ label: '증권사', value: providerFilter, icon: '🏢' }] : []),
+          ]}
+        />
         
         {/* 검색 폼 */}
         <form className="fnguide-search-form" onSubmit={handleSearchSubmit}>
@@ -173,7 +182,7 @@ function FnGuideList() {
       <div className="fnguide-list">
         {summaries.length === 0 && !isLoading ? (
           <div className="no-data-msg">
-            💡 검색 조건에 부합하는 요약 리포트가 없습니다.
+            💡 검색 조건에 부합하는 요약 레포트가 없습니다.
           </div>
         ) : (
           summaries.map((item) => {

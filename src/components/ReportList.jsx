@@ -10,6 +10,7 @@ import { CONFIG } from '../constants/config';
 import { isDsReport, prefetchPdf } from '../utils/reportLinks';
 import { normalizeReportItem } from '../utils/reportNormalizer';
 import { buildShareMenuData } from '../utils/shareMenuData';
+import MenuSummary from './MenuSummary';
 import './ReportList.css';
 
 function ReportList({ onWriterClick }) {
@@ -349,6 +350,23 @@ function ReportList({ onWriterClick }) {
   return (
     <div className="report-list-wrapper">
       <div className="container" id="report-container">
+        {/* 메뉴 요약정보 추가 */}
+        <MenuSummary 
+          menuName={
+            isFavoritesPage ? '즐겨찾기' :
+            isAiSummary ? 'AI 요약' :
+            isOutlook ? '전망 레포트' :
+            isRecent ? '최신 레포트' : '레포트'
+          }
+          summaryItems={[
+            ...(isFavoritesPage ? [{ label: '즐겨찾기', value: Object.keys(favorites).length, icon: '⭐' }] : []),
+            ...(isAiSummary ? [{ label: 'AI 요약', value: filteredSortedDates.length, icon: '🤖' }] : []),
+            ...(isOutlook ? [{ label: '전망', value: filteredSortedDates.length, icon: '🔮' }] : []),
+            ...(isRecent ? [{ label: '최신', value: filteredSortedDates.length, icon: '📰' }] : []),
+            ...(searchQuery.query ? [{ label: '검색', value: searchQuery.query, icon: '🔍' }] : []),
+          ]}
+          variant="compact"
+        />
         {isOutlook && !isLoading && (
           <div className="outlook-year-filter">
             <button
