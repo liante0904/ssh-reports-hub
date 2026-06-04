@@ -7,6 +7,7 @@ import { useReportFetch } from '../hooks/useReportFetch';
 import { useReport } from '../context/useReport';
 import { request } from '../utils/api';
 import { CONFIG } from '../constants/config';
+import { getReportSectionByPath } from '../constants/reportSections';
 import { isDsReport, prefetchPdf } from '../utils/reportLinks';
 import { normalizeReportItem } from '../utils/reportNormalizer';
 import { buildShareMenuData } from '../utils/shareMenuData';
@@ -275,6 +276,8 @@ function ReportList({ onWriterClick }) {
   const isFavoritesPage = location.pathname.includes('favorites');
   const isAiSummary = location.pathname.includes('ai-summary');
   const isRecent = location.pathname === '/recent';
+  const sectionMeta = getReportSectionByPath(location.pathname);
+  const menuTitle = sectionMeta?.title || '레포트';
 
   // 즐겨찾기 페이지: 서버 JOIN 데이터 우선, fallback으로 useReportFetch 데이터 사용
   const displayReports = isFavoritesPage && favoriteReports ? favoriteReports : reports;
@@ -352,17 +355,13 @@ function ReportList({ onWriterClick }) {
       <div className="container" id="report-container">
         {/* 메뉴 요약정보 추가 */}
         <MenuSummary
-          menuName={
-            isFavoritesPage ? '즐겨찾기' :
-            isAiSummary ? 'AI 요약' :
-            isOutlook ? '전망 레포트' :
-            isRecent ? '최신 레포트' : '레포트'
-          }
+          menuName={menuTitle}
+          description={sectionMeta?.description}
           summaryItems={[
             ...(isFavoritesPage ? [{ label: '즐겨찾기', value: Object.keys(favorites).length, icon: '⭐' }] : []),
             ...(isAiSummary ? [{ label: 'AI 요약', value: filteredSortedDates.length, icon: '🤖' }] : []),
             ...(isOutlook ? [{ label: '전망', value: filteredSortedDates.length, icon: '🔮' }] : []),
-            ...(isRecent ? [{ label: '최신', value: filteredSortedDates.length, icon: '📰' }] : []),
+            ...(sectionMeta && !isFavoritesPage && !isAiSummary && !isOutlook ? [{ label: menuTitle, value: filteredSortedDates.length, icon: '📰' }] : []),
             ...(searchQuery.query ? [{ label: '검색', value: searchQuery.query, icon: '🔍' }] : []),
           ]}
           variant="compact"

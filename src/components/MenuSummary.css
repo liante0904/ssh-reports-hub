@@ -1,6 +1,7 @@
 .menu-summary {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 16px;
   padding: 12px 16px;
   background: var(--bg-secondary, #f8f9fa);
@@ -13,18 +14,30 @@
   gap: 12px;
 }
 
+.menu-summary-heading {
+  min-width: 0;
+}
+
 .menu-summary-title {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-primary, #333);
   margin: 0;
-  white-space: nowrap;
+}
+
+.menu-summary-description {
+  margin: 4px 0 0;
+  color: var(--text-secondary, #666);
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .menu-summary-items {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .menu-summary-item {
@@ -49,4 +62,16 @@
 .menu-summary-value {
   font-weight: 600;
   color: var(--accent-color, #007bff);
+}
+
+@media (max-width: 640px) {
+  .menu-summary {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .menu-summary-items {
+    justify-content: flex-start;
+    width: 100%;
+  }
 }

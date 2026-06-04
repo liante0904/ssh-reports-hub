@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CONFIG } from '../constants/config';
+import { REPORT_SECTIONS } from '../constants/reportSections';
 import { request } from '../utils/api';
 import MenuSummary from './MenuSummary';
 import './FnGuideList.css';
@@ -108,7 +109,8 @@ function FnGuideList() {
     <div className="fnguide-container">
       <div className="fnguide-header-panel">
         <MenuSummary
-          menuName="FnGuide 종목요약 레포트"
+          menuName={REPORT_SECTIONS.fnguide.title}
+          description={REPORT_SECTIONS.fnguide.description}
           summaryItems={[
             { label: '전체', value: dates.length, icon: '📅' },
             ...(selectedDate ? [{ label: '선택일', value: selectedDate, icon: '📌' }] : []),

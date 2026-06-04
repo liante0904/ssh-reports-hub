@@ -1,39 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CONFIG } from '../constants/config';
+import { HOME_SECTIONS } from '../constants/reportSections';
 import { request } from '../utils/api';
 import { normalizeReportItem } from '../utils/reportNormalizer';
 import { getDirectUrl } from '../utils/reportLinks';
 import './HomeDashboard.css';
 
 const PREVIEW_LIMIT = 5;
-
-const HOME_SECTIONS = [
-  {
-    key: 'fnguide',
-    title: '종목요약',
-    description: 'FnGuide에서 수집한 종목별 요약 리포트',
-    path: '/fnguide',
-  },
-  {
-    key: 'recent',
-    title: '최근 레포트',
-    description: '실시간으로 수집되는 최신 증권사 리포트',
-    path: '/recent',
-  },
-  {
-    key: 'industry',
-    title: '산업레포트',
-    description: '업종과 테마 흐름을 빠르게 확인하는 산업 리포트',
-    path: '/industry',
-  },
-  {
-    key: 'global',
-    title: '글로벌',
-    description: '해외 시장과 글로벌 기업 관련 최신 리포트',
-    path: '/global',
-  },
-];
 
 function formatPreviewDate(rawDate) {
   if (!rawDate) return '';
