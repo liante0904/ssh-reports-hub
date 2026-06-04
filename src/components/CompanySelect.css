@@ -30,7 +30,7 @@
 }
 
 /* 전체 화면 오버레이 포탈 */
-.company-grid-container .grid-overlay-portal {
+.company-grid-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -44,27 +44,27 @@
   padding-top: env(safe-area-inset-top, 0px);
 }
 
-.company-grid-container .grid-overlay-header {
+.company-grid-overlay .grid-overlay-header {
   padding: 16px 20px;
   background-color: var(--background-color);
   border-bottom: 1px solid var(--glass-border);
 }
 
-.company-grid-container .grid-header-top {
+.company-grid-overlay .grid-header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 }
 
-.company-grid-container .grid-header-top h3 {
+.company-grid-overlay .grid-header-top h3 {
   margin: 0;
   font-size: 1.3rem;
   font-weight: 800;
   letter-spacing: -0.5px;
 }
 
-.company-grid-container .grid-close-btn {
+.company-grid-overlay .grid-close-btn {
   background: none;
   border: none;
   padding: 8px;
@@ -77,11 +77,11 @@
   transition: var(--transition-fast);
 }
 
-.company-grid-container .grid-close-btn:hover {
+.company-grid-overlay .grid-close-btn:hover {
   background-color: var(--bg-muted);
 }
 
-.company-grid-container .grid-search-wrapper input {
+.company-grid-overlay .grid-search-wrapper input {
   width: 100%;
   padding: 12px 18px;
   background-color: var(--bg-muted);
@@ -94,13 +94,13 @@
   -webkit-appearance: none;
 }
 
-.company-grid-container .grid-search-wrapper input:focus {
+.company-grid-overlay .grid-search-wrapper input:focus {
   background-color: var(--card-background-color);
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
-.company-grid-container .grid-overlay-content {
+.company-grid-overlay .grid-overlay-content {
   flex: 1;
   overflow-y: auto;
   padding: 20px 20px calc(40px + env(safe-area-inset-bottom, 20px));
@@ -109,14 +109,14 @@
 }
 
 /* 바둑판 그리드 레이아웃 */
-.company-grid-container .firm-checkerboard {
+.company-grid-overlay .firm-checkerboard {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   padding-bottom: 20px;
 }
 
-.company-grid-container .checker-item {
+.company-grid-overlay .checker-item {
   background-color: var(--card-background-color);
   border-radius: var(--radius-lg);
   padding: 18px 10px;
@@ -131,23 +131,23 @@
   box-shadow: 0 2px 8px color-mix(in srgb, var(--card-shadow-color) 40%, transparent);
 }
 
-.company-grid-container .checker-item:hover {
+.company-grid-overlay .checker-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px color-mix(in srgb, var(--card-shadow-color) 70%, transparent);
   border-color: color-mix(in srgb, var(--text-color) 20%, transparent);
 }
 
-.company-grid-container .checker-item:active {
+.company-grid-overlay .checker-item:active {
   transform: scale(0.96);
 }
 
-.company-grid-container .checker-item.active {
+.company-grid-overlay .checker-item.active {
   border-color: var(--primary-color);
   background-color: color-mix(in srgb, var(--primary-color) 12%, transparent);
   box-shadow: 0 4px 12px color-mix(in srgb, var(--primary-color) 20%, transparent);
 }
 
-.company-grid-container .checker-icon {
+.company-grid-overlay .checker-icon {
   width: 46px;
   height: 46px;
   border-radius: var(--radius-md);
@@ -160,13 +160,13 @@
   transition: var(--transition-smooth);
 }
 
-.company-grid-container .checker-item.all .checker-icon {
+.company-grid-overlay .checker-item.all .checker-icon {
   background-color: var(--text-color);
   color: var(--background-color);
   font-size: 0.85rem;
 }
 
-.company-grid-container .checker-name {
+.company-grid-overlay .checker-name {
   font-size: 0.82rem;
   color: var(--text-color);
   font-weight: 700;
@@ -174,7 +174,7 @@
   word-break: keep-all;
 }
 
-.company-grid-container .checker-item.active .checker-name {
+.company-grid-overlay .checker-item.active .checker-name {
   color: var(--primary-color);
   font-weight: 800;
 }
@@ -186,19 +186,19 @@
 
 /* 반응형 모드 설정 */
 @media (min-width: 480px) {
-  .company-grid-container .firm-checkerboard {
+  .company-grid-overlay .firm-checkerboard {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
 @media (min-width: 768px) {
-  .company-grid-container .firm-checkerboard {
+  .company-grid-overlay .firm-checkerboard {
     grid-template-columns: repeat(6, 1fr);
     max-width: 800px;
     margin: 0 auto;
   }
   
-  .company-grid-container .grid-overlay-header {
+  .company-grid-overlay .grid-overlay-header {
     max-width: 800px;
     margin: 0 auto;
     width: 100%;
