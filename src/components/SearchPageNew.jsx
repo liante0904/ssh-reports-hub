@@ -235,7 +235,7 @@ function SearchPageNew() {
   }, [reports]);
 
   return (
-    <main className="search-page-new">
+    <div className="search-page-new">
       <section className="search-page-header">
         <h1>통합 검색 및 필터</h1>
         <p>조건을 선택하는 즉시 실시간으로 최적화된 리포트를 분석합니다.</p>
@@ -243,9 +243,9 @@ function SearchPageNew() {
 
       {/* 프리미엄 필터 제어판 */}
       <section className="filter-panel-card">
-        <fieldset className="filter-grid">
+        <div className="filter-grid">
           
-          <section className="filter-item text-search-box">
+          <div className="filter-item text-search-box">
             <label className="filter-label">🔍 텍스트 검색</label>
             <div className="text-search-fields">
               <select
@@ -270,19 +270,19 @@ function SearchPageNew() {
                 <button className="clear-search-btn" onClick={() => setSearchTerm('')}>✕</button>
               )}
             </div>
-          </section>
+          </div>
 
-          <section className={`filter-item company-box ${selectedCompany ? 'has-boards' : ''}`}>
+          <div className={`filter-item company-box ${selectedCompany ? 'has-boards' : ''}`}>
             <label className="filter-label">🗂️ 증권사 필터</label>
             <CompanySelect
               value={selectedCompany}
               onChange={handleCompanyChange}
               className="search-company-select"
             />
-          </section>
+          </div>
 
           {selectedCompany && (
-            <section className="filter-item board-box">
+            <div className="filter-item board-box">
               <label className="filter-label">📋 게시판 필터</label>
               <BoardSelect
                 value={selectedBoard}
@@ -290,10 +290,10 @@ function SearchPageNew() {
                 onChange={(e) => setSelectedBoard(e.target.value)}
                 className="search-board-select"
               />
-            </section>
+            </div>
           )}
 
-          <section className="filter-item route-box">
+          <div className="filter-item route-box">
             <label className="filter-label">🏷️ 조회 대상 분류</label>
             <div className="filter-chip-group">
               {[
@@ -314,9 +314,9 @@ function SearchPageNew() {
                 </button>
               ))}
             </div>
-          </section>
+          </div>
 
-          <section className="filter-item sort-box">
+          <div className="filter-item sort-box">
             <label className="filter-label">⚖️ 정렬 기준</label>
             <div className="filter-chip-group">
               {[
@@ -334,8 +334,8 @@ function SearchPageNew() {
                 </button>
               ))}
             </div>
-          </section>
-        </fieldset>
+          </div>
+        </div>
 
         <div className="filter-actions-row">
           <button type="button" className="btn-filter-reset" onClick={handleReset}>
@@ -346,9 +346,9 @@ function SearchPageNew() {
 
       {/* 결과 리스트 영역 */}
       <section className="search-results-section">
-        <header className="results-header">
+        <div className="results-header">
           <h3>검색 결과 <span className="results-count">{totalCount}건</span></h3>
-        </header>
+        </div>
 
         <div className="results-list-container">
           {offset === 0 && isLoading ? (
@@ -404,7 +404,7 @@ function SearchPageNew() {
         reportData={selectedReport}
         position={menuPosition}
       />
-    </main>
+    </div>
   );
 }
 

@@ -52,10 +52,6 @@ header.nav-hidden {
   margin: 0;
   padding: 6px 0;
   transition: var(--transition-smooth);
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .title:hover {
@@ -107,7 +103,7 @@ header.nav-hidden {
 }
 
 /* 네비게이션 버튼 스타일 */
-header .nav-button {
+.nav-button {
   background-color: transparent;
   border: none;
   color: var(--text-muted);
@@ -125,13 +121,13 @@ header .nav-button {
   white-space: nowrap;
 }
 
-header .nav-button:hover {
+.nav-button:hover {
   background-color: var(--secondary-background-color);
   color: var(--primary-color);
   transform: translateY(-1px);
 }
 
-header .nav-button.active {
+.nav-button.active {
   font-weight: 800;
   color: var(--primary-color);
   background-color: var(--secondary-background-color);
@@ -375,7 +371,6 @@ header .nav-button.active {
   .header-top .title {
     flex-grow: 1;
     font-size: 1em;
-    padding-right: 8px;
   }
 
   .header-top .header-actions {
@@ -384,8 +379,7 @@ header .nav-button.active {
     margin-left: auto;
     gap: 8px;
     align-items: center;
-    flex-wrap: nowrap;
-    min-width: 0;
+    flex-wrap: wrap;
   }
 
   .tg-badge {
@@ -430,10 +424,10 @@ header .nav-button.active {
     min-width: max-content;
   }
 
-  header .nav-button {
+  .nav-button {
     flex-shrink: 0;
     font-size: 0.9em;
-    padding: 4px 14px;
+    padding: 4px 20px;
     height: 28px;
   }
 
