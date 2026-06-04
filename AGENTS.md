@@ -55,3 +55,9 @@ npm run test:coverage    ← API 커버리지 검증 (CI에서 블로킹)
 - `localStorage` 키: `auth_token`, `telegram_user`, `theme`, `report_favorites`
 - 리포트 아이템은 `normalizeReportItem()` 를 통해 정규화
 - DS투자증권은 PDF 다운로드 시 `proxy-ds` 함수 경유
+
+## LLM 컨텍스트 절약 규칙
+- `.aider*`, `.codex/`, `.agents/`, `dist/`, `public/lib/pdfjs/`, `node_modules/` 는 분석/수정 대상에서 제외한다.
+- 충돌 판단은 `main...branch` 기준의 실제 소스 diff만 본다. 오래된 feature 브랜치의 대량 diff를 그대로 컨텍스트에 넣지 않는다.
+- 생성물, 세션 로그, lockfile 전체 내용은 필요한 경우에만 특정 줄/키만 확인한다.
+- 새 구조를 만들기 전 `src/utils`, `src/hooks`, `src/components/report` 의 기존 헬퍼를 먼저 재사용한다.

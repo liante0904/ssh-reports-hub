@@ -1,5 +1,6 @@
 node_modules/
 dist/
+dist-ssr/
 .netlify/
 public/lib/pdfjs/
 package-lock.json
@@ -11,5 +12,9 @@ deno.lock
 .venv/
 .env
 .env.*
+.aider*
+.aider.tags.cache.v4/
+.codex/
+.agents/
 secrets/
 ~/secrets/

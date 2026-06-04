@@ -1,3 +1,27 @@
-.codex
+# Local assistant/session state
+.codex/
+.agents/
+.aider*
+.aider.tags.cache.v4/
+
+# Generated dependencies and build outputs
+node_modules/
+dist/
+dist-ssr/
+.netlify/
+public/lib/pdfjs/
+
+# Large lock/generated artifacts that are rarely useful in LLM context
+package-lock.json
+deno.lock
+*.log
+**/*.map
+**/__pycache__/
+.venv/
+
+# Local environment and secrets
+.env
+.env.*
+*.local
 secrets/
 ~/secrets/

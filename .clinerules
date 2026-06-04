@@ -105,10 +105,7 @@ src/
 - DO NOT refactor existing working code unless the user says "refactor" or "fix".
 - DO NOT add new features without explicit user request.
 - DO NOT create backup files, migration scripts, or cleanup scripts.
-<<<<<<< HEAD
 - DO NOT read, modify, or reference any files under `~/secrets/`. This directory contains credentials and API keys. Treat it as out of bounds.
-=======
->>>>>>> e700fe9 (feat: add is_admin column support - backend returns is_admin, frontend conditionally renders admin section)
 
 ## 10. Working with the project
 
