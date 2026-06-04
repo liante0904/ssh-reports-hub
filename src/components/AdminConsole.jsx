@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useReport } from '../context/useReport';
 import { FIRM_NAMES } from '../constants/firms';
 import { CONFIG } from '../constants/config';
+import AdminLogContent from './admin/AdminLogContent';
 import './AdminConsole.css';
 
 /* ===== Reprocess Log ===== */
@@ -12,80 +13,6 @@ const REPROCESS_TASKS = [
   { id: 'all-firms', label: '전체 증권사 재수집' },
   { id: 'pdf-regen', label: 'PDF 재생성' },
 ];
-
-/* ===== Log Content Colorizer ===== */
-
-const LOG_LEVEL_COLORS = {
-  ERROR: '#ff3b30',
-  WARNING: '#ff9500',
-  INFO: '#34c759',
-  SUCCESS: '#30d158',
-  DEBUG: '#007aff',
-};
-
-/** URL 정규식 */
-const URL_RE = /https?:\/\/[^\s'")>]+/g;
-
-/**
- * 텍스트 조각 안에 URL이 있으면 <a>로 감싼 배열로 쪼갠다.
- */
-function linkify(text, lineIdx, offset) {
-  const pieces = [];
-  let last = 0;
-  let m;
-  // eslint-disable-next-line no-cond-assign
-  while ((m = URL_RE.exec(text)) !== null) {
-    if (m.index > last) pieces.push(text.slice(last, m.index));
-    pieces.push(
-      <a key={`u${lineIdx}_${offset + m.index}`}
-         href={m[0]}
-         target="_blank"
-         rel="noopener noreferrer"
-         className="log-url">
-        {m[0]}
-      </a>
-    );
-    last = m.index + m[0].length;
-  }
-  if (last < text.length) pieces.push(text.slice(last));
-  return pieces.length > 0 ? pieces : text;
-}
-
-function LogContent({ text }) {
-  const lines = text.split('\n');
-  // 정규식: "2026-05-08 00:02:31 | DEBUG    | ..."
-  // 캡처: (앞부분) (LEVEL) (뒷부분)
-  const LEVEL_RE = /^(\S+\s+\S+\s+\|\s+)(\w+)(\s+\|.*)$/;
-
-  return (
-    <pre className="log-viewer-pre">
-      {lines.map((line, i) => {
-        const m = line.match(LEVEL_RE);
-        if (m) {
-          const level = m[2];
-          const color = LOG_LEVEL_COLORS[level];
-          return (
-            <div key={i} className="log-line">
-              {linkify(m[1], i, 0)}
-              {color ? (
-                <span style={{ color, fontWeight: 600 }}>{level}</span>
-              ) : (
-                level
-              )}
-              {linkify(m[3], i, m[1].length + level.length)}
-            </div>
-          );
-        }
-        // 레벨 패턴 없으면 일반 줄 (URL만 링크)
-        return (
-          <div key={i} className="log-line">
-            {linkify(line, i, 0)}
-          </div>
-        );
-      })}
-    </pre>
-  );
-}
 
 /* ===== Main Component ===== */
 
@@ -710,7 +637,7 @@ function AdminConsole() {
           ) : (
             <div className="log-viewer-content" ref={logViewerRef}>
               {logViewer.content
-                ? <LogContent text={logViewer.content} />
+                ? <AdminLogContent text={logViewer.content} />
                 : '(빈 파일)'}
             </div>
           )}
