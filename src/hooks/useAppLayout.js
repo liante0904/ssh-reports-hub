@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useReport } from '../context/useReport';
 
 export function useAppLayout() {
+  const location = useLocation();
   const { isMenuOpen, setIsMenuOpen, isTopMenuOpen, setIsTopMenuOpen } = useReport();
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isFloatingNavVisible, setIsFloatingNavVisible] = useState(true);
@@ -18,6 +20,14 @@ export function useAppLayout() {
   isTopMenuOpenRef.current = isTopMenuOpen;
 
   const toggleFloatingNav = useCallback(() => setIsFloatingNavVisible(p => !p), []);
+
+  // 라우트 전환 직후에는 이전 페이지의 스크롤 숨김 상태를 유지하지 않는다.
+  useEffect(() => {
+    setIsNavVisible(true);
+    lastScrollY.current = window.scrollY;
+    scrollDir.current = null;
+    dirDistance.current = 0;
+  }, [location.pathname]);
 
   // 리사이즈 감지 (모바일/데스크톱 플로팅 바 제어)
   useEffect(() => {
