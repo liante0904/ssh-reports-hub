@@ -5,6 +5,12 @@
  *   node test/unit/utils.test.js
  */
 
+import {
+  buildSearchParams,
+  createCompanySearch,
+  parseSearchParams,
+} from '../../src/utils/searchSelection.js';
+
 // ─── 테스트 헬퍼 ───
 let passed = 0;
 let failed = 0;
@@ -368,6 +374,29 @@ assertEqual(previewResult.meta, '키움증권 · 이순신', 'meta 생성 (증�
 assertEqual(previewResult.date, '05.05', 'date 포맷 변환 (MM.DD)');
 assert(previewResult.rawReport !== undefined && previewResult.rawReport !== null, 'rawReport 객체 존재');
 assertEqual(previewResult.rawReport.id, 98765, 'rawReport의 id 일치');
+
+// ─── Test 11: Search Selection URL 파라미터 ───
+console.log('\n─── [Test 11] Search Selection URL 파라미터 ───');
+
+const companyParams = buildSearchParams(createCompanySearch(5));
+assert(companyParams instanceof URLSearchParams, 'buildSearchParams → URLSearchParams');
+assertEqual(companyParams.toString(), 'company=5', '증권사 필터 URL 문자열 생성');
+
+const companyBoardParams = buildSearchParams({
+  query: '5',
+  category: 'company',
+  companyOrder: '5',
+  board: 12,
+});
+assertEqual(companyBoardParams.toString(), 'company=5&board=12', '증권사+게시판 URL 문자열 생성');
+
+const parsedCompany = parseSearchParams(new URLSearchParams('company=5&board=12'));
+assertEqual(parsedCompany.category, 'company', 'company 파라미터 → category company 복원');
+assertEqual(parsedCompany.companyOrder, '5', 'companyOrder 복원');
+assertEqual(parsedCompany.board, 12, 'board 숫자 복원');
+
+const textParams = buildSearchParams({ query: '삼성', category: 'title' });
+assertEqual(textParams.toString(), 'q=%EC%82%BC%EC%84%B1&category=title', '텍스트 검색 URL 문자열 생성');
 
 // ─── 결과 요약 ───
 console.log('\n════════════════════════════════════════════');

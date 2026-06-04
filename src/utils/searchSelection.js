@@ -47,20 +47,20 @@ export function normalizeSearchSelection(nextSearch) {
 }
 
 export function buildSearchParams(search) {
-  const params = {};
+  const params = new URLSearchParams();
   const normalized = normalizeSearchSelection(search);
 
   if (normalized.query && normalized.category && normalized.category !== 'company') {
-    params.q = normalized.query;
-    params.category = normalized.category;
+    params.set('q', normalized.query);
+    params.set('category', normalized.category);
   }
 
   if (normalized.companyOrder) {
-    params.company = normalized.companyOrder;
+    params.set('company', normalized.companyOrder);
   }
 
   if (normalized.board !== null && normalized.board !== undefined) {
-    params.board = normalized.board.toString();
+    params.set('board', normalized.board.toString());
   }
 
   return params;
@@ -74,7 +74,7 @@ export function parseSearchParams(searchParams) {
 
   const normalized = normalizeSearchSelection({
     query,
-    category: category,
+    category: company ? 'company' : category,
     board: board ? Number(board) : null,
     companyOrder: company || null,
   });

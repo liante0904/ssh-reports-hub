@@ -20,7 +20,8 @@ function SearchOverlay() {
     handleSearch: onSearch, 
     pendingSearch,
     setPendingSearch,
-    boards
+    boards,
+    activeSearch,
   } = useReport();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('title');
@@ -28,7 +29,10 @@ function SearchOverlay() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const inputRef = useRef(null);
-  const selectedCompanyOrder = getSelectedCompanyOrder(pendingSearch, '');
+  const selectedCompanyOrder = category === 'company'
+    ? getSelectedCompanyOrder(activeSearch, query)
+    : '';
+  const selectedBoard = activeSearch.category === 'company' ? activeSearch.board : null;
 
   // 오버레이 열릴 때 상태 복원 및 외부(pendingSearch) 동기화
   useEffect(() => {
@@ -41,12 +45,11 @@ function SearchOverlay() {
     setCategory(nextCategory);
 
     if (shouldSearch) {
-      onSearch(
-        nextCategory === 'company'
-          ? createCompanySearch(companyOrder ?? nextQuery)
-          : createTextSearch(nextQuery, nextCategory)
-      );
-      setSearchParams(buildSearchParams({ query: nextQuery, category: nextCategory }));
+      const nextSearch = nextCategory === 'company'
+        ? createCompanySearch(companyOrder ?? nextQuery)
+        : createTextSearch(nextQuery, nextCategory);
+      onSearch(nextSearch);
+      setSearchParams(buildSearchParams(nextSearch));
     }
 
     if (shouldClearPending) {
@@ -168,7 +171,7 @@ function SearchOverlay() {
               <CompanySelect value={selectedCompanyOrder} onChange={handleCompanyChange} className="company-select" />
               {selectedCompanyOrder && (
                 <BoardSelect
-                  value={pendingSearch.board}
+                  value={selectedBoard}
                   boards={boards}
                   onChange={handleBoardChange}
                   className="board-select-overlay"
