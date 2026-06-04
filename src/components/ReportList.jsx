@@ -26,9 +26,9 @@ function ReportList({ onWriterClick }) {
     fetchReports 
   } = useReportFetch(searchQuery, location.pathname, outlookYear, sortBy);
 
-  const [dateToggles, setDateToggles] = useState({});
-  const [firmToggles, setFirmToggles] = useState({});
-  const [summaryToggles, setSummaryToggles] = useState({});
+  const [collapsedDates, setCollapsedDates] = useState({});
+  const [collapsedFirms, setCollapsedFirms] = useState({});
+  const [expandedSummaries, setExpandedSummaries] = useState({});
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem('report_favorites');
     try {
@@ -175,9 +175,9 @@ function ReportList({ onWriterClick }) {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setDateToggles({});
-    setFirmToggles({});
-    setSummaryToggles({});
+    setCollapsedDates({});
+    setCollapsedFirms({});
+    setExpandedSummaries({});
     setSummaryRequestedIds(new Set());
   }, [location.pathname, searchQuery, sortBy]);
 
@@ -186,24 +186,25 @@ function ReportList({ onWriterClick }) {
     const reportDates = Object.keys(reports);
     if (reportDates.length === 0 && !isLoading) return;
 
-    const allCollapsed = reportDates.every(date => dateToggles[date] === true);
+    const allCollapsed = reportDates.every(date => collapsedDates[date] === true);
     if (allCollapsed && hasMore && !isLoading) fetchReports();
-  }, [dateToggles, reports, hasMore, isLoading, fetchReports]);
+  }, [collapsedDates, reports, hasMore, isLoading, fetchReports]);
 
   const toggleDate = (date) => {
-    setDateToggles(prev => ({ ...prev, [date]: !prev[date] }));
+    setCollapsedDates(prev => ({ ...prev, [date]: !prev[date] }));
   };
 
   const toggleFirm = (date, firm) => {
-    setFirmToggles(prev => ({
+    setCollapsedFirms(prev => ({
       ...prev,
       [date]: { ...prev[date], [firm]: !prev[date]?.[firm] }
     }));
   };
 
   const toggleSummary = (id) => {
-    setSummaryToggles(prev => ({ ...prev, [id]: !prev[id] }));
+    setExpandedSummaries(prev => ({ ...prev, [id]: !prev[id] }));
   };
+
 
   const toggleFavorite = (id) => {
     const baseUrl = CONFIG.API.BASE_URL;
@@ -315,7 +316,7 @@ function ReportList({ onWriterClick }) {
     const topReports = filteredSortedDates
       .slice(0, 2)
       .flatMap((date) => {
-        if (dateToggles[date]) return [];
+        if (collapsedDates[date]) return [];
         const items = displayReports[date];
         const list = Array.isArray(items) ? items : Object.values(items).flat();
         return list.filter((report) => {
@@ -343,7 +344,7 @@ function ReportList({ onWriterClick }) {
 
     const timeoutId = window.setTimeout(runPrefetch, 1200);
     return () => window.clearTimeout(timeoutId);
-  }, [dateToggles, favorites, filteredSortedDates, isFavoritesPage, isLoading, reports]);
+  }, [collapsedDates, favorites, filteredSortedDates, isFavoritesPage, isLoading, reports]);
 
   return (
     <div className="report-list-wrapper">
@@ -399,14 +400,14 @@ function ReportList({ onWriterClick }) {
                 key={date}
                 date={date}
                 items={displayReports[date]}
-                isCollapsed={!!dateToggles[date]}
+                isCollapsed={!!collapsedDates[date]}
                 onToggleDate={toggleDate}
                 sortBy={sortBy}
                 isFavoritesPage={isFavoritesPage}
                 favorites={favorites}
-                firmToggles={firmToggles}
+                collapsedFirms={collapsedFirms}
                 onToggleFirm={toggleFirm}
-                summaryToggles={summaryToggles}
+                expandedSummaries={expandedSummaries}
                 onToggleSummary={toggleSummary}
                 onToggleFavorite={toggleFavorite}
                 onOpenShareMenu={handleOpenShareMenu}
@@ -436,5 +437,6 @@ function ReportList({ onWriterClick }) {
     </div>
   );
 }
+
 
 export default ReportList;

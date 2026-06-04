@@ -32,9 +32,9 @@ function ReportGroup({
   sortBy, 
   isFavoritesPage, 
   favorites, 
-  firmToggles, 
+  collapsedFirms, 
   onToggleFirm, 
-  summaryToggles, 
+  expandedSummaries, 
   onToggleSummary, 
   onToggleFavorite, 
   onOpenShareMenu, 
@@ -91,7 +91,7 @@ function ReportGroup({
                   key={report.id}
                   report={report}
                   isFavorite={!!favorites[report.id]}
-                  isSummaryExpanded={summaryToggles[report.id]}
+                  isSummaryExpanded={expandedSummaries[report.id]}
                   onToggleFavorite={onToggleFavorite}
                   onToggleSummary={onToggleSummary}
                   onOpenShareMenu={onOpenShareMenu}
@@ -110,29 +110,29 @@ function ReportGroup({
           companyGroups.map(([firm, firmReports]) => (
             <div className="company-group" key={firm}>
               <div 
-                className={`company-title ${!firmToggles[date]?.[firm] ? 'expanded' : ''}`} 
+                className={`company-title ${!collapsedFirms[date]?.[firm] ? 'expanded' : ''}`} 
                 onClick={() => onToggleFirm(date, firm)}
               >
                 {firm}
               </div>
-              <div className={`report-wrapper ${firmToggles[date]?.[firm] ? 'collapsed' : ''}`}>
+              <div className={`report-wrapper ${collapsedFirms[date]?.[firm] ? 'collapsed' : ''}`}>
                 {Array.isArray(firmReports) ? firmReports
                   .filter(r => !isAiSummary || hasSummaryContent(r))
                   .map(report => (
                   <ReportItem 
-                    key={report.id}
-                    report={report}
-                    isFavorite={!!favorites[report.id]}
-                    isSummaryExpanded={summaryToggles[report.id]}
-                    onToggleFavorite={onToggleFavorite}
-                    onToggleSummary={onToggleSummary}
-                    onOpenShareMenu={onOpenShareMenu}
-                    showFirmTag={false}
-                    onWriterClick={onWriterClick}
-                    isAdmin={isAdmin}
-                    onTriggerSummary={onTriggerSummary}
-                    summaryRequestedIds={summaryRequestedIds}
-                    summaryCompletedIds={summaryCompletedIds}
+                     key={report.id}
+                     report={report}
+                     isFavorite={!!favorites[report.id]}
+                     isSummaryExpanded={expandedSummaries[report.id]}
+                     onToggleFavorite={onToggleFavorite}
+                     onToggleSummary={onToggleSummary}
+                     onOpenShareMenu={onOpenShareMenu}
+                     showFirmTag={false}
+                     onWriterClick={onWriterClick}
+                     isAdmin={isAdmin}
+                     onTriggerSummary={onTriggerSummary}
+                     summaryRequestedIds={summaryRequestedIds}
+                     summaryCompletedIds={summaryCompletedIds}
                   />
                 )) : null}
               </div>

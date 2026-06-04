@@ -189,14 +189,6 @@ body {
   animation: searchPageFadeIn 0.3s ease-out;
 }
 
-/* 모바일에서 검색 로딩 시에만 상단으로 이동 */
-@media (max-width: 1023px) {
-  .loading-overlay.search-loading {
-    top: 20px;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
 /* 글래스모피즘 토스트 메시지 */
 .toast-container {
   position: fixed;
