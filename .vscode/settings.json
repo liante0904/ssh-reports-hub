@@ -1,0 +1,5 @@
+{
+  "makefile.makeDirectory": "${workspaceFolder}",
+  "makefile.makefilePath": "Makefile",
+  "makefile.buildTarget": "build"
+}

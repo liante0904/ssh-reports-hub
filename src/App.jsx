@@ -6,7 +6,6 @@ import SearchPageNew from './components/SearchPageNew';
 import HomeDashboard from './components/HomeDashboard';
 import ReportList from './components/ReportList';
 import BottomNav from './components/BottomNav';
-import FloatingMenu from './components/FloatingMenu';
 import AdminConsole from './components/AdminConsole';
 import FnGuideList from './components/FnGuideList';
 import { ReportProvider } from './context/ReportContext';
@@ -30,9 +29,7 @@ function AppContent() {
 
   const {
     isNavVisible,
-    isFloatingNavVisible,
     headerRef,
-    toggleFloatingNav
   } = useAppLayout();
 
   // 글로벌 워밍업: 앱 시작 시 서버(Lambda) 미리 깨우기
@@ -103,11 +100,7 @@ function AppContent() {
       <SearchOverlay />
       <BottomNav 
         isNavVisible={isNavVisible} 
-        toggleFloatingNav={toggleFloatingNav}
         onHomeClick={handleHomeClick}
-      />
-      <FloatingMenu
-        isFloatingNavVisible={isFloatingNavVisible}
       />
       
       {/* 인앱 뷰어 모달 */}

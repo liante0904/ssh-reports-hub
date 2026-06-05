@@ -5,7 +5,6 @@ function TelegramAuth({
   telegramUser,
   isAuthenticating,
   loginWithTelegram,
-  loginWithTelegramApp,
   loginWithDevBypass,
   handleLogout,
   toggleKeywordOverlay,
@@ -31,9 +30,7 @@ function TelegramAuth({
               <button className="telegram-custom-login-btn" onClick={loginWithTelegram} disabled={isAuthenticating}>
                 <span className="telegram-icon">✈️</span> {isAuthenticating ? '인증 중...' : '브라우저로 로그인'}
               </button>
-              <button className="telegram-app-login-btn" onClick={loginWithTelegramApp}>
-                <span className="telegram-icon">📲</span> 앱으로 연결
-              </button>
+              {/* 앱으로 연결 버튼은 모바일 로그인 흐름 정리 후 필요 시 복구 */}
             </div>
           )}
         </div>
