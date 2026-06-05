@@ -1,12 +1,7 @@
 import React from 'react';
-import { createPortal } from 'react-dom';
 import CompanySelect from './CompanySelect';
 import BoardSelect from './BoardSelect';
-import TelegramAuth from './menu/TelegramAuth';
-import KeywordOverlay from './menu/KeywordOverlay';
 import AdminSection from './menu/AdminSection';
-import { useKeywords } from '../hooks/useKeywords';
-import { useTelegramAuth } from '../hooks/useTelegramAuth';
 import { useReport } from '../context/useReport';
 import './HamburgerMenu.css';
 
@@ -20,27 +15,7 @@ function HamburgerMenu({
   selectedBoard,
   handleBoardChange,
 }) {
-  const { telegramUser, logout } = useReport();
-  const {
-    isAuthenticating,
-    loginWithTelegram,
-    loginWithTelegramApp,
-    loginWithDevBypass,
-  } = useTelegramAuth();
-
-  const {
-    keywords,
-    newKeyword,
-    setNewKeyword,
-    isLoadingKeywords,
-    isKeywordOverlayOpen,
-    lastDeleted,
-    handleAddKeyword,
-    handleDeleteKeyword,
-    handleDeleteAllKeywords,
-    handleUndoDelete,
-    toggleKeywordOverlay
-  } = useKeywords(telegramUser);
+  const { telegramUser } = useReport();
 
   const handleSelectChange = (e) => {
     handleCompanyChange(e);
@@ -78,35 +53,9 @@ function HamburgerMenu({
               </div>
             )}
 
-            <div className="menu-title">알림 & 즐겨찾기</div>
-            <TelegramAuth
-              telegramUser={telegramUser}
-              isAuthenticating={isAuthenticating}
-              loginWithTelegram={loginWithTelegram}
-              loginWithTelegramApp={loginWithTelegramApp}
-              loginWithDevBypass={loginWithDevBypass}
-              handleLogout={logout}
-              toggleKeywordOverlay={toggleKeywordOverlay}
-            />
-
             <AdminSection isAdmin={telegramUser?.is_admin} />
           </div>
         </div>
-      )}
-      {isKeywordOverlayOpen && createPortal(
-        <KeywordOverlay
-          newKeyword={newKeyword}
-          setNewKeyword={setNewKeyword}
-          handleAddKeyword={handleAddKeyword}
-          handleDeleteKeyword={handleDeleteKeyword}
-          handleDeleteAllKeywords={handleDeleteAllKeywords}
-          handleUndoDelete={handleUndoDelete}
-          keywords={keywords}
-          isLoadingKeywords={isLoadingKeywords}
-          lastDeleted={lastDeleted}
-          toggleKeywordOverlay={toggleKeywordOverlay}
-        />,
-        document.body
       )}
     </>
   );

@@ -1,10 +1,13 @@
 import React, { forwardRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import HamburgerMenu from './HamburgerMenu';
+import KeywordOverlay from './menu/KeywordOverlay';
 import { useReport } from '../context/useReport';
 import { HEADER_PATHS } from '../utils/headerNavigation';
 import { useHeaderSearchState } from '../hooks/useHeaderSearchState';
 import { useTelegramAuth } from '../hooks/useTelegramAuth';
+import { useKeywords } from '../hooks/useKeywords';
 import './Header.css';
 
 const Header = forwardRef(({ isNavVisible }, ref) => {
@@ -22,8 +25,23 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     boards,
     activeSearch,
     telegramUser,
+    logout,
   } = useReport();
   const { isAuthenticating, loginWithTelegram } = useTelegramAuth();
+  const botName = import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot';
+  const {
+    keywords,
+    newKeyword,
+    setNewKeyword,
+    isLoadingKeywords,
+    isKeywordOverlayOpen,
+    lastDeleted,
+    handleAddKeyword,
+    handleDeleteKeyword,
+    handleDeleteAllKeywords,
+    handleUndoDelete,
+    toggleKeywordOverlay,
+  } = useKeywords(telegramUser);
 
   const {
     clearSearchState,
@@ -45,15 +63,35 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const renderTelegramBadge = () => {
     if (telegramUser) {
       return (
-        <button
-          type="button"
-          className="tg-badge tg-badge-on"
-          title={`텔레그램 로그인: ${telegramUser.first_name} (ID:${telegramUser.id})`}
-          onClick={toggleMenuTop}
-        >
-          <span className="tg-badge-icon">✈️</span>
-          <span className="tg-badge-name">{telegramUser.first_name}</span>
-        </button>
+        <>
+          <span
+            className="tg-badge tg-badge-on"
+            title={`텔레그램 로그인: ${telegramUser.first_name} (ID:${telegramUser.id})`}
+          >
+            <span className="tg-badge-icon">✈️</span>
+            <span className="tg-badge-name">{telegramUser.first_name}</span>
+          </span>
+          <button type="button" className="header-mini-action logout" onClick={logout} title="로그아웃">
+            로그아웃
+          </button>
+          <a
+            className="header-icon-action"
+            href={`https://t.me/${botName}?start=${telegramUser.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="레포트 알림"
+          >
+            🔔
+          </a>
+          <button
+            type="button"
+            className="header-icon-action"
+            onClick={toggleKeywordOverlay}
+            title="키워드 설정"
+          >
+            ⚙️
+          </button>
+        </>
       );
     }
     return (
@@ -120,6 +158,21 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
         selectedBoard={activeSearch.board}
         handleBoardChange={handleBoardChange}
       />
+      {isKeywordOverlayOpen && createPortal(
+        <KeywordOverlay
+          newKeyword={newKeyword}
+          setNewKeyword={setNewKeyword}
+          handleAddKeyword={handleAddKeyword}
+          handleDeleteKeyword={handleDeleteKeyword}
+          handleDeleteAllKeywords={handleDeleteAllKeywords}
+          handleUndoDelete={handleUndoDelete}
+          keywords={keywords}
+          isLoadingKeywords={isLoadingKeywords}
+          lastDeleted={lastDeleted}
+          toggleKeywordOverlay={toggleKeywordOverlay}
+        />,
+        document.body
+      )}
     </>
   );
 });
