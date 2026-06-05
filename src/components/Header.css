@@ -175,48 +175,6 @@ header.nav-hidden {
   white-space: nowrap;
 }
 
-.tg-badge-on {
-  cursor: default;
-}
-
-.header-mini-action,
-.header-icon-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 28px;
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-full);
-  background: var(--secondary-background-color);
-  color: var(--text-color);
-  font: inherit;
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-decoration: none;
-  cursor: pointer;
-  transition: var(--transition-smooth);
-}
-
-.header-mini-action {
-  padding: 0 9px;
-}
-
-.header-mini-action.logout {
-  color: var(--text-muted);
-}
-
-.header-icon-action {
-  width: 28px;
-  padding: 0;
-}
-
-.header-mini-action:hover,
-.header-icon-action:hover {
-  color: var(--primary-color);
-  border-color: var(--primary-color);
-  transform: translateY(-1px);
-}
-
 /* 미로그인 상태 배지 */
 .tg-badge-off {
   background: var(--bg-muted);
@@ -429,23 +387,6 @@ header.nav-hidden {
     font-size: 0.7em;
     padding: 3px 8px;
     gap: 3px;
-  }
-
-  .header-mini-action {
-    width: 28px;
-    padding: 0;
-    font-size: 0;
-  }
-
-  .header-mini-action::before {
-    content: "⏻";
-    font-size: 0.78rem;
-  }
-
-  .header-icon-action {
-    width: 26px;
-    height: 26px;
-    font-size: 0.76rem;
   }
 
   .header-top .company-select-wrapper {

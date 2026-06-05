@@ -4,7 +4,6 @@ import CompanySelect from './CompanySelect';
 import BoardSelect from './BoardSelect';
 import ShareMenu from './ShareMenu';
 import ReportGroup from './report/ReportGroup';
-import FnGuideList from './FnGuideList';
 import { useReport } from '../context/useReport';
 import { useReportFetch } from '../hooks/useReportFetch';
 import { CONFIG } from '../constants/config';
@@ -74,7 +73,7 @@ function SearchPageNew() {
   }, [debouncedQuery, category, selectedCompany, selectedBoard]);
 
   // useReportFetch를 활용하여 실시간 검색 결과 fetch
-  const fetchPathname = selectedRoute === 'fnguide' ? '/recent' : `/${selectedRoute}`;
+  const fetchPathname = `/${selectedRoute}`;
   const {
     reports,
     isLoading,
@@ -303,7 +302,6 @@ function SearchPageNew() {
                 { id: 'industry', label: '산업 레포트', icon: '🏭' },
                 { id: 'outlook', label: '전망 레포트', icon: '🔮' },
                 { id: 'ai-summary', label: 'AI요약 리포트', icon: '🤖' },
-                { id: 'fnguide', label: '종목요약', icon: '📄' },
               ].map((route) => (
                 <button
                   key={route.id}
@@ -346,11 +344,7 @@ function SearchPageNew() {
         </div>
       </section>
 
-      {selectedRoute === 'fnguide' ? (
-        <section className="search-results-section">
-          <FnGuideList embedded initialSearchTerm={debouncedQuery.trim()} />
-        </section>
-      ) : (
+      {/* 결과 리스트 영역 */}
       <section className="search-results-section">
         <div className="results-header">
           <h3>검색 결과 <span className="results-count">{totalCount}건</span></h3>
@@ -403,7 +397,6 @@ function SearchPageNew() {
           )}
         </div>
       </section>
-      )}
 
       <ShareMenu 
         isOpen={isShareOpen} 
