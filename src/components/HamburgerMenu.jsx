@@ -61,6 +61,12 @@ function HamburgerMenu({
     handleHeaderClick(key);
   };
 
+  const handleOpenKeywordOverlay = () => {
+    if (!isKeywordOverlayOpen) {
+      toggleKeywordOverlay();
+    }
+  };
+
   return (
     <>
       {isOpen && (
@@ -82,7 +88,7 @@ function HamburgerMenu({
                 loginWithTelegram={loginWithTelegram}
                 loginWithDevBypass={loginWithDevBypass}
                 handleLogout={logout}
-                toggleKeywordOverlay={toggleKeywordOverlay}
+                toggleKeywordOverlay={handleOpenKeywordOverlay}
               />
             </section>
 
@@ -136,7 +142,7 @@ function HamburgerMenu({
                     <small>{theme === 'light' ? '다크모드로 전환' : '라이트모드로 전환'}</small>
                   </span>
                 </button>
-                <button type="button" className="menu-setting-row" onClick={toggleKeywordOverlay}>
+                <button type="button" className="menu-setting-row" onClick={handleOpenKeywordOverlay}>
                   <span className="menu-setting-icon">🔔</span>
                   <span>
                     <strong>리포트 알림</strong>

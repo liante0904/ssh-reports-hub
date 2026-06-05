@@ -585,14 +585,62 @@
 
 /* 모바일/태블릿 여백 최적화 */
 .keyword-setup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  display: flex;
+  flex-direction: column;
+  background: var(--background-color);
   padding: 0 !important;
+  animation: slideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .keyword-setup-overlay .grid-overlay-header {
+  flex: 0 0 auto;
+  background: var(--background-color);
+  border-bottom: 1px solid var(--glass-border);
   padding: 20px 20px 15px 20px;
 }
 
+.keyword-setup-overlay .grid-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.keyword-setup-overlay .grid-header-top h3 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.keyword-setup-overlay .grid-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  background: var(--secondary-background-color);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.keyword-setup-overlay .grid-close-btn:hover {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
 .keyword-setup-overlay .grid-overlay-content {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
   padding: 0 20px 80px 20px; /* 취소 바 공간 확보 */
 }
 
