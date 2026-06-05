@@ -106,6 +106,16 @@ export const useKeywords = (telegramUser) => {
     setLastDeleted(null);
   };
 
+  const openKeywordOverlay = () => {
+    setIsKeywordOverlayOpen(true);
+    setLastDeleted(null);
+  };
+
+  const closeKeywordOverlay = () => {
+    setIsKeywordOverlayOpen(false);
+    setLastDeleted(null);
+  };
+
   useEffect(() => {
     if (telegramUser) {
       fetchKeywords();
@@ -129,6 +139,8 @@ export const useKeywords = (telegramUser) => {
     handleDeleteAllKeywords,
     handleUndoDelete,
     toggleKeywordOverlay,
+    openKeywordOverlay,
+    closeKeywordOverlay,
     setKeywords,
   };
 };

@@ -38,7 +38,8 @@ function HamburgerMenu({
     handleDeleteKeyword,
     handleDeleteAllKeywords,
     handleUndoDelete,
-    toggleKeywordOverlay
+    openKeywordOverlay,
+    closeKeywordOverlay
   } = useKeywords(telegramUser);
 
   const handleSelectChange = (e) => {
@@ -61,10 +62,10 @@ function HamburgerMenu({
     handleHeaderClick(key);
   };
 
-  const handleOpenKeywordOverlay = () => {
-    if (!isKeywordOverlayOpen) {
-      toggleKeywordOverlay();
-    }
+  const handleOpenKeywordOverlay = (event) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    openKeywordOverlay();
   };
 
   return (
@@ -167,7 +168,7 @@ function HamburgerMenu({
           keywords={keywords}
           isLoadingKeywords={isLoadingKeywords}
           lastDeleted={lastDeleted}
-          toggleKeywordOverlay={toggleKeywordOverlay}
+          toggleKeywordOverlay={closeKeywordOverlay}
         />,
         document.body
       )}

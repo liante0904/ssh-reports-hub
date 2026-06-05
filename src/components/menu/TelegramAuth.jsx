@@ -52,7 +52,7 @@ function TelegramAuth({
             </a>
           </div>
 
-          <button className="open-keyword-overlay-btn" onClick={toggleKeywordOverlay}>
+          <button type="button" className="open-keyword-overlay-btn" onClick={toggleKeywordOverlay}>
             <span className="icon">⚙️</span> 키워드 알림 설정하기
           </button>
         </div>
