@@ -180,6 +180,98 @@
   opacity: 0.8;
 }
 
+.fnguide-facet-panel {
+  margin-top: 12px;
+  padding-top: 14px;
+  border-top: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+}
+
+.fnguide-facet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.fnguide-facet-tabs {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 3px;
+  border-radius: 7px;
+  background: var(--secondary-background-color);
+}
+
+.fnguide-facet-tab,
+.fnguide-facet-reset {
+  border: 0;
+  color: var(--text-color);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.fnguide-facet-tab {
+  min-width: 58px;
+  padding: 7px 9px;
+  border-radius: 5px;
+  background: transparent;
+  font-size: 0.76rem;
+}
+
+.fnguide-facet-tab.active {
+  background: var(--background-color);
+  color: var(--primary-color);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--text-color) 12%, transparent);
+}
+
+.fnguide-facet-reset {
+  background: transparent;
+  color: var(--primary-color);
+  padding: 6px 0;
+  font-size: 0.72rem;
+}
+
+.fnguide-facet-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  max-height: 154px;
+  overflow-y: auto;
+}
+
+.fnguide-facet-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  border: 1px solid color-mix(in srgb, var(--text-color) 13%, transparent);
+  border-radius: 6px;
+  background: var(--background-color);
+  color: var(--text-color);
+  padding: 5px 8px;
+  font-size: calc(0.78rem * var(--facet-scale, 1));
+  font-weight: 800;
+  line-height: 1.15;
+  cursor: pointer;
+}
+
+.fnguide-facet-tag small {
+  color: var(--text-muted);
+  font-size: 0.68em;
+  font-weight: 900;
+}
+
+.fnguide-facet-tag:hover,
+.fnguide-facet-tag.active {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.fnguide-facet-tag.active {
+  background: color-mix(in srgb, var(--primary-color) 10%, var(--background-color));
+}
+
 /* FnGuide Cards List */
 .fnguide-list {
   display: flex;
@@ -538,6 +630,22 @@ html[data-theme='dark'] .card-financial-grid {
 
   .fnguide-date-section {
     gap: 12px;
+  }
+
+  .fnguide-header-panel {
+    padding: 16px;
+  }
+
+  .fnguide-facet-header {
+    align-items: flex-start;
+  }
+
+  .fnguide-facet-tab {
+    min-width: 52px;
+  }
+
+  .fnguide-facet-cloud {
+    max-height: 132px;
   }
 
   .fnguide-company-group-toggle {

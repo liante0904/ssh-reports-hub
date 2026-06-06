@@ -4,7 +4,13 @@ import { CONFIG } from '../constants/config';
 import { REPORT_SECTIONS } from '../constants/reportSections';
 import { request } from '../utils/api';
 import { calculateUpsidePercent, formatUpsidePercent } from '../utils/financial';
-import { groupFnGuideSummaries, tokenizeFinancialHighlights } from '../utils/fnguide';
+import {
+  buildFnGuideFacets,
+  getFnGuideFacetScale,
+  groupFnGuideSummaries,
+  matchesFnGuideFacet,
+  tokenizeFinancialHighlights,
+} from '../utils/fnguide';
 import MenuSummary from './MenuSummary';
 import './FnGuideList.css';
 
@@ -22,9 +28,11 @@ function FnGuideList() {
   const scrolledSummaryIdRef = useRef(null);
   const [summaries, setSummaries] = useState([]);
   const [dates, setDates] = useState([]);
-  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedDate, setSelectedDate] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [providerFilter, setProviderFilter] = useState('');
+  const [facetType, setFacetType] = useState('company');
+  const [selectedFacet, setSelectedFacet] = useState(null);
   
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingDates, setIsLoadingDates] = useState(false);
@@ -33,7 +41,7 @@ function FnGuideList() {
   const [expandedItems, setExpandedItems] = useState({});
   const [collapsedCompanyGroups, setCollapsedCompanyGroups] = useState({});
 
-  const LIMIT = 30;
+  const LIMIT = 100;
 
   // 1. 날짜별 집계 목록 조회
   const fetchDates = useCallback(async () => {
@@ -46,7 +54,15 @@ function FnGuideList() {
       
       const url = `${CONFIG.API.BASE_URL}/api/fnguide/report-dates?${params.toString()}`;
       const data = await request(url, { skipAuth: false });
-      setDates(Array.isArray(data) ? data : []);
+      const nextDates = Array.isArray(data) ? data : [];
+      setDates(nextDates);
+      setSelectedDate((currentDate) => {
+        if (currentDate === '') return currentDate;
+        if (currentDate && nextDates.some((item) => item.report_date === currentDate)) {
+          return currentDate;
+        }
+        return nextDates[0]?.report_date || '';
+      });
     } catch (error) {
       console.error('Failed to fetch FnGuide report dates:', error);
       setDates([]);
@@ -57,6 +73,7 @@ function FnGuideList() {
 
   // 2. 요약본 목록 조회
   const fetchSummaries = useCallback(async (isInitial = false) => {
+    if (selectedDate === null) return;
     setIsLoading(true);
     const currentOffset = isInitial ? 0 : offset;
     try {
@@ -88,12 +105,13 @@ function FnGuideList() {
   // 검색어 입력 혹은 필터 변경 시 날짜 및 목록 초기화 후 재조회
   useEffect(() => {
     fetchDates();
-    fetchSummaries(true);
+    if (selectedDate !== null) fetchSummaries(true);
   }, [selectedDate, providerFilter]);
 
   // 검색 수동 실행 (엔터키 또는 검색 버튼 클릭)
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+    setSelectedFacet(null);
     fetchDates();
     fetchSummaries(true);
   };
@@ -120,14 +138,23 @@ function FnGuideList() {
 
   // 날짜 선택 칩 토글
   const handleDateClick = (dateStr) => {
-    if (selectedDate === dateStr) {
-      setSelectedDate(''); // 해제
-    } else {
-      setSelectedDate(dateStr);
-    }
+    setSelectedDate(dateStr);
+    setSelectedFacet(null);
   };
 
-  const groupedSummaries = groupFnGuideSummaries(summaries);
+  const facets = buildFnGuideFacets(summaries);
+  const activeFacets = facets[facetType];
+  const maxFacetCount = activeFacets[0]?.count || 0;
+  const filteredSummaries = summaries.filter((item) => matchesFnGuideFacet(item, selectedFacet));
+  const groupedSummaries = groupFnGuideSummaries(filteredSummaries);
+
+  const handleFacetClick = (value) => {
+    setSelectedFacet((current) => (
+      current?.type === facetType && current.value === value
+        ? null
+        : { type: facetType, value }
+    ));
+  };
 
   const renderSummaryCard = (item, { showCompany = true } = {}) => {
     const isSelected = String(item.summary_id) === selectedSummaryId;
@@ -252,8 +279,8 @@ function FnGuideList() {
           menuName={REPORT_SECTIONS.fnguide.title}
           description={REPORT_SECTIONS.fnguide.description}
           summaryItems={[
-            { label: '전체', value: dates.length, icon: '📅' },
-            ...(selectedDate ? [{ label: '선택일', value: selectedDate, icon: '📌' }] : []),
+            { label: '조회일', value: selectedDate || '전체', icon: '📅' },
+            { label: '레포트', value: filteredSummaries.length, icon: '📄' },
             ...(searchQuery ? [{ label: '검색', value: searchQuery, icon: '🔍' }] : []),
             ...(providerFilter ? [{ label: '증권사', value: providerFilter, icon: '🏢' }] : []),
           ]}
@@ -285,7 +312,10 @@ function FnGuideList() {
             type="text"
             placeholder="증권사 필터..."
             value={providerFilter}
-            onChange={(e) => setProviderFilter(e.target.value)}
+            onChange={(e) => {
+              setProviderFilter(e.target.value);
+              setSelectedFacet(null);
+            }}
             className="fnguide-provider-input"
           />
           
@@ -301,7 +331,8 @@ function FnGuideList() {
           ) : (
             <>
               <button 
-                onClick={() => setSelectedDate('')}
+                type="button"
+                onClick={() => handleDateClick('')}
                 className={`date-chip ${!selectedDate ? 'active' : ''}`}
               >
                 전체
@@ -309,6 +340,7 @@ function FnGuideList() {
               {dates.map((d) => (
                 <button
                   key={d.report_date}
+                  type="button"
                   onClick={() => handleDateClick(d.report_date)}
                   className={`date-chip ${selectedDate === d.report_date ? 'active' : ''}`}
                 >
@@ -318,13 +350,67 @@ function FnGuideList() {
             </>
           )}
         </div>
+
+        {summaries.length > 0 && (
+          <section className="fnguide-facet-panel" aria-label="현재 일자 레포트 필터">
+            <div className="fnguide-facet-header">
+              <div className="fnguide-facet-tabs" role="tablist" aria-label="태그 분류">
+                {[
+                  ['company', '종목'],
+                  ['provider', '증권사'],
+                  ['author', '작성자'],
+                ].map(([type, label]) => (
+                  <button
+                    key={type}
+                    type="button"
+                    role="tab"
+                    aria-selected={facetType === type}
+                    className={`fnguide-facet-tab ${facetType === type ? 'active' : ''}`}
+                    onClick={() => {
+                      setFacetType(type);
+                      setSelectedFacet(null);
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {selectedFacet && (
+                <button
+                  type="button"
+                  className="fnguide-facet-reset"
+                  onClick={() => setSelectedFacet(null)}
+                >
+                  필터 해제
+                </button>
+              )}
+            </div>
+            <div className="fnguide-facet-cloud">
+              {activeFacets.map((facet) => {
+                const isActive = selectedFacet?.type === facetType && selectedFacet.value === facet.label;
+                return (
+                  <button
+                    key={facet.label}
+                    type="button"
+                    className={`fnguide-facet-tag ${isActive ? 'active' : ''}`}
+                    style={{ '--facet-scale': getFnGuideFacetScale(facet.count, maxFacetCount) }}
+                    onClick={() => handleFacetClick(facet.label)}
+                  >
+                    <span>{facet.label}</span>
+                    <small>{facet.count}</small>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </div>
 
       {/* 요약본 목록 */}
       <div className="fnguide-list">
-        {summaries.length === 0 && !isLoading ? (
+        {filteredSummaries.length === 0 && !isLoading ? (
           <div className="no-data-msg">
-            💡 검색 조건에 부합하는 요약 레포트가 없습니다.
+            검색 조건에 부합하는 요약 레포트가 없습니다.
           </div>
         ) : (
           groupedSummaries.map((dateGroup) => (

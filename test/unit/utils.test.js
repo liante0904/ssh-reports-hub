@@ -16,7 +16,10 @@ import {
   parseFinancialNumber,
 } from '../../src/utils/financial.js';
 import {
+  buildFnGuideFacets,
+  getFnGuideFacetScale,
   groupFnGuideSummaries,
+  matchesFnGuideFacet,
   tokenizeFinancialHighlights,
 } from '../../src/utils/fnguide.js';
 
@@ -427,13 +430,20 @@ assertEqual(formatUpsidePercent(0), '0.0%', '0 포맷');
 console.log('\n─── [Test 13] FnGuide 표시 유틸리티 ───');
 
 const highlightTokens = tokenizeFinancialHighlights(
-  '2027F PER 5.7x, PBR 1.03x, 영업이익 1,470억원(YoY +0.3%)'
+  '2027F PER 5.7x, 목표 PBR은 1.8x, 매출액 1조 1,678억 원, 영업이익 1,470억원(YoY +0.3%), 전년 동기 대비 2.5%p 상승'
 );
 const highlightedText = highlightTokens.filter((token) => token.highlighted).map((token) => token.text);
 assert(highlightedText.includes('PER 5.7x'), 'PER 강조 토큰');
-assert(highlightedText.includes('PBR 1.03x'), 'PBR 강조 토큰');
+assert(highlightedText.includes('목표 PBR은 1.8x'), '목표 PBR 강조 토큰');
+assert(highlightedText.includes('매출액 1조 1,678억 원'), '복합 매출액 강조 토큰');
 assert(highlightedText.includes('영업이익 1,470억원'), '영업이익 강조 토큰');
 assert(highlightedText.includes('YoY +0.3%'), '성장률 강조 토큰');
+assert(highlightedText.includes('전년 동기 대비 2.5%p'), '한국어 성장률 강조 토큰');
+assertEqual(
+  tokenizeFinancialHighlights('매출원가 개선').filter((token) => token.highlighted),
+  [],
+  '숫자 없는 매출 문구는 강조 제외'
+);
 
 const groupedSummaries = groupFnGuideSummaries([
   { summary_id: 1, report_date: '2026.06.02', company_code: '128940', company_name: '한미약품' },
@@ -446,6 +456,19 @@ assertEqual(groupedSummaries[0].reportCount, 3, '첫 날짜 리포트 수');
 assertEqual(groupedSummaries[0].repeated[0].companyName, '한미약품', '중복 종목 우선 그룹');
 assertEqual(groupedSummaries[0].repeated[0].items.length, 2, '중복 발간 건수');
 assertEqual(groupedSummaries[0].singles[0].companyName, '삼성전자', '단일 발간 분리');
+
+const facetSource = [
+  { company_name: '삼성전자', provider: 'KB증권', author: '김분석.이리서치' },
+  { company_name: '삼성전자', provider: 'KB증권', author: '김분석' },
+  { company_name: '한미약품', provider: '신한투자증권', author: '박제약' },
+];
+const facets = buildFnGuideFacets(facetSource);
+assertEqual(facets.company[0], { label: '삼성전자', count: 2 }, '종목 태그 발간 건수 정렬');
+assertEqual(facets.provider[0], { label: 'KB증권', count: 2 }, '증권사 태그 발간 건수 정렬');
+assertEqual(facets.author[0], { label: '김분석', count: 2 }, '복수 작성자 분리 집계');
+assert(getFnGuideFacetScale(2, 2) > getFnGuideFacetScale(1, 2), '발간 건수별 태그 크기 차등');
+assert(matchesFnGuideFacet(facetSource[0], { type: 'author', value: '이리서치' }), '작성자 태그 필터');
+assert(!matchesFnGuideFacet(facetSource[2], { type: 'provider', value: 'KB증권' }), '증권사 태그 필터 제외');
 
 // ─── 결과 요약 ───
 console.log('\n════════════════════════════════════════════');
