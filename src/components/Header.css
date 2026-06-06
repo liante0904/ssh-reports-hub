@@ -63,6 +63,8 @@ header.nav-hidden {
   position: relative;
   width: 35px;
   height: 24px;
+  border: 0;
+  background: transparent;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -142,6 +144,346 @@ header.nav-hidden {
   flex: 1 1 auto;
   min-width: 0;
   justify-content: flex-end;
+}
+
+.header-notification-button,
+.header-icon-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  background: var(--secondary-background-color);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.header-notification-button:hover,
+.header-icon-button:hover {
+  border-color: color-mix(in srgb, var(--primary-color) 45%, transparent);
+  background: color-mix(in srgb, var(--primary-color) 8%, var(--secondary-background-color));
+  color: var(--primary-color);
+}
+
+.header-notification-button svg,
+.header-icon-button svg,
+.header-popover-empty-icon svg,
+.notification-latest-icon svg,
+.account-popover-actions svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.header-popover-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: transparent;
+}
+
+.header-popover {
+  position: absolute;
+  top: calc(68px + env(safe-area-inset-top, 0px));
+  right: max(15px, calc((100vw - 1200px) / 2 + 15px));
+  width: min(360px, calc(100vw - 30px));
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  box-shadow: 0 18px 50px color-mix(in srgb, var(--card-shadow-color) 75%, transparent);
+  color: var(--text-color);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  animation: headerPopoverIn 160ms ease-out;
+}
+
+@keyframes headerPopoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header-popover-heading,
+.account-popover-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.header-popover-heading {
+  justify-content: space-between;
+}
+
+.header-popover-eyebrow {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.header-popover h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: 0;
+}
+
+.header-popover-tools {
+  display: flex;
+  gap: 6px;
+}
+
+.header-icon-button {
+  width: 34px;
+  height: 34px;
+}
+
+.header-popover-empty {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 28px 22px;
+  text-align: center;
+}
+
+.header-popover-empty.compact {
+  padding: 24px 18px;
+}
+
+.header-popover-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--primary-color);
+}
+
+.header-popover-empty strong {
+  font-size: 0.92rem;
+}
+
+.header-popover-empty p {
+  margin: 7px 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.header-popover-primary {
+  min-height: 38px;
+  margin-top: 16px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--primary-color);
+  color: #fff;
+  padding: 0 18px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.header-popover-primary:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.notification-status,
+.notification-latest {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+}
+
+.notification-status {
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.notification-status-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #2ca66f;
+  box-shadow: 0 0 0 4px color-mix(in srgb, #2ca66f 14%, transparent);
+}
+
+.notification-status span:last-child,
+.notification-latest span:last-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.notification-status strong,
+.notification-latest strong {
+  font-size: 0.82rem;
+}
+
+.notification-status small,
+.notification-latest small {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.notification-keywords {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.notification-keywords-title {
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.notification-keyword-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.notification-keyword-list span {
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 18%, var(--glass-border));
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--primary-color) 7%, transparent);
+  color: var(--primary-color);
+  padding: 5px 9px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-popover-loading {
+  padding: 26px 16px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.notification-latest {
+  background: color-mix(in srgb, var(--text-color) 3%, transparent);
+}
+
+.notification-latest-icon {
+  display: inline-flex;
+  color: var(--text-muted);
+}
+
+.account-popover-profile {
+  position: relative;
+}
+
+.account-popover-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: #fff;
+  font-weight: 900;
+}
+
+.account-popover-profile > span:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+
+.account-popover-profile small {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-close {
+  margin-left: auto;
+}
+
+.account-popover-actions {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+}
+
+.account-popover-actions > button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-color);
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.account-popover-actions > button:hover {
+  background: color-mix(in srgb, var(--primary-color) 7%, transparent);
+}
+
+.account-popover-actions > button > svg,
+.account-action-symbol {
+  width: 22px;
+  flex: 0 0 22px;
+  color: var(--primary-color);
+}
+
+.account-popover-actions > button > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.account-popover-actions strong {
+  font-size: 0.84rem;
+}
+
+.account-popover-actions small {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.account-popover-actions .account-logout-button,
+.account-popover-actions .account-logout-button .account-action-symbol {
+  color: var(--danger-color);
 }
 
 /* 텔레그램 로그인 배지 */
@@ -394,14 +736,18 @@ header.nav-hidden {
   }
 
   .hamburger-menu {
-    width: 30px;
-    height: 20px;
-    padding: 2px 0;
+    display: none;
   }
 
-  .hamburger-menu div {
-    width: 25px;
-    height: 2px;
+  .header-notification-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .header-popover {
+    top: calc(74px + env(safe-area-inset-top, 0px));
+    right: 10px;
+    width: calc(100vw - 20px);
   }
 
   .header-nav {

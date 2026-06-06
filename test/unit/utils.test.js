@@ -10,6 +10,11 @@ import {
   createCompanySearch,
   parseSearchParams,
 } from '../../src/utils/searchSelection.js';
+import {
+  calculateUpsidePercent,
+  formatUpsidePercent,
+  parseFinancialNumber,
+} from '../../src/utils/financial.js';
 
 // ─── 테스트 헬퍼 ───
 let passed = 0;
@@ -397,6 +402,21 @@ assertEqual(parsedCompany.board, 12, 'board 숫자 복원');
 
 const textParams = buildSearchParams({ query: '삼성', category: 'title' });
 assertEqual(textParams.toString(), 'q=%EC%82%BC%EC%84%B1&category=title', '텍스트 검색 URL 문자열 생성');
+
+// ─── Test 12: Financial 계산 유틸리티 ───
+console.log('\n─── [Test 12] Financial 계산 유틸리티 ───');
+
+assertEqual(parseFinancialNumber('120,000원'), 120000, '원화 문자열 파싱');
+assertEqual(parseFinancialNumber(' 85000 '), 85000, '공백 포함 숫자 파싱');
+assertEqual(parseFinancialNumber('0'), null, '0은 유효하지 않은 가격');
+assertEqual(parseFinancialNumber('-100'), null, '음수는 유효하지 않은 가격');
+assertEqual(parseFinancialNumber('가격없음'), null, '문자열은 null');
+assertEqual(calculateUpsidePercent('120,000', '100,000'), 20, '상승여력 계산');
+assertEqual(calculateUpsidePercent('90,000', '100,000'), -10, '하락여력 계산');
+assertEqual(calculateUpsidePercent(null, '100,000'), null, '목표가 누락');
+assertEqual(formatUpsidePercent(20), '+20.0%', '양수 포맷');
+assertEqual(formatUpsidePercent(-10), '-10.0%', '음수 포맷');
+assertEqual(formatUpsidePercent(0), '0.0%', '0 포맷');
 
 // ─── 결과 요약 ───
 console.log('\n════════════════════════════════════════════');

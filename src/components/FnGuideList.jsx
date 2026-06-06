@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CONFIG } from '../constants/config';
 import { REPORT_SECTIONS } from '../constants/reportSections';
 import { request } from '../utils/api';
+import { calculateUpsidePercent, formatUpsidePercent } from '../utils/financial';
 import MenuSummary from './MenuSummary';
 import './FnGuideList.css';
 
@@ -189,6 +190,7 @@ function FnGuideList() {
         ) : (
           summaries.map((item) => {
             const isExpanded = expandedItems[item.summary_id];
+            const upsidePercent = calculateUpsidePercent(item.target_price, item.prev_close);
             const textLimit = 300;
             const needsTruncate = item.summary_text && item.summary_text.length > textLimit;
             const displayText = isExpanded 
@@ -256,6 +258,12 @@ function FnGuideList() {
                       {item.prev_close && item.prev_close !== '0' 
                         ? `${item.prev_close}` 
                         : '-'}
+                    </span>
+                  </div>
+                  <div className="grid-cell">
+                    <span className="cell-label">상승여력</span>
+                    <span className={`cell-value upside ${upsidePercent === null ? '' : upsidePercent >= 0 ? 'positive' : 'negative'}`}>
+                      {upsidePercent === null ? '-' : formatUpsidePercent(upsidePercent)}
                     </span>
                   </div>
                 </div>
