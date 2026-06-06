@@ -3,8 +3,17 @@ import { CONFIG } from '../constants/config';
 import { REPORT_SECTIONS } from '../constants/reportSections';
 import { request } from '../utils/api';
 import { calculateUpsidePercent, formatUpsidePercent } from '../utils/financial';
+import { groupFnGuideSummaries, tokenizeFinancialHighlights } from '../utils/fnguide';
 import MenuSummary from './MenuSummary';
 import './FnGuideList.css';
+
+function HighlightedSummary({ text }) {
+  return tokenizeFinancialHighlights(text).map((token, index) => (
+    token.highlighted
+      ? <strong className="financial-highlight" key={`${token.text}-${index}`}>{token.text}</strong>
+      : <React.Fragment key={`${index}-${token.text.slice(0, 12)}`}>{token.text}</React.Fragment>
+  ));
+}
 
 function FnGuideList() {
   const [summaries, setSummaries] = useState([]);
@@ -18,6 +27,7 @@ function FnGuideList() {
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [expandedItems, setExpandedItems] = useState({});
+  const [collapsedCompanyGroups, setCollapsedCompanyGroups] = useState({});
 
   const LIMIT = 30;
 
@@ -97,6 +107,13 @@ function FnGuideList() {
     }));
   };
 
+  const toggleCompanyGroup = (groupKey) => {
+    setCollapsedCompanyGroups((prev) => ({
+      ...prev,
+      [groupKey]: !prev[groupKey],
+    }));
+  };
+
   // 날짜 선택 칩 토글
   const handleDateClick = (dateStr) => {
     if (selectedDate === dateStr) {
@@ -104,6 +121,98 @@ function FnGuideList() {
     } else {
       setSelectedDate(dateStr);
     }
+  };
+
+  const groupedSummaries = groupFnGuideSummaries(summaries);
+
+  const renderSummaryCard = (item, { showCompany = true } = {}) => {
+    const isExpanded = expandedItems[item.summary_id];
+    const upsidePercent = calculateUpsidePercent(item.target_price, item.prev_close);
+    const hasTargetPrice = Boolean(item.target_price && item.target_price !== '0');
+    const textLimit = 300;
+    const needsTruncate = item.summary_text && item.summary_text.length > textLimit;
+    const displayText = isExpanded
+      ? item.summary_text
+      : (item.summary_text ? `${item.summary_text.slice(0, textLimit)}${needsTruncate ? '...' : ''}` : '');
+
+    return (
+      <article className="fnguide-card" key={item.summary_id}>
+        <div className="card-top-meta">
+          <span className="card-provider-badge">{item.provider || '증권사 미상'}</span>
+          {item.author && <span className="card-author-badge">{item.author}</span>}
+        </div>
+
+        {showCompany && (
+          <div className="card-company-section">
+            <span className="card-company-name">{item.company_name}</span>
+            {item.company_code && <span className="card-company-code">{item.company_code}</span>}
+          </div>
+        )}
+
+        <h3 className="card-report-title">{item.report_title}</h3>
+
+        {item.summary_text ? (
+          <div className="card-summary-text">
+            <p style={{ whiteSpace: 'pre-line' }}>
+              <HighlightedSummary text={displayText} />
+            </p>
+            {needsTruncate && (
+              <button
+                type="button"
+                className="toggle-expand-btn"
+                onClick={() => toggleExpand(item.summary_id)}
+              >
+                {isExpanded ? '접기 ▲' : '더보기 ▼'}
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="card-summary-empty">요약 정보 본문이 없습니다.</div>
+        )}
+
+        <div className="card-financial-grid">
+          <div className="grid-cell">
+            <span className="cell-label">투자의견</span>
+            <strong className="cell-value opinion">{item.opinion || '-'}</strong>
+          </div>
+          <div className="grid-cell">
+            <span className="cell-label">목표가</span>
+            <strong className="cell-value target-price">
+              {hasTargetPrice ? item.target_price : '-'}
+            </strong>
+          </div>
+          <div className="grid-cell">
+            <span className="cell-label">직전 종가</span>
+            <strong className="cell-value prev-close">
+              {item.prev_close && item.prev_close !== '0' ? item.prev_close : '-'}
+            </strong>
+          </div>
+          <div className="grid-cell">
+            <span className="cell-label">상승여력</span>
+            <strong className={`cell-value upside ${upsidePercent === null ? '' : upsidePercent >= 0 ? 'positive' : 'negative'}`}>
+              {upsidePercent === null ? '-' : formatUpsidePercent(upsidePercent)}
+            </strong>
+          </div>
+        </div>
+
+        {hasTargetPrice && upsidePercent === null && (
+          <p className="upside-data-note">직전 종가 데이터가 없어 상승여력을 계산하지 못했습니다.</p>
+        )}
+
+        {(item.pdf_url || item.article_url) && (
+          <div className="card-actions">
+            <a
+              href={item.pdf_url || item.article_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pdf-action-btn"
+            >
+              원본 보기
+            </a>
+          </div>
+        )}
+      </article>
+    );
   };
 
   return (
@@ -188,102 +297,57 @@ function FnGuideList() {
             💡 검색 조건에 부합하는 요약 레포트가 없습니다.
           </div>
         ) : (
-          summaries.map((item) => {
-            const isExpanded = expandedItems[item.summary_id];
-            const upsidePercent = calculateUpsidePercent(item.target_price, item.prev_close);
-            const textLimit = 300;
-            const needsTruncate = item.summary_text && item.summary_text.length > textLimit;
-            const displayText = isExpanded 
-              ? item.summary_text 
-              : (item.summary_text ? `${item.summary_text.slice(0, textLimit)}...` : '');
-
-            return (
-              <div className="fnguide-card" key={item.summary_id}>
-                {/* 상단 메타 정보 */}
-                <div className="card-top-meta">
-                  <span className="card-date-badge">📅 {item.report_date}</span>
-                  {item.provider && (
-                    <span className="card-provider-badge">🏢 {item.provider}</span>
-                  )}
-                  {item.author && (
-                    <span className="card-author-badge">✍️ {item.author}</span>
-                  )}
-                </div>
-
-                {/* 회사명 및 종목코드 */}
-                <div className="card-company-section">
-                  <span className="card-company-name">{item.company_name}</span>
-                  {item.company_code && (
-                    <span className="card-company-code">{item.company_code}</span>
-                  )}
-                </div>
-
-                {/* 리포트 제목 */}
-                <h3 className="card-report-title">{item.report_title}</h3>
-
-                {/* 요약 텍스트 */}
-                {item.summary_text ? (
-                  <div className="card-summary-text">
-                    <p style={{ whiteSpace: 'pre-line' }}>{displayText}</p>
-                    {needsTruncate && (
-                      <button 
-                        className="toggle-expand-btn"
-                        onClick={() => toggleExpand(item.summary_id)}
-                      >
-                        {isExpanded ? '접기 ▲' : '더보기 ▼'}
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="card-summary-empty">요약 정보 본문이 없습니다.</div>
-                )}
-
-                {/* 하단 투자의견 및 가격정보 그리드 */}
-                <div className="card-financial-grid">
-                  <div className="grid-cell">
-                    <span className="cell-label">투자의견</span>
-                    <span className="cell-value opinion">{item.opinion || '-'}</span>
-                  </div>
-                  <div className="grid-cell">
-                    <span className="cell-label">목표가</span>
-                    <span className="cell-value target-price">
-                      {item.target_price && item.target_price !== '0' 
-                        ? `${item.target_price}` 
-                        : '-'}
-                    </span>
-                  </div>
-                  <div className="grid-cell">
-                    <span className="cell-label">직전 종가</span>
-                    <span className="cell-value prev-close">
-                      {item.prev_close && item.prev_close !== '0' 
-                        ? `${item.prev_close}` 
-                        : '-'}
-                    </span>
-                  </div>
-                  <div className="grid-cell">
-                    <span className="cell-label">상승여력</span>
-                    <span className={`cell-value upside ${upsidePercent === null ? '' : upsidePercent >= 0 ? 'positive' : 'negative'}`}>
-                      {upsidePercent === null ? '-' : formatUpsidePercent(upsidePercent)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* PDF 다운로드 및 액션 영역 */}
-                {(item.pdf_url || item.article_url) && (
-                  <div className="card-actions">
-                    <a 
-                      href={item.pdf_url || item.article_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="pdf-action-btn"
-                    >
-                      <span>📕</span> 원본 PDF 보기
-                    </a>
-                  </div>
-                )}
+          groupedSummaries.map((dateGroup) => (
+            <section className="fnguide-date-section" key={dateGroup.date}>
+              <div className="fnguide-date-heading">
+                <h2>{dateGroup.date}</h2>
+                <span>{dateGroup.reportCount}건</span>
               </div>
-            );
-          })
+
+              {dateGroup.repeated.length > 0 && (
+                <div className="fnguide-repeated-area">
+                  <div className="fnguide-repeated-title">집중 발간 종목</div>
+                  {dateGroup.repeated.map((companyGroup) => {
+                    const groupKey = `${dateGroup.date}-${companyGroup.key}`;
+                    const isCollapsed = collapsedCompanyGroups[groupKey];
+                    const providers = [...new Set(companyGroup.items.map((item) => item.provider).filter(Boolean))];
+
+                    return (
+                      <section className="fnguide-company-group" key={groupKey}>
+                        <button
+                          type="button"
+                          className="fnguide-company-group-toggle"
+                          onClick={() => toggleCompanyGroup(groupKey)}
+                          aria-expanded={!isCollapsed}
+                        >
+                          <span className="company-group-main">
+                            <strong>{companyGroup.companyName}</strong>
+                            {companyGroup.companyCode && <small>{companyGroup.companyCode}</small>}
+                          </span>
+                          <span className="company-group-meta">
+                            <span className="company-report-count">{companyGroup.items.length}건</span>
+                            <small>{providers.join(' · ')}</small>
+                            <span aria-hidden="true">{isCollapsed ? '＋' : '−'}</span>
+                          </span>
+                        </button>
+                        {!isCollapsed && (
+                          <div className="fnguide-company-reports">
+                            {companyGroup.items.map((item) => renderSummaryCard(item, { showCompany: false }))}
+                          </div>
+                        )}
+                      </section>
+                    );
+                  })}
+                </div>
+              )}
+
+              {dateGroup.singles.length > 0 && (
+                <div className="fnguide-single-reports">
+                  {dateGroup.singles.map((companyGroup) => renderSummaryCard(companyGroup.items[0]))}
+                </div>
+              )}
+            </section>
+          ))
         )}
       </div>
 

@@ -184,7 +184,136 @@
 .fnguide-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 28px;
+}
+
+.fnguide-date-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fnguide-date-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px 8px;
+  border-bottom: 2px solid color-mix(in srgb, var(--text-color) 12%, transparent);
+}
+
+.fnguide-date-heading h2 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.fnguide-date-heading > span {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.fnguide-repeated-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 0 4px;
+  border-top: 1px solid color-mix(in srgb, var(--primary-color) 18%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--primary-color) 18%, transparent);
+}
+
+.fnguide-repeated-title {
+  color: var(--primary-color);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.fnguide-company-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fnguide-company-group + .fnguide-company-group {
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--text-color) 8%, transparent);
+}
+
+.fnguide-company-group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--primary-color) 7%, var(--background-color));
+  color: var(--text-color);
+  padding: 9px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.company-group-main,
+.company-group-meta {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.company-group-main {
+  gap: 7px;
+}
+
+.company-group-main strong {
+  overflow: hidden;
+  font-size: 0.95rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.company-group-main small,
+.company-group-meta small {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.company-group-meta {
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.company-group-meta small {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.company-report-count {
+  flex: 0 0 auto;
+  border-radius: var(--radius-full);
+  background: var(--primary-color);
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.fnguide-company-reports,
+.fnguide-single-reports {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fnguide-company-reports {
+  padding-left: 12px;
+  border-left: 3px solid color-mix(in srgb, var(--primary-color) 28%, transparent);
 }
 
 .no-data-msg {
@@ -290,6 +419,14 @@ html[data-theme='dark'] .card-author-badge {
   margin: 0 0 8px 0;
 }
 
+.financial-highlight {
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--text-color);
+  font-weight: 900;
+  padding: 0 2px;
+}
+
 .toggle-expand-btn {
   background: none;
   border: none;
@@ -367,9 +504,48 @@ html[data-theme='dark'] .card-financial-grid {
   color: #2777c7;
 }
 
+.upside-data-note {
+  margin: -8px 0 14px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.4;
+  text-align: right;
+}
+
 @media (max-width: 560px) {
+  .fnguide-container {
+    padding: 12px;
+  }
+
+  .fnguide-date-section {
+    gap: 12px;
+  }
+
+  .fnguide-company-group-toggle {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .company-group-meta {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .company-group-meta small {
+    max-width: calc(100% - 74px);
+  }
+
+  .fnguide-company-reports {
+    padding-left: 8px;
+  }
+
   .card-financial-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fnguide-card {
+    padding: 16px;
   }
 }
 

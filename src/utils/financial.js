@@ -7,8 +7,12 @@ export function parseFinancialNumber(value) {
     .trim();
 
   if (!normalized) return null;
+  if (normalized.startsWith('-')) return null;
 
-  const number = Number(normalized);
+  const numericMatch = normalized.match(/\d+(?:\.\d+)?/);
+  if (!numericMatch) return null;
+
+  const number = Number(numericMatch[0]);
   return Number.isFinite(number) && number > 0 ? number : null;
 }
 
