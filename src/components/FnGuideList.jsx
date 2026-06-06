@@ -17,15 +17,23 @@ import './FnGuideList.css';
 function HighlightedSummary({ text }) {
   return tokenizeFinancialHighlights(text).map((token, index) => (
     token.highlighted
-      ? <strong className="financial-highlight" key={`${token.text}-${index}`}>{token.text}</strong>
+      ? (
+          <strong
+            className={token.kind === 'keyword' ? 'industry-keyword-highlight' : 'financial-highlight'}
+            key={`${token.text}-${index}`}
+          >
+            {token.text}
+          </strong>
+        )
       : <React.Fragment key={`${index}-${token.text.slice(0, 12)}`}>{token.text}</React.Fragment>
   ));
 }
 
 function FnGuideList() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const selectedSummaryId = searchParams.get('summary_id');
   const scrolledSummaryIdRef = useRef(null);
+  const dateChipsRef = useRef(null);
   const [summaries, setSummaries] = useState([]);
   const [dates, setDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -142,11 +150,36 @@ function FnGuideList() {
     setSelectedFacet(null);
   };
 
+  const scrollDateChips = (direction) => {
+    const container = dateChipsRef.current;
+    if (!container) return;
+    container.scrollBy({
+      left: direction * container.clientWidth * 0.75,
+      behavior: 'smooth',
+    });
+  };
+
+  useEffect(() => {
+    if (selectedDate === null) return;
+    const container = dateChipsRef.current;
+    const selectedChip = container?.querySelector(`[data-date-chip="${selectedDate || 'all'}"]`);
+    if (!container || !selectedChip) return;
+
+    container.scrollTo({
+      left: selectedChip.offsetLeft - container.offsetLeft,
+      behavior: 'smooth',
+    });
+  }, [selectedDate, dates]);
+
   const facets = buildFnGuideFacets(summaries);
   const activeFacets = facets[facetType];
   const maxFacetCount = activeFacets[0]?.count || 0;
   const filteredSummaries = summaries.filter((item) => matchesFnGuideFacet(item, selectedFacet));
   const groupedSummaries = groupFnGuideSummaries(filteredSummaries);
+  const visibleSummaries = groupedSummaries.flatMap((dateGroup) => [
+    ...dateGroup.repeated.flatMap((companyGroup) => companyGroup.items),
+    ...dateGroup.singles.flatMap((companyGroup) => companyGroup.items),
+  ]);
 
   const handleFacetClick = (value) => {
     setSelectedFacet((current) => (
@@ -156,9 +189,22 @@ function FnGuideList() {
     ));
   };
 
+  const navigateToSummary = (summaryId) => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('summary_id', String(summaryId));
+    setSearchParams(nextParams);
+  };
+
   const renderSummaryCard = (item, { showCompany = true } = {}) => {
     const isSelected = String(item.summary_id) === selectedSummaryId;
     const isExpanded = expandedItems[item.summary_id];
+    const selectedIndex = isSelected
+      ? visibleSummaries.findIndex((summary) => String(summary.summary_id) === selectedSummaryId)
+      : -1;
+    const previousSummary = selectedIndex > 0 ? visibleSummaries[selectedIndex - 1] : null;
+    const nextSummary = selectedIndex >= 0 && selectedIndex < visibleSummaries.length - 1
+      ? visibleSummaries[selectedIndex + 1]
+      : null;
     const upsidePercent = calculateUpsidePercent(item.target_price, item.prev_close);
     const hasTargetPrice = Boolean(item.target_price && item.target_price !== '0');
     const textLimit = 300;
@@ -170,10 +216,37 @@ function FnGuideList() {
     return (
       <article
         id={`fnguide-summary-${item.summary_id}`}
-        className={`fnguide-card ${isSelected ? 'selected-summary' : ''}`}
+        className={`fnguide-card ${isSelected ? 'selected-summary' : ''} ${isExpanded ? 'expanded-summary' : ''}`}
         key={item.summary_id}
       >
         {isSelected && <div className="selected-summary-label">선택한 레포트</div>}
+        {isSelected && visibleSummaries.length > 1 && (
+          <nav className="summary-sequence-nav" aria-label="선택한 레포트 이동">
+            <button
+              type="button"
+              className="summary-sequence-btn"
+              disabled={!previousSummary}
+              onClick={() => previousSummary && navigateToSummary(previousSummary.summary_id)}
+              aria-label={previousSummary ? `이전 레포트: ${previousSummary.company_name}` : '이전 레포트 없음'}
+            >
+              <span aria-hidden="true">←</span>
+              <span>이전</span>
+            </button>
+            <span className="summary-sequence-position">
+              {selectedIndex + 1} / {visibleSummaries.length}
+            </span>
+            <button
+              type="button"
+              className="summary-sequence-btn"
+              disabled={!nextSummary}
+              onClick={() => nextSummary && navigateToSummary(nextSummary.summary_id)}
+              aria-label={nextSummary ? `다음 레포트: ${nextSummary.company_name}` : '다음 레포트 없음'}
+            >
+              <span>다음</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </nav>
+        )}
         <div className="card-top-meta">
           <span className="card-provider-badge">{item.provider || '증권사 미상'}</span>
           {item.author && <span className="card-author-badge">{item.author}</span>}
@@ -198,6 +271,7 @@ function FnGuideList() {
                 type="button"
                 className="toggle-expand-btn"
                 onClick={() => toggleExpand(item.summary_id)}
+                aria-expanded={Boolean(isExpanded)}
               >
                 {isExpanded ? '접기 ▲' : '더보기 ▼'}
               </button>
@@ -286,69 +360,91 @@ function FnGuideList() {
           ]}
         />
         
-        {/* 검색 폼 */}
-        <form className="fnguide-search-form" onSubmit={handleSearchSubmit}>
-          <div className="search-input-wrapper">
-            <span className="search-icon">🔍</span>
+        {/* 전체 조회에서만 자유 검색을 노출한다. */}
+        {!selectedDate && (
+          <form className="fnguide-search-form" onSubmit={handleSearchSubmit}>
+            <div className="search-input-wrapper">
+              <span className="search-icon">🔍</span>
+              <input
+                type="text"
+                placeholder="회사명, 제목, 요약 내용 검색..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="fnguide-search-input"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="clear-search-btn"
+                  onClick={() => { setSearchQuery(''); }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
             <input
               type="text"
-              placeholder="회사명, 제목, 요약 내용 검색..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="fnguide-search-input"
+              placeholder="증권사 필터..."
+              value={providerFilter}
+              onChange={(e) => {
+                setProviderFilter(e.target.value);
+                setSelectedFacet(null);
+              }}
+              className="fnguide-provider-input"
             />
-            {searchQuery && (
-              <button 
-                type="button" 
-                className="clear-search-btn"
-                onClick={() => { setSearchQuery(''); }}
-              >
-                ✕
-              </button>
-            )}
-          </div>
-          
-          <input
-            type="text"
-            placeholder="증권사 필터..."
-            value={providerFilter}
-            onChange={(e) => {
-              setProviderFilter(e.target.value);
-              setSelectedFacet(null);
-            }}
-            className="fnguide-provider-input"
-          />
-          
-          <button type="submit" className="fnguide-search-submit">
-            검색
-          </button>
-        </form>
+
+            <button type="submit" className="fnguide-search-submit">
+              검색
+            </button>
+          </form>
+        )}
 
         {/* 날짜 필터 가로 칩 리스트 */}
-        <div className="date-chips-scroll">
-          {isLoadingDates && dates.length === 0 ? (
-            <div className="chips-loading">날짜 로딩 중...</div>
-          ) : (
-            <>
-              <button 
-                type="button"
-                onClick={() => handleDateClick('')}
-                className={`date-chip ${!selectedDate ? 'active' : ''}`}
-              >
-                전체
-              </button>
-              {dates.map((d) => (
+        <div className="date-chips-control">
+          <button
+            type="button"
+            className="date-scroll-btn previous"
+            onClick={() => scrollDateChips(-1)}
+            aria-label="이전 날짜 보기"
+          >
+            ‹
+          </button>
+          <div className="date-chips-scroll" ref={dateChipsRef}>
+            {isLoadingDates && dates.length === 0 ? (
+              <div className="chips-loading">날짜 로딩 중...</div>
+            ) : (
+              <>
                 <button
-                  key={d.report_date}
                   type="button"
-                  onClick={() => handleDateClick(d.report_date)}
-                  className={`date-chip ${selectedDate === d.report_date ? 'active' : ''}`}
+                  data-date-chip="all"
+                  onClick={() => handleDateClick('')}
+                  className={`date-chip ${!selectedDate ? 'active' : ''}`}
                 >
-                  📅 {d.report_date} <span className="chip-count">({d.report_count})</span>
+                  전체
                 </button>
-              ))}
-            </>
-          )}
+                {dates.map((d) => (
+                  <button
+                    key={d.report_date}
+                    type="button"
+                    data-date-chip={d.report_date}
+                    onClick={() => handleDateClick(d.report_date)}
+                    className={`date-chip ${selectedDate === d.report_date ? 'active' : ''}`}
+                  >
+                    📅 {d.report_date} <span className="chip-count">({d.report_count})</span>
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
+          <button
+            type="button"
+            className="date-scroll-btn next"
+            onClick={() => scrollDateChips(1)}
+            aria-label="다음 날짜 보기"
+          >
+            ›
+          </button>
         </div>
 
         {summaries.length > 0 && (

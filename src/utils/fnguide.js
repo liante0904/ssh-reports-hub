@@ -9,23 +9,40 @@ const FINANCIAL_METRIC_PATTERN = new RegExp(
   'gi'
 );
 
+const INDUSTRY_KEYWORD_PATTERN = /증설|감산|쇼티지|공급\s*부족|공급\s*과잉/gi;
+
 export function tokenizeFinancialHighlights(text) {
   if (!text) return [];
+
+  const source = String(text);
+  const matches = [
+    ...Array.from(source.matchAll(FINANCIAL_METRIC_PATTERN), (match) => ({
+      index: match.index ?? 0,
+      text: match[0],
+      kind: 'financial',
+    })),
+    ...Array.from(source.matchAll(INDUSTRY_KEYWORD_PATTERN), (match) => ({
+      index: match.index ?? 0,
+      text: match[0],
+      kind: 'keyword',
+    })),
+  ].sort((a, b) => a.index - b.index || b.text.length - a.text.length);
 
   const tokens = [];
   let cursor = 0;
 
-  for (const match of String(text).matchAll(FINANCIAL_METRIC_PATTERN)) {
-    const index = match.index ?? 0;
+  for (const match of matches) {
+    const index = match.index;
+    if (index < cursor) continue;
     if (index > cursor) {
-      tokens.push({ text: text.slice(cursor, index), highlighted: false });
+      tokens.push({ text: source.slice(cursor, index), highlighted: false, kind: 'text' });
     }
-    tokens.push({ text: match[0], highlighted: true });
-    cursor = index + match[0].length;
+    tokens.push({ text: match.text, highlighted: true, kind: match.kind });
+    cursor = index + match.text.length;
   }
 
-  if (cursor < text.length) {
-    tokens.push({ text: text.slice(cursor), highlighted: false });
+  if (cursor < source.length) {
+    tokens.push({ text: source.slice(cursor), highlighted: false, kind: 'text' });
   }
 
   return tokens;
@@ -100,8 +117,8 @@ export function buildFnGuideFacets(summaries) {
 
 export function getFnGuideFacetScale(count, maxCount) {
   if (!count || !maxCount || maxCount <= 1) return 1;
-  const ratio = Math.log(count + 1) / Math.log(maxCount + 1);
-  return Number((0.84 + ratio * 0.28).toFixed(3));
+  const ratio = Math.sqrt((count - 1) / (maxCount - 1));
+  return Number((1 + ratio * 0.7).toFixed(3));
 }
 
 export function matchesFnGuideFacet(item, facet) {

@@ -122,6 +122,10 @@
 }
 
 /* Date Chips Scroll Row */
+.date-chips-control {
+  position: relative;
+}
+
 .date-chips-scroll {
   display: flex;
   gap: 8px;
@@ -129,6 +133,10 @@
   padding-bottom: 8px;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+}
+
+.date-scroll-btn {
+  display: none;
 }
 
 /* Scrollbar styling for Webkit */
@@ -250,9 +258,9 @@
   background: var(--background-color);
   color: var(--text-color);
   padding: 5px 8px;
-  font-size: calc(0.78rem * var(--facet-scale, 1));
+  font-size: calc(0.8rem * var(--facet-scale, 1));
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.2;
   cursor: pointer;
 }
 
@@ -439,7 +447,8 @@
   box-shadow: 0 10px 30px color-mix(in srgb, var(--card-shadow-color) 45%, transparent);
 }
 
-.fnguide-card.selected-summary {
+.fnguide-card.selected-summary,
+.fnguide-card.expanded-summary {
   border-color: color-mix(in srgb, var(--primary-color) 72%, transparent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 12%, transparent), var(--glass-shadow);
 }
@@ -455,6 +464,53 @@
   padding: 0 9px;
   font-size: 0.68rem;
   font-weight: 900;
+}
+
+.summary-sequence-nav {
+  display: grid;
+  grid-template-columns: minmax(76px, 1fr) auto minmax(76px, 1fr);
+  align-items: center;
+  gap: 10px;
+  margin: -2px 0 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--primary-color) 18%, transparent);
+}
+
+.summary-sequence-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 28%, transparent);
+  border-radius: 6px;
+  background: var(--background-color);
+  color: var(--primary-color);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.summary-sequence-btn:last-child {
+  justify-self: end;
+}
+
+.summary-sequence-btn:first-child {
+  justify-self: start;
+}
+
+.summary-sequence-btn:disabled {
+  border-color: color-mix(in srgb, var(--text-color) 10%, transparent);
+  color: var(--text-muted);
+  cursor: default;
+  opacity: 0.5;
+}
+
+.summary-sequence-position {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 /* Card Top Meta Badges */
@@ -510,30 +566,45 @@ html[data-theme='dark'] .card-author-badge {
 
 /* Report Title */
 .card-report-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  line-height: 1.4;
-  margin: 0 0 12px 0;
+  font-size: 1.22rem;
+  font-weight: 800;
+  line-height: 1.5;
+  letter-spacing: 0;
+  margin: 0 0 14px 0;
   color: var(--text-color);
 }
 
 /* Summary Text Block */
 .card-summary-text {
-  font-size: 0.92rem;
-  line-height: 1.6;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+  font-size: 1.02rem;
+  font-weight: 450;
+  line-height: 1.9;
+  letter-spacing: 0;
   color: var(--text-color);
-  opacity: 0.95;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .card-summary-text p {
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .financial-highlight {
   border-radius: 3px;
   background: color-mix(in srgb, var(--primary-color) 10%, transparent);
   color: var(--text-color);
+  font-weight: 900;
+  padding: 0 2px;
+}
+
+.industry-keyword-highlight {
+  display: inline;
+  border-radius: 3px;
+  background: color-mix(in srgb, #d94a4a 12%, transparent);
+  color: color-mix(in srgb, #d94a4a 82%, var(--text-color));
+  font-size: 1.1em;
   font-weight: 900;
   padding: 0 2px;
 }
@@ -636,6 +707,38 @@ html[data-theme='dark'] .card-financial-grid {
     padding: 16px;
   }
 
+  .date-chips-control {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 34px;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .date-scroll-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 38px;
+    border: 1px solid color-mix(in srgb, var(--text-color) 14%, transparent);
+    border-radius: 6px;
+    background: var(--background-color);
+    color: var(--text-color);
+    font-size: 1.35rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .date-chips-scroll {
+    min-width: 0;
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+  }
+
+  .date-chip {
+    scroll-snap-align: start;
+  }
+
   .fnguide-facet-header {
     align-items: flex-start;
   }
@@ -673,6 +776,15 @@ html[data-theme='dark'] .card-financial-grid {
 
   .fnguide-card {
     padding: 16px;
+  }
+
+  .card-report-title {
+    font-size: 1.16rem;
+  }
+
+  .card-summary-text {
+    font-size: 1rem;
+    line-height: 1.86;
   }
 }
 
