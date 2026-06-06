@@ -19,7 +19,7 @@ function HighlightedSummary({ text }) {
     token.highlighted
       ? (
           <strong
-            className={token.kind === 'keyword' ? 'industry-keyword-highlight' : 'financial-highlight'}
+            className={token.kind === 'financial' ? 'financial-highlight' : `investment-keyword-highlight ${token.kind}`}
             key={`${token.text}-${index}`}
           >
             {token.text}

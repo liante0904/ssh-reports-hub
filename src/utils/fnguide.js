@@ -1,3 +1,5 @@
+import { FNGUIDE_KEYWORD_GROUPS } from '../constants/fnguideKeywords.js';
+
 const FINANCIAL_METRIC_PATTERN = new RegExp(
   [
     '(?:(?:Target|목표|타겟|적정)\\s*)?(?:PER|PBR|ROE)(?:은|는|이|가)?\\s*[:：]?\\s*[\\d,.]+\\s*(?:x|배|%|%p)?',
@@ -9,7 +11,20 @@ const FINANCIAL_METRIC_PATTERN = new RegExp(
   'gi'
 );
 
-const INDUSTRY_KEYWORD_PATTERN = /증설|감산|쇼티지|공급\s*부족|공급\s*과잉/gi;
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+const INVESTMENT_KEYWORD_GROUPS = FNGUIDE_KEYWORD_GROUPS.map((group) => ({
+  ...group,
+  pattern: new RegExp(
+    [...group.keywords]
+      .sort((a, b) => b.length - a.length)
+      .map((keyword) => keyword.trim().split(/\s+/).map(escapeRegex).join('\\s*'))
+      .join('|'),
+    'gi'
+  ),
+}));
 
 export function tokenizeFinancialHighlights(text) {
   if (!text) return [];
@@ -21,24 +36,41 @@ export function tokenizeFinancialHighlights(text) {
       text: match[0],
       kind: 'financial',
     })),
-    ...Array.from(source.matchAll(INDUSTRY_KEYWORD_PATTERN), (match) => ({
-      index: match.index ?? 0,
-      text: match[0],
-      kind: 'keyword',
-    })),
-  ].sort((a, b) => a.index - b.index || b.text.length - a.text.length);
+    ...INVESTMENT_KEYWORD_GROUPS.flatMap(({ kind, pattern }) => (
+      Array.from(source.matchAll(pattern), (match) => ({
+        index: match.index ?? 0,
+        text: match[0],
+        kind,
+      }))
+    )),
+  ].sort((a, b) => (
+    a.index - b.index
+    || Number(a.kind === 'financial') - Number(b.kind === 'financial')
+    || b.text.length - a.text.length
+  ));
 
   const tokens = [];
   let cursor = 0;
 
   for (const match of matches) {
     const index = match.index;
-    if (index < cursor) continue;
+    const end = index + match.text.length;
+    if (index < cursor) {
+      if (match.kind === 'financial' && end > cursor) {
+        tokens.push({
+          text: match.text.slice(cursor - index),
+          highlighted: true,
+          kind: 'financial',
+        });
+        cursor = end;
+      }
+      continue;
+    }
     if (index > cursor) {
       tokens.push({ text: source.slice(cursor, index), highlighted: false, kind: 'text' });
     }
     tokens.push({ text: match.text, highlighted: true, kind: match.kind });
-    cursor = index + match.text.length;
+    cursor = end;
   }
 
   if (cursor < source.length) {

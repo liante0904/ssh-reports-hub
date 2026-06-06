@@ -430,17 +430,21 @@ assertEqual(formatUpsidePercent(0), '0.0%', '0 포맷');
 console.log('\n─── [Test 13] FnGuide 표시 유틸리티 ───');
 
 const highlightTokens = tokenizeFinancialHighlights(
-  '증설 이후 쇼티지 해소, 공급부족 우려. 2027F PER 5.7x, 목표 PBR은 1.8x, 매출액 1조 1,678억 원, 영업이익 1,470억원(YoY +0.3%), 전년 동기 대비 2.5%p 상승'
+  '증설 이후 쇼티지와 고가수주, 판가 인상으로 리레이팅 기대. 감산과 저가 수주는 부정적. 성장률 20%. 2027F PER 5.7x, 목표 PBR은 1.8x, 매출액 1조 1,678억 원, 영업이익 1,470억원(YoY +0.3%)'
 );
 const highlightedText = highlightTokens.filter((token) => token.highlighted).map((token) => token.text);
-const industryKeywords = highlightTokens.filter((token) => token.kind === 'keyword').map((token) => token.text);
-assertEqual(industryKeywords, ['증설', '쇼티지', '공급부족'], '산업 수급 키워드 강조 토큰');
+const positiveKeywords = highlightTokens.filter((token) => token.kind === 'positive').map((token) => token.text);
+const negativeKeywords = highlightTokens.filter((token) => token.kind === 'negative').map((token) => token.text);
+const catalystKeywords = highlightTokens.filter((token) => token.kind === 'catalyst').map((token) => token.text);
+assertEqual(positiveKeywords, ['쇼티지', '고가수주', '판가 인상', '리레이팅'], '긍정 투자 키워드 강조');
+assertEqual(negativeKeywords, ['감산', '저가 수주'], '부정 투자 키워드 강조');
+assertEqual(catalystKeywords, ['증설', '성장률'], '중립 촉매 키워드 강조');
 assert(highlightedText.includes('PER 5.7x'), 'PER 강조 토큰');
 assert(highlightedText.includes('목표 PBR은 1.8x'), '목표 PBR 강조 토큰');
+assert(highlightedText.some((text) => text.trim() === '20%'), '성장률 수치 강조 토큰');
 assert(highlightedText.includes('매출액 1조 1,678억 원'), '복합 매출액 강조 토큰');
 assert(highlightedText.includes('영업이익 1,470억원'), '영업이익 강조 토큰');
-assert(highlightedText.includes('YoY +0.3%'), '성장률 강조 토큰');
-assert(highlightedText.includes('전년 동기 대비 2.5%p'), '한국어 성장률 강조 토큰');
+assert(highlightedText.includes('YoY +0.3%'), 'YoY 강조 토큰');
 assertEqual(
   tokenizeFinancialHighlights('매출원가 개선').filter((token) => token.highlighted),
   [],

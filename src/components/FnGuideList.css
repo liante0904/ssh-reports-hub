@@ -599,14 +599,27 @@ html[data-theme='dark'] .card-author-badge {
   padding: 0 2px;
 }
 
-.industry-keyword-highlight {
+.investment-keyword-highlight {
   display: inline;
   border-radius: 3px;
-  background: color-mix(in srgb, #d94a4a 12%, transparent);
-  color: color-mix(in srgb, #d94a4a 82%, var(--text-color));
   font-size: 1.1em;
   font-weight: 900;
   padding: 0 2px;
+}
+
+.investment-keyword-highlight.positive {
+  background: color-mix(in srgb, #d94a4a 12%, transparent);
+  color: color-mix(in srgb, #d94a4a 82%, var(--text-color));
+}
+
+.investment-keyword-highlight.negative {
+  background: color-mix(in srgb, #2777c7 12%, transparent);
+  color: color-mix(in srgb, #2777c7 84%, var(--text-color));
+}
+
+.investment-keyword-highlight.catalyst {
+  background: color-mix(in srgb, #9a6a00 12%, transparent);
+  color: color-mix(in srgb, #8a5b00 86%, var(--text-color));
 }
 
 .toggle-expand-btn {
