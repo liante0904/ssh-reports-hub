@@ -2,12 +2,15 @@
 
 ## 관리 위치
 
-- 키워드 원본: `src/constants/fnguideKeywords.js`
+- 운영 마스터: `public.tbm_fnguide_keyword_dictionary`
+- 재현 가능한 DDL/seed: `docs/sql/tbm_fnguide_keyword_dictionary.sql`
+- 프론트 런타임 스냅샷: `src/constants/fnguideKeywords.js`
 - 토큰화 로직: `src/utils/fnguide.js`
 - 화면 스타일: `src/components/FnGuideList.css`
 - 회귀 테스트: `test/unit/utils.test.js`
 
-키워드는 정규식에 직접 추가하지 않고 `FNGUIDE_KEYWORD_GROUPS`의 배열에 추가한다.
+현재 프론트는 API 연동 전이므로 `FNGUIDE_KEYWORD_GROUPS`를 런타임 스냅샷으로 사용한다.
+키워드를 변경할 때는 운영 마스터와 스냅샷을 함께 갱신한다.
 띄어쓰기가 있는 표현은 붙여 쓴 문장도 자동으로 인식한다.
 
 ## 분류
@@ -20,20 +23,23 @@
 
 ## 운영 DB 기준
 
-2026년 6월 6일 운영 PostgreSQL의 `tbl_fnguide_report_summaries` 9,732건을 전수 확인했다.
+2026년 6월 6일 운영 PostgreSQL에 `tbm_fnguide_keyword_dictionary`를 생성하고
+`tbl_fnguide_report_summaries` 9,732건을 정규화해 전수 집계했다.
 
 주요 등장 횟수:
 
-- 수주 5,477
+- 수주 5,486
 - 성장률 1,043
 - 증설 1,264
 - 가동률 1,100
 - 리레이팅 541
-- 판가 인상 288
+- 판가 인상 300
 - 증산 67
-- 감산 43
+- 감산 44
 - 저가 수주 10
 - 고가 수주 4
+
+공백 제거 후 집계하므로 붙여 쓴 표현도 같은 키워드로 계산한다.
 
 ## 추가 기준
 
