@@ -339,11 +339,30 @@
   transition: var(--transition-smooth);
   position: relative;
   overflow: hidden;
+  scroll-margin-top: calc(88px + env(safe-area-inset-top, 0px));
 }
 
 .fnguide-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 30px color-mix(in srgb, var(--card-shadow-color) 45%, transparent);
+}
+
+.fnguide-card.selected-summary {
+  border-color: color-mix(in srgb, var(--primary-color) 72%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 12%, transparent), var(--glass-shadow);
+}
+
+.selected-summary-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin: -4px 0 12px;
+  border-radius: var(--radius-full);
+  background: var(--primary-color);
+  color: #fff;
+  padding: 0 9px;
+  font-size: 0.68rem;
+  font-weight: 900;
 }
 
 /* Card Top Meta Badges */

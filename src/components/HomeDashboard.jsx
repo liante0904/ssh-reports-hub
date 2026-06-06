@@ -174,7 +174,7 @@ function HomeDashboard() {
                         key={item.id}
                         type="button"
                         className="home-preview-row"
-                        onClick={() => navigate(section.path)}
+                        onClick={() => navigate(`${section.path}?summary_id=${item.id}`)}
                       >
                         <span className="home-preview-main">
                           <span className="home-preview-title">{item.title}</span>

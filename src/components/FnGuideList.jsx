@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CONFIG } from '../constants/config';
 import { REPORT_SECTIONS } from '../constants/reportSections';
 import { request } from '../utils/api';
@@ -16,6 +17,9 @@ function HighlightedSummary({ text }) {
 }
 
 function FnGuideList() {
+  const [searchParams] = useSearchParams();
+  const selectedSummaryId = searchParams.get('summary_id');
+  const scrolledSummaryIdRef = useRef(null);
   const [summaries, setSummaries] = useState([]);
   const [dates, setDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
@@ -126,6 +130,7 @@ function FnGuideList() {
   const groupedSummaries = groupFnGuideSummaries(summaries);
 
   const renderSummaryCard = (item, { showCompany = true } = {}) => {
+    const isSelected = String(item.summary_id) === selectedSummaryId;
     const isExpanded = expandedItems[item.summary_id];
     const upsidePercent = calculateUpsidePercent(item.target_price, item.prev_close);
     const hasTargetPrice = Boolean(item.target_price && item.target_price !== '0');
@@ -136,7 +141,12 @@ function FnGuideList() {
       : (item.summary_text ? `${item.summary_text.slice(0, textLimit)}${needsTruncate ? '...' : ''}` : '');
 
     return (
-      <article className="fnguide-card" key={item.summary_id}>
+      <article
+        id={`fnguide-summary-${item.summary_id}`}
+        className={`fnguide-card ${isSelected ? 'selected-summary' : ''}`}
+        key={item.summary_id}
+      >
+        {isSelected && <div className="selected-summary-label">선택한 레포트</div>}
         <div className="card-top-meta">
           <span className="card-provider-badge">{item.provider || '증권사 미상'}</span>
           {item.author && <span className="card-author-badge">{item.author}</span>}
@@ -207,13 +217,33 @@ function FnGuideList() {
               rel="noopener noreferrer"
               className="pdf-action-btn"
             >
-              원본 보기
+              FnGuide 원문 보기
             </a>
           </div>
         )}
       </article>
     );
   };
+
+  useEffect(() => {
+    if (!selectedSummaryId || scrolledSummaryIdRef.current === selectedSummaryId) return;
+
+    const selectedItem = summaries.find((item) => String(item.summary_id) === selectedSummaryId);
+    if (!selectedItem) return;
+
+    const groupKey = `${selectedItem.report_date}-${selectedItem.company_code || selectedItem.company_name || `summary-${selectedItem.summary_id}`}`;
+    setCollapsedCompanyGroups((prev) => ({ ...prev, [groupKey]: false }));
+    setExpandedItems((prev) => ({ ...prev, [selectedItem.summary_id]: true }));
+    scrolledSummaryIdRef.current = selectedSummaryId;
+
+    const timeoutId = window.setTimeout(() => {
+      document
+        .getElementById(`fnguide-summary-${selectedSummaryId}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [selectedSummaryId, summaries]);
 
   return (
     <div className="fnguide-container">
