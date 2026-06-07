@@ -154,7 +154,7 @@ function SearchPageNew() {
     setIsShareOpen(true);
   }, []);
 
-  const handleTriggerSummary = useCallback(async (reportId) => {
+  const handleTriggerSummary = useCallback(async (reportId, engine = 'deepseek') => {
     const baseUrl = CONFIG.API.BASE_URL;
     const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     if (!token) return;
@@ -163,7 +163,7 @@ function SearchPageNew() {
     setSummaryRequestedIds(prev => new Set(prev).add(reportId));
 
     try {
-      const result = await request(`${baseUrl}/admin/reports/${reportId}/summarize`, {
+      const result = await request(`${baseUrl}/admin/reports/${reportId}/summarize?engine=${engine}`, {
         method: 'POST',
         skipAuth: false,
         timeout: 180000,

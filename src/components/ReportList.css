@@ -332,6 +332,33 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  gap: 5px;
+}
+
+/* 딥시크 스타일 요약 버튼 */
+.admin-summary-btn.deepseek-btn {
+  border-color: #0064ff;
+  color: #0064ff;
+}
+
+.admin-summary-btn.deepseek-btn:hover,
+.admin-summary-btn.deepseek-btn.active {
+  background: #0064ff;
+  color: #fff;
+  opacity: 1;
+}
+
+/* 안티그래비티 스타일 요약 버튼 */
+.admin-summary-btn.antigravity-btn {
+  border-color: #7f00ff;
+  color: #7f00ff;
+}
+
+.admin-summary-btn.antigravity-btn:hover,
+.admin-summary-btn.antigravity-btn.active {
+  background: #7f00ff;
+  color: #fff;
+  opacity: 1;
 }
 
 .admin-summary-confirm-btns {

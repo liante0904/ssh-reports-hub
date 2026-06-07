@@ -20,7 +20,7 @@ const ReportItem = ({
 }) => {
   const { id, title, writer, gemini_summary, fnguide_summary, firm, pdf_url, tags, stock_names, sector } = report;
   const { setViewerReport } = useReport();
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(null);
   const isSummaryRequested = summaryRequestedIds?.has(id);
   const isSummaryCompleted = summaryCompletedIds?.has(id);
   
@@ -117,18 +117,29 @@ const ReportItem = ({
               {isAdmin && !hasSummary && !isSummaryRequested && !isSummaryCompleted && (
                 <span className="admin-summary-confirm">
                   <button 
-                    className="admin-summary-btn"
-                    onClick={() => setShowConfirm(true)}
+                    className={`admin-summary-btn deepseek-btn ${showConfirm === 'deepseek' ? 'active' : ''}`}
+                    onClick={() => setShowConfirm(showConfirm === 'deepseek' ? null : 'deepseek')}
                     title="DeepSeek AI 요약 생성"
                   >
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                      <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86l-3 3.87L9 13.14 6 17h12l-3.86-5.14z"/>
+                      {/* DeepSeek - 미래지향적 인공지능 정보망 기하학 심볼 */}
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                    </svg>
+                  </button>
+                  <button 
+                    className={`admin-summary-btn antigravity-btn ${showConfirm === 'ag' ? 'active' : ''}`}
+                    onClick={() => setShowConfirm(showConfirm === 'ag' ? null : 'ag')}
+                    title="Antigravity AI 요약 생성"
+                  >
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                      {/* Antigravity - 반중력/우주선 기하학적 상승 포탈 */}
+                      <path d="M12 3L2 21h20L12 3zm0 4.5L18.5 19H5.5L12 7.5zM12 11l-3 5h6l-3-5z"/>
                     </svg>
                   </button>
                   {showConfirm && (
                     <span className="admin-summary-confirm-btns">
-                      <button className="confirm-yes" onClick={() => { setShowConfirm(false); onTriggerSummary(id); }}>✓</button>
-                      <button className="confirm-no" onClick={() => setShowConfirm(false)}>✗</button>
+                      <button className="confirm-yes" onClick={() => { const engine = showConfirm; setShowConfirm(null); onTriggerSummary(id, engine); }}>✓</button>
+                      <button className="confirm-no" onClick={() => setShowConfirm(null)}>✗</button>
                     </span>
                   )}
                 </span>

@@ -241,7 +241,7 @@ function ReportList({ onWriterClick }) {
     setIsShareOpen(true);
   };
 
-  const handleTriggerSummary = async (reportId) => {
+  const handleTriggerSummary = async (reportId, engine = 'deepseek') => {
     const baseUrl = CONFIG.API.BASE_URL;
     const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     if (!token) return;
@@ -251,7 +251,7 @@ function ReportList({ onWriterClick }) {
     setSummaryRequestedIds(prev => new Set(prev).add(reportId));
 
     try {
-      const result = await request(`${baseUrl}/admin/reports/${reportId}/summarize`, {
+      const result = await request(`${baseUrl}/admin/reports/${reportId}/summarize?engine=${engine}`, {
         method: 'POST',
         skipAuth: false,
         timeout: 180000,
