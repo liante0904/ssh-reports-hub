@@ -310,18 +310,43 @@ function FnGuideList() {
           <p className="upside-data-note">직전 종가 데이터가 없어 상승여력을 계산하지 못했습니다.</p>
         )}
 
-        {(item.pdf_url || item.article_url) && (
-          <div className="card-actions">
+        <div className="card-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '14px' }}>
+          {(item.pdf_url || item.article_url) && (
             <a
               href={item.pdf_url || item.article_url}
               target="_blank"
               rel="noopener noreferrer"
               className="pdf-action-btn"
+              style={{ padding: '8px 14px', fontSize: '13px', borderRadius: '8px', backgroundColor: 'var(--card-action-bg-fnguide, rgba(46, 125, 50, 0.1))', color: '#2e7d32', border: '1px solid rgba(46, 125, 50, 0.2)', fontWeight: '500', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', transition: 'all 0.2s ease' }}
             >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style={{ marginRight: '6px' }}>
+                <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41 9.83-9.83V9h2V3h-7z"/>
+              </svg>
               FnGuide 원문 보기
             </a>
-          </div>
-        )}
+          )}
+          
+          {item.sec_reports && item.sec_reports.length > 0 && item.sec_reports.map((secReport) => {
+            const reportUrl = secReport.pdf_url || secReport.download_url || secReport.telegram_url;
+            if (!reportUrl) return null;
+            return (
+              <a
+                key={secReport.report_id}
+                href={reportUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pdf-action-btn sec-pdf-btn"
+                style={{ padding: '8px 14px', fontSize: '13px', borderRadius: '8px', backgroundColor: 'rgba(21, 101, 192, 0.1)', color: '#1565c0', border: '1px solid rgba(21, 101, 192, 0.2)', fontWeight: '500', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', transition: 'all 0.2s ease' }}
+                title={`${secReport.firm_nm}: ${secReport.article_title}`}
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style={{ marginRight: '6px' }}>
+                  <path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 10h1V8.5H9V10zm5.5 2H15V8.5h-.5V12zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z"/>
+                </svg>
+                {secReport.firm_nm} 원본 PDF 보기
+              </a>
+            );
+          })}
+        </div>
       </article>
     );
   };

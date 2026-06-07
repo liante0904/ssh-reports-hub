@@ -18,7 +18,7 @@ const ReportItem = ({
   summaryRequestedIds,
   summaryCompletedIds
 }) => {
-  const { id, title, writer, gemini_summary, firm, pdf_url, tags, stock_names, sector } = report;
+  const { id, title, writer, gemini_summary, fnguide_summary, firm, pdf_url, tags, stock_names, sector } = report;
   const { setViewerReport } = useReport();
   const [showConfirm, setShowConfirm] = useState(false);
   const isSummaryRequested = summaryRequestedIds?.has(id);
@@ -48,9 +48,11 @@ const ReportItem = ({
   };
   
   const hasSummary = gemini_summary && gemini_summary.trim() !== "" && gemini_summary.trim() !== " ";
+  const hasFnguideSummary = fnguide_summary && fnguide_summary.summary_text && fnguide_summary.summary_text.trim() !== "";
+  const hasAnySummary = hasSummary || hasFnguideSummary;
 
   return (
-    <div className={`report-container-item ${hasSummary ? 'has-summary' : ''}`} key={id}>
+    <div className={`report-container-item ${hasAnySummary ? 'has-summary' : ''}`} key={id}>
       <div className="report">
         <div className="report-content">
           <div className="report-header">
@@ -62,6 +64,11 @@ const ReportItem = ({
               {hasSummary && (
                 <span className="ai-badge" onClick={() => onToggleSummary(id)}>
                   AI 요약
+                </span>
+              )}
+              {hasFnguideSummary && (
+                <span className="ai-badge fnguide-badge-title" onClick={() => onToggleSummary(id)} style={{ backgroundColor: '#2e7d32', marginLeft: '6px' }}>
+                  FnGuide 요약
                 </span>
               )}
             </div>
@@ -85,12 +92,12 @@ const ReportItem = ({
               작성자: {writer} <span className="writer-search-icon">🔍</span>
             </p>
             <div className="report-actions">
-              {hasSummary && (
+              {hasAnySummary && (
                 <button 
                   className={`summary-toggle-btn ${isSummaryExpanded ? 'active' : ''}`}
                   onClick={() => onToggleSummary(id)}
                 >
-                  {isSummaryExpanded ? '요약 닫기' : 'AI 요약 보기'}
+                  {isSummaryExpanded ? '요약 닫기' : (hasSummary ? 'AI 요약 보기' : 'FnGuide 요약 보기')}
                   <svg className="chevron-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                     <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
                   </svg>
@@ -157,20 +164,72 @@ const ReportItem = ({
           </div>
         </div>
       </div>
-      {hasSummary && (
+      {hasAnySummary && (
         <div className={`summary-content ${isSummaryExpanded ? 'expanded' : 'collapsed'}`}>
-          <div className="summary-inner">
-            <div className="summary-title-row">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="var(--primary-color)" style={{marginRight: '6px'}}>
-                <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86l-3 3.87L9 13.14 6 17h12l-3.86-5.14z"/>
-              </svg>
-              AI 핵심 요약
-            </div>
-            <div className="summary-text">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {gemini_summary}
-              </ReactMarkdown>
-            </div>
+          <div className="summary-inner-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '14px', padding: '12px' }}>
+            {hasSummary && (
+              <div className="summary-inner" style={{ width: '100%' }}>
+                <div className="summary-title-row">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="var(--primary-color)" style={{marginRight: '6px'}}>
+                    <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86l-3 3.87L9 13.14 6 17h12l-3.86-5.14z"/>
+                  </svg>
+                  AI 핵심 요약
+                </div>
+                <div className="summary-text">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {gemini_summary}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            )}
+            
+            {hasFnguideSummary && (
+              <div className="summary-inner fnguide-summary-section" style={{ 
+                borderTop: hasSummary ? '1px dashed var(--border-color, #e0e0e0)' : 'none', 
+                paddingTop: hasSummary ? '14px' : '0',
+                width: '100%'
+              }}>
+                <div className="summary-title-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="#2e7d32" style={{marginRight: '6px'}}>
+                      <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                    </svg>
+                    <span style={{ fontWeight: 'bold' }}>FnGuide 요약</span>
+                  </div>
+                  <div className="fnguide-meta-badges" style={{ display: 'flex', gap: '6px' }}>
+                    {fnguide_summary.opinion && (
+                      <span className={`fnguide-badge opinion-badge`} style={{
+                        fontSize: '11px',
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        fontWeight: 'bold',
+                        backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                        color: '#2e7d32',
+                        border: '1px solid rgba(46, 125, 50, 0.3)'
+                      }}>
+                        의견: {fnguide_summary.opinion}
+                      </span>
+                    )}
+                    {fnguide_summary.target_price && fnguide_summary.target_price !== '0' && fnguide_summary.target_price !== '-' && (
+                      <span className="fnguide-badge target-price-badge" style={{
+                        fontSize: '11px',
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        fontWeight: 'bold',
+                        backgroundColor: 'rgba(123, 31, 162, 0.1)',
+                        color: '#7b1fa2',
+                        border: '1px solid rgba(123, 31, 162, 0.3)'
+                      }}>
+                        목표가: {fnguide_summary.target_price}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="summary-text" style={{ marginTop: '8px', color: 'var(--text-color-secondary, #666)', fontSize: '13.5px', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                  {fnguide_summary.summary_text}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

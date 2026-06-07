@@ -14,14 +14,20 @@ export function useReportFetch(searchQuery, pathname, outlookYear, sortBy) {
   const isLoadingRef = useRef(false);
   const hasMoreRef = useRef(true);
 
+  // searchQuery 객체의 주소값이 변경되어도 내용이 같으면 재실행을 방지하기 위해 프리미티브 값으로 분해
+  const query = searchQuery?.query;
+  const category = searchQuery?.category;
+  const companyOrder = searchQuery?.companyOrder;
+  const board = searchQuery?.board;
+
   const buildApiUrl = useCallback(() => buildReportFetchUrl({
     pathname,
     offset,
     sortBy,
-    searchQuery,
+    searchQuery: { query, category, companyOrder, board },
     outlookYear,
     baseUrl: CONFIG.API.REPORT_API_URL,
-  }), [offset, searchQuery, pathname, outlookYear, sortBy]);
+  }), [offset, pathname, outlookYear, sortBy, query, category, companyOrder, board]);
 
   const mergeReports = useCallback((prev, newItems) => {
     const updated = { ...prev };
@@ -82,7 +88,7 @@ export function useReportFetch(searchQuery, pathname, outlookYear, sortBy) {
     setOffset(0);
     setHasMore(true);
     hasMoreRef.current = true;
-  }, [searchQuery, pathname, outlookYear, sortBy]);
+  }, [query, category, companyOrder, board, pathname, outlookYear, sortBy]);
 
   useEffect(() => {
     if (offset === 0) {

@@ -29,6 +29,7 @@ export function normalizeReportItem(item) {
     firm_id: item.firm_id,
     sec_firm_order: item.sec_firm_order,
     gemini_summary: item.gemini_summary,
+    fnguide_summary: item.fnguide_summary || null,
     tags: item.tags || [],
     stock_names: item.stock_names || [],
     sector: item.sector || '',
