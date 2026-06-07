@@ -277,6 +277,18 @@ async function runTests() {
     assert(metricRes.status === 200 || metricRes.status === 401,
       '/admin/metrics 응답이 200 또는 401', `HTTP ${metricRes.status}`);
   }
+  {
+    const dsSummarizeRes = await assertHttpOk(`${BASE_URL}/admin/reports/1/summarize?engine=deepseek`, 'POST /admin/reports/{id}/summarize?engine=deepseek (미인증)',
+      { method: 'POST' });
+    assert([401, 403, 404].includes(dsSummarizeRes.status),
+      '/admin/reports/{id}/summarize?engine=deepseek 미인증 401/403/404 통제 검증', `HTTP ${dsSummarizeRes.status}`);
+  }
+  {
+    const agSummarizeRes = await assertHttpOk(`${BASE_URL}/admin/reports/1/summarize?engine=ag`, 'POST /admin/reports/{id}/summarize?engine=ag (미인증)',
+      { method: 'POST' });
+    assert([401, 403, 404].includes(agSummarizeRes.status),
+      '/admin/reports/{id}/summarize?engine=ag 미인증 401/403/404 통제 검증', `HTTP ${agSummarizeRes.status}`);
+  }
 
   // ────────────────────────────────────────────
   // Section 3: 응답 시간 성능
