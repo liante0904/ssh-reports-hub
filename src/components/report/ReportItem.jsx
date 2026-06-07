@@ -72,9 +72,12 @@ const ReportItem = ({
               {stock_names && stock_names.slice(0, 3).map((s, i) => (
                 <span key={`stock-${i}`} className="tag tag-stock">{s}</span>
               ))}
-              {tags && tags.slice(0, 5).map((t, i) => (
-                <span key={`tag-${i}`} className="tag tag-keyword">{t}</span>
-              ))}
+              {tags && tags
+                .filter(t => t !== sector && !stock_names?.includes(t))
+                .slice(0, 5)
+                .map((t, i) => (
+                  <span key={`tag-${i}`} className="tag tag-keyword">{t}</span>
+                ))}
             </div>
           )}
           <div className="report-footer">
