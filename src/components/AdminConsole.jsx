@@ -458,53 +458,18 @@ function AdminConsole() {
       </div>
 
       {/* ===== LLM Summary Visibility Settings (Premium Glassmorphic Panel) ===== */}
-      <div className="section-card llm-visibility-settings" style={{
-        background: 'rgba(255, 255, 255, 0.03)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)',
-        borderRadius: '16px',
-        padding: '20px',
-        marginBottom: '20px'
-      }}>
-        <div className="section-title" style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          fontSize: '1.2rem',
-          fontWeight: '700',
-          color: '#fff',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          paddingBottom: '12px',
-          marginBottom: '16px'
-        }}>
+      <div className="section-card llm-visibility-settings">
+        <div className="section-title">
           🧠 LLM 핵심 요약 노출 설정
-          <span className="badge" style={{
-            background: 'linear-gradient(135deg, #a777e3, #6e8efb)',
-            color: '#fff',
-            fontSize: '11px',
-            padding: '2px 8px',
-            borderRadius: '12px'
-          }}>
-            Global Policy
-          </span>
+          <span className="badge">Global Policy</span>
         </div>
         
-        <p style={{
-          fontSize: '0.88rem',
-          color: '#aaa',
-          lineHeight: '1.5',
-          marginBottom: '20px'
-        }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9em', marginBottom: '16px' }}>
           증권사 리포트 카드 하단에 노출되는 <strong>AI 요약(Gemini/DeepSeek 핵심 요약)</strong>의 공개 대상을 설정합니다. 
           이 설정은 전역적으로 적용되며 즉각적으로 화면에 반영됩니다.
         </p>
 
-        <div style={{
-          display: 'flex',
-          gap: '16px',
-          flexWrap: 'wrap'
-        }}>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
           <label style={{
             flex: '1',
             minWidth: '240px',
@@ -512,11 +477,12 @@ function AdminConsole() {
             alignItems: 'center',
             gap: '12px',
             padding: '16px',
-            background: llmVisibility === 'admin' ? 'rgba(110, 142, 251, 0.15)' : 'rgba(255, 255, 255, 0.02)',
-            border: llmVisibility === 'admin' ? '1px solid rgba(110, 142, 251, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
+            background: llmVisibility === 'admin' ? 'var(--secondary-background-color)' : 'var(--bg-muted)',
+            border: llmVisibility === 'admin' ? '1px solid var(--primary-color)' : '1px solid var(--glass-border)',
+            boxShadow: llmVisibility === 'admin' ? '0 0 0 1px var(--primary-color)' : 'none',
             borderRadius: '12px',
             cursor: 'pointer',
-            transition: 'all 0.3s ease'
+            transition: 'all 0.2s ease'
           }}>
             <input
               type="radio"
@@ -526,7 +492,7 @@ function AdminConsole() {
               onChange={() => handleLlmVisibilityChange('admin')}
               disabled={updatingLlm}
               style={{
-                accentColor: '#6e8efb',
+                accentColor: 'var(--primary-color)',
                 width: '18px',
                 height: '18px',
                 cursor: 'pointer'
@@ -534,7 +500,7 @@ function AdminConsole() {
             />
             <div>
               <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.95rem' }}>관리자만 보기 (Admin Only)</div>
-              <div style={{ fontSize: '0.78rem', color: '#888', marginTop: '4px' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                 오직 텔레그램 관리자(Admin) 권한을 가진 계정에게만 AI 요약 영역이 노출됩니다. (보안 극대화)
               </div>
             </div>
@@ -547,11 +513,12 @@ function AdminConsole() {
             alignItems: 'center',
             gap: '12px',
             padding: '16px',
-            background: llmVisibility === 'telegram' ? 'rgba(167, 119, 227, 0.15)' : 'rgba(255, 255, 255, 0.02)',
-            border: llmVisibility === 'telegram' ? '1px solid rgba(167, 119, 227, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
+            background: llmVisibility === 'telegram' ? 'var(--secondary-background-color)' : 'var(--bg-muted)',
+            border: llmVisibility === 'telegram' ? '1px solid var(--primary-color)' : '1px solid var(--glass-border)',
+            boxShadow: llmVisibility === 'telegram' ? '0 0 0 1px var(--primary-color)' : 'none',
             borderRadius: '12px',
             cursor: 'pointer',
-            transition: 'all 0.3s ease'
+            transition: 'all 0.2s ease'
           }}>
             <input
               type="radio"
@@ -561,7 +528,7 @@ function AdminConsole() {
               onChange={() => handleLlmVisibilityChange('telegram')}
               disabled={updatingLlm}
               style={{
-                accentColor: '#a777e3',
+                accentColor: 'var(--primary-color)',
                 width: '18px',
                 height: '18px',
                 cursor: 'pointer'
