@@ -42,12 +42,61 @@ jest.mock('../../src/hooks/useReportFetch', () => ({
   })
 }));
 
-// MenuSummary 컴포넌트 모킹
+// constants/config 모킹 (import.meta.env 파싱 SyntaxError 원천 회피)
+jest.mock('../../src/constants/config', () => ({
+  CONFIG: {
+    API: {
+      BASE_URL: 'https://example.com',
+      COMPANIES_URL: 'https://example.com/companies',
+      BOARDS_URL: 'https://example.com/boards'
+    },
+    STORAGE_KEYS: {
+      AUTH_TOKEN: 'auth_token',
+      TELEGRAM_USER: 'telegram_user',
+      THEME: 'theme'
+    }
+  }
+}));
+
+// constants/reportSections 모킹
+jest.mock('../../src/constants/reportSections', () => ({
+  getReportSectionByPath: () => ({
+    title: '최신 리포트',
+    description: '최신 증권사 분석 리포트입니다.'
+  })
+}));
+
+// utils/reportLinks 및 reportNormalizer 모킹
+jest.mock('../../src/utils/reportLinks', () => ({
+  isDsReport: () => false,
+  prefetchPdf: jest.fn()
+}));
+
+jest.mock('../../src/utils/reportNormalizer', () => ({
+  normalizeReportItem: (item) => item
+}));
+
+// 하위 컴포넌트 전체 모킹 (CSS 파싱 에러 방지를 위한 격리 처리)
 jest.mock('../../src/components/MenuSummary', () => {
   return function DummyMenuSummary() {
     return <div data-testid="menu-summary" />;
   };
 });
+
+jest.mock('../../src/components/ShareMenu', () => {
+  return function DummyShareMenu() {
+    return <div data-testid="share-menu" />;
+  };
+});
+
+jest.mock('../../src/components/report/ReportGroup', () => {
+  return function DummyReportGroup() {
+    return <div data-testid="report-group" />;
+  };
+});
+
+// CSS 파일 강제 모킹 (혹시 모를 CSS 로딩 에러 원천 차단)
+jest.mock('../../src/components/ReportList.css', () => ({}));
 
 // API request 모킹
 jest.mock('../../src/utils/api', () => ({
