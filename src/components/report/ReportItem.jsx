@@ -21,8 +21,19 @@ const ReportItem = ({
   const { id, title, writer, gemini_summary, fnguide_summary, firm, pdf_url, tags, stock_names, sector } = report;
   const { setViewerReport } = useReport();
   const [showConfirm, setShowConfirm] = useState(null);
+  /* 기존 주석 유지: 요약 요청 및 완료 여부 파악 */
   const isSummaryRequested = summaryRequestedIds?.has(id);
   const isSummaryCompleted = summaryCompletedIds?.has(id);
+  
+  /* 글래스모피즘 토스트 전용 컴포넌트 상태 정의 */
+  const [toast, setToast] = useState({ visible: false, message: '' });
+  
+  const showToast = (message) => {
+    setToast({ visible: true, message });
+    setTimeout(() => {
+      setToast({ visible: false, message: '' });
+    }, 3000);
+  };
   
   const finalLink = getDirectUrl(report);
 
@@ -160,12 +171,12 @@ const ReportItem = ({
                   <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                 </svg>
               </button>
-              {isAdmin && !hasSummary && !isSummaryRequested && !isSummaryCompleted && (
+              {isAdmin && !isSummaryRequested && !isSummaryCompleted && (
                 <span className="admin-summary-confirm">
                   <button 
                     className={`admin-summary-btn deepseek-btn ${showConfirm === 'deepseek' ? 'active' : ''}`}
                     onClick={() => setShowConfirm(showConfirm === 'deepseek' ? null : 'deepseek')}
-                    title="DeepSeek AI 요약 생성"
+                    title={hasSummary ? "DeepSeek AI 요약 재처리 요청" : "DeepSeek AI 요약 생성"}
                   >
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                       {/* DeepSeek - 미래지향적 인공지능 정보망 기하학 심볼 */}
@@ -175,7 +186,7 @@ const ReportItem = ({
                   <button 
                     className={`admin-summary-btn antigravity-btn ${showConfirm === 'ag' ? 'active' : ''}`}
                     onClick={() => setShowConfirm(showConfirm === 'ag' ? null : 'ag')}
-                    title="Antigravity AI 요약 생성"
+                    title={hasSummary ? "Antigravity AI 요약 재처리 요청" : "Antigravity AI 요약 생성"}
                   >
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                       {/* Antigravity - 반중력/우주선 기하학적 상승 포탈 */}
@@ -183,9 +194,44 @@ const ReportItem = ({
                     </svg>
                   </button>
                   {showConfirm && (
-                    <span className="admin-summary-confirm-btns">
-                      <button className="confirm-yes" onClick={() => { const engine = showConfirm; setShowConfirm(null); onTriggerSummary(id, engine); }}>✓</button>
-                      <button className="confirm-no" onClick={() => setShowConfirm(null)}>✗</button>
+                    <span className="admin-summary-confirm-btns-wrapper" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      {hasSummary && (
+                        <span className="re-summarize-tooltip" style={{
+                          position: 'absolute',
+                          bottom: '100%',
+                          left: '50%',
+                          transform: 'translateX(-50%) translateY(-6px)',
+                          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                          color: '#fff',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          whiteSpace: 'nowrap',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                          zIndex: 10,
+                          fontWeight: 'normal'
+                        }}>
+                          ⚠️ 이미 요약이 존재합니다. 재처리하시겠습니까?
+                        </span>
+                      )}
+                      <span className="admin-summary-confirm-btns" style={{ display: 'inline-flex', gap: '4px' }}>
+                        <button 
+                          className="confirm-yes" 
+                          onClick={() => { 
+                            const engine = showConfirm; 
+                            setShowConfirm(null); 
+                            if (hasSummary) {
+                              showToast("기존 요약이 존재하여 AI 재처리 요약을 요청합니다...");
+                            } else {
+                              showToast("AI 요약 요청을 시작합니다...");
+                            }
+                            onTriggerSummary(id, engine, hasSummary); 
+                          }}
+                        >
+                          ✓
+                        </button>
+                        <button className="confirm-no" onClick={() => setShowConfirm(null)}>✗</button>
+                      </span>
                     </span>
                   )}
                 </span>
@@ -223,9 +269,9 @@ const ReportItem = ({
       </div>
       {hasAnySummary && (
         <div className={`summary-content ${isSummaryExpanded ? 'expanded' : 'collapsed'}`}>
-          <div className="summary-inner-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '14px', padding: '12px' }}>
+          <div className="summary-inner-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '14px', padding: '12px', boxSizing: 'border-box', width: '100%', maxWidth: '100%' }}>
             {hasSummary && (
-              <div className="summary-inner" style={{ width: 'auto' }}>
+              <div className="summary-inner" style={{ width: '100%', boxSizing: 'border-box' }}>
                 <div className="summary-title-row">
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="var(--primary-color)" style={{marginRight: '6px'}}>
                     <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86l-3 3.87L9 13.14 6 17h12l-3.86-5.14z"/>
@@ -244,7 +290,8 @@ const ReportItem = ({
               <div className="summary-inner fnguide-summary-section" style={{ 
                 borderTop: hasSummary ? '1px dashed var(--border-color, #e0e0e0)' : 'none', 
                 paddingTop: hasSummary ? '14px' : '0',
-                width: 'auto'
+                width: '100%',
+                boxSizing: 'border-box'
               }}>
                 <div className="summary-title-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -288,6 +335,12 @@ const ReportItem = ({
               </div>
             )}
           </div>
+        </div>
+      )}
+      {/* 글래스모피즘 토스트 UI 렌더링 */}
+      {toast.visible && (
+        <div className={`toast-container ${toast.visible ? 'visible' : ''}`} style={{ transition: 'all 0.3s ease' }}>
+          {toast.message}
         </div>
       )}
     </div>

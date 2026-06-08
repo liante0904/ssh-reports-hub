@@ -241,17 +241,32 @@ function ReportList({ onWriterClick }) {
     setIsShareOpen(true);
   };
 
-  const handleTriggerSummary = async (reportId, engine = 'deepseek') => {
+  const handleTriggerSummary = async (reportId, engine = 'deepseek', force = false) => {
     const baseUrl = CONFIG.API.BASE_URL;
     const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     if (!token) return;
 
-    // 중복 요청 방지
-    if (summaryRequestedIds.has(reportId)) return;
+    /* 기존 주석 유지: 중복 요청 방지 (force=true일 때는 우회를 위해 상태 초기화) */
+    if (force) {
+      setSummaryCompletedIds(prev => {
+        const next = new Set(prev);
+        next.delete(reportId);
+        return next;
+      });
+      setSummaryRequestedIds(prev => {
+        const next = new Set(prev);
+        next.delete(reportId);
+        return next;
+      });
+    } else if (summaryRequestedIds.has(reportId)) {
+      return;
+    }
+    
     setSummaryRequestedIds(prev => new Set(prev).add(reportId));
 
     try {
-      const result = await request(`${baseUrl}/admin/reports/${reportId}/summarize?engine=${engine}`, {
+      const url = `${baseUrl}/admin/reports/${reportId}/summarize?engine=${engine}${force ? '&force=true' : ''}`;
+      const result = await request(url, {
         method: 'POST',
         skipAuth: false,
         timeout: 180000,
