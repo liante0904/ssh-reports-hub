@@ -4,6 +4,8 @@
   padding-bottom: calc(100px + env(safe-area-inset-bottom, 20px));
   color: var(--text-color);
   animation: searchPageFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  overflow-x: clip;
 }
 
 @keyframes searchPageFadeIn {
@@ -53,6 +55,7 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   transition: var(--transition-smooth);
+  box-sizing: border-box;
 }
 
 .filter-panel-card:hover {
@@ -69,6 +72,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
 }
 
 /* 텍스트 검색, 증권사 및 게시판 필터가 나란히 배열되도록 함 */
@@ -130,6 +134,7 @@
   height: 48px;
   position: relative;
   transition: var(--transition-smooth);
+  min-width: 0;
 }
 
 .text-search-fields:focus-within {
@@ -148,6 +153,8 @@
   height: 100%;
   cursor: pointer;
   outline: none;
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
 .search-text-input {
@@ -159,6 +166,7 @@
   flex: 1;
   height: 100%;
   outline: none;
+  min-width: 0;
 }
 
 .search-text-input::placeholder {
@@ -198,6 +206,16 @@
   font-weight: 700 !important;
   transition: var(--transition-smooth) !important;
   box-shadow: none !important;
+  width: 100%;
+  min-width: 0;
+  justify-content: space-between;
+}
+
+.search-page-new .company-grid-container,
+.search-page-new .board-grid-container {
+  display: block;
+  min-width: 0;
+  width: 100%;
 }
 
 .search-page-new .grid-trigger-btn:hover,
@@ -226,6 +244,12 @@
   align-items: center;
   gap: 8px;
   transition: var(--transition-smooth);
+  min-width: 0;
+}
+
+.chip-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .filter-chip-item:hover {
@@ -309,6 +333,59 @@
 
 .results-list-container {
   min-height: 300px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.search-page-new .infinite-scroll-component__outerdiv,
+.search-page-new .infinite-scroll-component,
+.search-page-new .date-group,
+.search-page-new .company-group-wrapper,
+.search-page-new .company-group,
+.search-page-new .report-wrapper,
+.search-page-new .report-container-item,
+.search-page-new .report,
+.search-page-new .report-content,
+.search-page-new .report-header,
+.search-page-new .report-title-container,
+.search-page-new .report-footer,
+.search-page-new .summary-content,
+.search-page-new .summary-inner-wrapper,
+.search-page-new .summary-inner {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.search-page-new .report-content {
+  overflow-wrap: anywhere;
+}
+
+.search-page-new .report-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+
+.search-page-new .report-tags,
+.search-page-new .report-summary-buttons,
+.search-page-new .admin-summary-section {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.search-page-new .report-footer {
+  gap: 12px;
+}
+
+.search-page-new .report-writer {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.search-page-new .report-actions {
+  flex: 0 0 auto;
 }
 
 .search-state-msg {
@@ -382,6 +459,10 @@
 }
 
 @media (max-width: 820px) {
+  .search-page-new {
+    width: min(760px, calc(100% - 28px));
+  }
+
   .filter-grid {
     grid-template-columns: 1fr;
     gap: 18px;
@@ -389,8 +470,117 @@
 
   .filter-item.text-search-box,
   .filter-item.company-box,
-  .filter-item.board-box {
+  .filter-item.board-box,
+  .filter-item.route-box,
+  .filter-item.sort-box {
     grid-column: span 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .search-page-new {
+    width: 100%;
+    padding-inline: 12px;
+  }
+
+  .search-page-header {
+    margin-bottom: 18px;
+    padding-left: 12px;
+  }
+
+  .search-page-header p {
+    font-size: 0.9rem;
+  }
+
+  .filter-panel-card {
+    padding: 16px;
+    border-radius: var(--radius-md);
+    margin-bottom: 22px;
+  }
+
+  .text-search-fields {
+    height: auto;
+    min-height: 46px;
+    flex-wrap: wrap;
+  }
+
+  .search-category-select {
+    width: 100%;
+    height: 42px;
+    border-right: 0;
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .search-text-input {
+    flex: 1 1 0;
+    width: 0;
+    min-height: 46px;
+  }
+
+  .filter-chip-group {
+    gap: 8px;
+  }
+
+  .filter-chip-item {
+    flex: 1 1 calc(50% - 8px);
+    justify-content: center;
+    padding: 8px 10px;
+    border-radius: var(--radius-md);
+  }
+
+  .filter-actions-row {
+    justify-content: stretch;
+  }
+
+  .btn-filter-reset {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .results-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .search-page-new .date-header {
+    align-items: flex-start;
+    gap: 10px;
+    flex-direction: column;
+  }
+
+  .search-page-new .date-title {
+    font-size: 1.2em;
+  }
+
+  .search-page-new .company-title {
+    font-size: 1.08em;
+  }
+
+  .search-page-new .report {
+    padding: 12px;
+    font-size: 0.95em;
+    align-items: stretch;
+  }
+
+  .search-page-new .report-title-container {
+    flex-wrap: wrap;
+  }
+
+  .search-page-new .report-title {
+    flex: 1 1 100%;
+  }
+
+  .search-page-new .report-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .search-page-new .report-actions {
+    align-self: flex-end;
+    gap: 8px;
+  }
+
+  .search-state-msg {
+    padding-inline: 12px;
   }
 }
 
@@ -399,12 +589,22 @@
     font-size: 1.7rem;
   }
 
+  .filter-chip-item {
+    font-size: 0.85rem;
+    padding: 7px 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .search-page-new {
+    padding-inline: 8px;
+  }
+
   .filter-panel-card {
-    padding: 18px;
+    padding: 12px;
   }
 
   .filter-chip-item {
-    font-size: 0.85rem;
-    padding: 7px 14px;
+    flex-basis: 100%;
   }
 }

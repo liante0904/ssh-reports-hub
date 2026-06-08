@@ -169,7 +169,7 @@ const ReportItem = ({
                             } else {
                               showToast("AI 요약 요청을 시작합니다...");
                             }
-                            onTriggerSummary(id, engine, hasSummary); 
+                            onTriggerSummary(id, engine, hasSummary, report);
                           }}
                         >
                           ✓

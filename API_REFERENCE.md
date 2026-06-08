@@ -272,6 +272,38 @@ GET {BASE}/external/api/reports/notifications?limit={limit}
 
 ---
 
+### 1.8 텔레그램 리포트 발송 내역 조회
+
+```
+GET {BASE}/external/api/reports/send-history?limit={limit}
+```
+
+| Param | Type | 필수 | 설명 |
+|-------|------|------|------|
+| `limit` | number | - | 최근 조회할 발송 내역 개수 (기본값: 30) |
+
+**Response**:
+```json
+[
+  {
+    "id": 1,
+    "report_id": 12345,
+    "user_id": 123456789,
+    "keyword": "반도체",
+    "sent_at": "2026-06-08T15:54:40",
+    "article_title": "리포트 제목",
+    "firm_nm": "증권사명",
+    "message": "[반도체] 리포트 제목"
+  }
+]
+```
+
+**테스트**: `test/integration/api.test.js`에 추가됨. 서버가 아직 라우트를 배포하지 않은 경우 404는 skip 처리.
+**호출 위치**:
+- `src/components/Header.jsx`에서 헤더 알림 팝오버에 AI 요약 알림과 함께 표시
+
+---
+
 
 
 ## 2. FastAPI — 인증 / 키워드 / 즐겨찾기 (API_PATH prefix 없음)
@@ -768,6 +800,8 @@ navigator.share({ title, text })
 | `src/components/ReportList.jsx:83` | POST | `/favorites/{id}` (초기 업로드) |
 | `src/components/ReportList.jsx:218` | POST/DELETE | `/favorites/{id}` (토글) |
 | `src/components/ReportList.jsx:249` | POST | `/admin/reports/{id}/summarize` |
+| `src/components/Header.jsx` | GET | `/external/api/reports/notifications?limit=` |
+| `src/components/Header.jsx` | GET | `/external/api/reports/send-history?limit=` |
 | `src/components/AdminConsole.jsx:134` | GET | `/admin/metrics` |
 | `src/components/AdminConsole.jsx:281` | GET | `/admin/logs?path=` |
 | `src/components/AdminConsole.jsx:306` | GET | `/admin/logs/view?file=&lines=&tail=` |

@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useEffect, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import HamburgerMenu from './HamburgerMenu';
@@ -12,6 +12,55 @@ import { useHeaderSearchState } from '../hooks/useHeaderSearchState';
 import { useKeywords } from '../hooks/useKeywords';
 import { useTelegramAuth } from '../hooks/useTelegramAuth';
 import './Header.css';
+
+const SUMMARY_NOTIFICATION_EVENT = 'ssh-summary-notification';
+const NOTIFICATION_TOAST_TIMEOUT_MS = 4500;
+
+function getNotificationKey(item) {
+  return item?.notification_key || `${item?.source || 'summary'}:${item?.id}`;
+}
+
+function normalizeSummaryNotification(item) {
+  return {
+    ...item,
+    source: item.source || 'summary',
+    notification_key: item.notification_key || `summary:${item.id}`,
+    created_at: item.created_at,
+  };
+}
+
+function normalizeSendHistoryItem(item) {
+  const reportTitle = item.article_title || item.report_title || item.title || '텔레그램 알림';
+  const keyword = item.keyword ? ` [${item.keyword}]` : '';
+  return {
+    id: item.id,
+    report_id: item.report_id,
+    article_title: reportTitle,
+    firm_nm: item.firm_nm || item.firm || '',
+    summary_model: null,
+    source: 'telegram',
+    notification_key: `telegram:${item.id}`,
+    message: item.message || `${keyword} ${reportTitle}`.trim(),
+    created_at: item.sent_at || item.created_at,
+    keyword: item.keyword || null,
+  };
+}
+
+function normalizeLocalSummaryEvent(detail) {
+  const id = `local-${detail.status || 'summary'}-${detail.report_id}-${Date.now()}`;
+  return {
+    id,
+    report_id: detail.report_id,
+    article_title: detail.article_title,
+    firm_nm: detail.firm_nm || '',
+    summary_model: detail.summary_model,
+    source: 'summary',
+    notification_key: `local-summary:${id}`,
+    message: detail.message,
+    created_at: detail.created_at || new Date().toISOString(),
+    status: detail.status,
+  };
+}
 
 const Header = forwardRef(({ isNavVisible }, ref) => {
   const navigate = useNavigate();
@@ -97,6 +146,9 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   };
 
   const [notifications, setNotifications] = useState([]);
+  const [localNotifications, setLocalNotifications] = useState([]);
+  const [notificationToast, setNotificationToast] = useState(null);
+  const sendHistoryUnsupportedRef = useRef(false);
   const [readNotifyIds, setReadNotifyIds] = useState(() => {
     try {
       const saved = localStorage.getItem('ssh_read_notifications');
@@ -110,9 +162,25 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     try {
       const url = `${CONFIG.API.REPORT_API_URL}/reports/notifications?limit=30`;
       const data = await request(url, { skipAuth: false });
-      if (Array.isArray(data)) {
-        setNotifications(data);
+      const summaryItems = Array.isArray(data) ? data.map(normalizeSummaryNotification) : [];
+
+      let sendHistoryItems = [];
+      if (!sendHistoryUnsupportedRef.current) {
+        try {
+          const historyUrl = `${CONFIG.API.REPORT_API_URL}/reports/send-history?limit=30`;
+          const historyData = await request(historyUrl, { skipAuth: false, logoutOn401: false });
+          sendHistoryItems = Array.isArray(historyData) ? historyData.map(normalizeSendHistoryItem) : [];
+        } catch (err) {
+          if (err.message?.includes('404')) {
+            sendHistoryUnsupportedRef.current = true;
+          }
+          sendHistoryItems = [];
+        }
       }
+
+      setNotifications([...summaryItems, ...sendHistoryItems].sort((a, b) => (
+        new Date(b.created_at || 0) - new Date(a.created_at || 0)
+      )));
     } catch (err) {
       console.error('Failed to fetch summary notifications:', err);
     }
@@ -124,19 +192,27 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
-  const unreadCount = notifications.filter(
-    (item) => !readNotifyIds.includes(item.id)
+  const visibleNotifications = [...localNotifications, ...notifications]
+    .filter((item, index, items) => (
+      items.findIndex((candidate) => getNotificationKey(candidate) === getNotificationKey(item)) === index
+    ))
+    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+    .slice(0, 50);
+
+  const unreadCount = visibleNotifications.filter(
+    (item) => !readNotifyIds.includes(getNotificationKey(item)) && !readNotifyIds.includes(item.id)
   ).length;
 
   const handleMarkAllAsRead = useCallback(() => {
-    const allIds = notifications.map((item) => item.id);
+    const allIds = visibleNotifications.flatMap((item) => [getNotificationKey(item), item.id]);
     setReadNotifyIds(allIds);
     localStorage.setItem('ssh_read_notifications', JSON.stringify(allIds));
-  }, [notifications]);
+  }, [visibleNotifications]);
 
   const handleNotificationItemClick = useCallback((item) => {
-    if (!readNotifyIds.includes(item.id)) {
-      const nextReadIds = [...readNotifyIds, item.id];
+    const notificationKey = getNotificationKey(item);
+    if (!readNotifyIds.includes(notificationKey) && !readNotifyIds.includes(item.id)) {
+      const nextReadIds = [...readNotifyIds, notificationKey, item.id];
       setReadNotifyIds(nextReadIds);
       localStorage.setItem('ssh_read_notifications', JSON.stringify(nextReadIds));
     }
@@ -147,6 +223,23 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
       navigate('/');
     }
   }, [readNotifyIds, handleSearch, navigate]);
+
+  useEffect(() => {
+    const handleSummaryNotification = (event) => {
+      const item = normalizeLocalSummaryEvent(event.detail || {});
+      setLocalNotifications((current) => [item, ...current].slice(0, 20));
+      setNotificationToast(item);
+    };
+
+    window.addEventListener(SUMMARY_NOTIFICATION_EVENT, handleSummaryNotification);
+    return () => window.removeEventListener(SUMMARY_NOTIFICATION_EVENT, handleSummaryNotification);
+  }, []);
+
+  useEffect(() => {
+    if (!notificationToast) return undefined;
+    const timeout = setTimeout(() => setNotificationToast(null), NOTIFICATION_TOAST_TIMEOUT_MS);
+    return () => clearTimeout(timeout);
+  }, [notificationToast]);
 
   useEffect(() => {
     if (isTopMenuOpen || !isNavVisible) {
@@ -217,11 +310,27 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
           onOpenSettings={handleOpenKeywordSettings}
           onLogin={loginWithTelegram}
           isAuthenticating={isAuthenticating}
-          notifications={notifications}
+          notifications={visibleNotifications}
           readNotifyIds={readNotifyIds}
           onMarkAllAsRead={handleMarkAllAsRead}
           onNotificationClick={handleNotificationItemClick}
         />
+      )}
+
+      {notificationToast && (
+        <button
+          type="button"
+          className="header-notification-toast"
+          onClick={() => {
+            setActivePopover('notifications');
+            setNotificationToast(null);
+          }}
+        >
+          <span className={`notification-toast-icon ${notificationToast.source || 'summary'}`}>
+            {notificationToast.source === 'telegram' ? 'T' : notificationToast.summary_model === 'deepseek' ? '!' : '▲'}
+          </span>
+          <span>{notificationToast.message}</span>
+        </button>
       )}
 
       {activePopover === 'account' && (

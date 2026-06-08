@@ -14,6 +14,17 @@ import { buildShareMenuData } from '../utils/shareMenuData';
 import MenuSummary from './MenuSummary';
 import './ReportList.css';
 
+const SUMMARY_NOTIFICATION_EVENT = 'ssh-summary-notification';
+
+function emitSummaryNotification(detail) {
+  window.dispatchEvent(new CustomEvent(SUMMARY_NOTIFICATION_EVENT, {
+    detail: {
+      created_at: new Date().toISOString(),
+      ...detail,
+    },
+  }));
+}
+
 function ReportList({ onWriterClick }) {
   const { searchQuery, sortBy, setSortBy, telegramUser } = useReport();
   const isAdmin = telegramUser?.is_admin === true;
@@ -241,10 +252,13 @@ function ReportList({ onWriterClick }) {
     setIsShareOpen(true);
   };
 
-  const handleTriggerSummary = async (reportId, engine = 'deepseek', force = false) => {
+  const handleTriggerSummary = async (reportId, engine = 'deepseek', force = false, report = null) => {
     const baseUrl = CONFIG.API.BASE_URL;
     const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     if (!token) return;
+    const title = report?.title || report?.article_title || `리포트 #${reportId}`;
+    const firm = report?.firm || report?.firm_nm || '';
+    const modelLabel = engine === 'ag' ? 'Gemini' : 'DeepSeek';
 
     /* 기존 주석 유지: 중복 요청 방지 (force=true일 때는 우회를 위해 상태 초기화) */
     if (force) {
@@ -263,6 +277,14 @@ function ReportList({ onWriterClick }) {
     }
     
     setSummaryRequestedIds(prev => new Set(prev).add(reportId));
+    emitSummaryNotification({
+      report_id: reportId,
+      article_title: title,
+      firm_nm: firm,
+      summary_model: engine === 'ag' ? 'gemini' : engine,
+      status: 'requested',
+      message: `${modelLabel} 요약 요청을 접수했습니다: ${title}`,
+    });
 
     try {
       const url = `${baseUrl}/admin/reports/${reportId}/summarize?engine=${engine}${force ? '&force=true' : ''}`;
@@ -273,8 +295,24 @@ function ReportList({ onWriterClick }) {
       });
       if (result?.status === 'success') {
         setSummaryCompletedIds(prev => new Set(prev).add(reportId));
+        emitSummaryNotification({
+          report_id: reportId,
+          article_title: title,
+          firm_nm: firm,
+          summary_model: engine === 'ag' ? 'gemini' : engine,
+          status: 'completed',
+          message: `${modelLabel} 요약이 완료되었습니다: ${title}`,
+        });
       } else if (result?.status === 'skipped') {
         setSummaryCompletedIds(prev => new Set(prev).add(reportId));
+        emitSummaryNotification({
+          report_id: reportId,
+          article_title: title,
+          firm_nm: firm,
+          summary_model: engine === 'ag' ? 'gemini' : engine,
+          status: 'skipped',
+          message: `${modelLabel} 요약이 이미 완료되어 있습니다: ${title}`,
+        });
       }
     } catch (error) {
       console.error('[Admin] ❌ 요청 실패:', error.message);
@@ -283,6 +321,14 @@ function ReportList({ onWriterClick }) {
         const next = new Set(prev);
         next.delete(reportId);
         return next;
+      });
+      emitSummaryNotification({
+        report_id: reportId,
+        article_title: title,
+        firm_nm: firm,
+        summary_model: engine === 'ag' ? 'gemini' : engine,
+        status: 'failed',
+        message: `${modelLabel} 요약 요청에 실패했습니다: ${title}`,
       });
     }
   };

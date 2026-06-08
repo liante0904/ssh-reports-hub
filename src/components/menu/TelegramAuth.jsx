@@ -7,7 +7,6 @@ function TelegramAuth({
   loginWithTelegram,
   loginWithDevBypass,
   handleLogout,
-  toggleKeywordOverlay,
 }) {
   const botName = import.meta.env.VITE_TELEGRAM_BOT_NAME || 'ebest_noti_bot';
 

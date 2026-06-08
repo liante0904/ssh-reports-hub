@@ -63,9 +63,13 @@ function formatRelativeTime(dateString) {
     if (diffMins < 60) return `${diffMins}분 전`;
     if (diffHours < 24) return `${diffHours}시간 전`;
     return `${diffDays}일 전`;
-  } catch (e) {
+  } catch {
     return '방금 전';
   }
+}
+
+function getNotificationKey(item) {
+  return item?.notification_key || `${item?.source || 'summary'}:${item?.id}`;
 }
 
 export function NotificationPopover({
@@ -81,7 +85,9 @@ export function NotificationPopover({
   onMarkAllAsRead,
   onNotificationClick,
 }) {
-  const hasUnread = notifications.some(item => !readNotifyIds.includes(item.id));
+  const hasUnread = notifications.some(item => (
+    !readNotifyIds.includes(getNotificationKey(item)) && !readNotifyIds.includes(item.id)
+  ));
 
   return (
     <HeaderPopoverShell labelledBy="notification-popover-title" onClose={onClose}>
@@ -116,23 +122,24 @@ export function NotificationPopover({
         <>
           <div className="notification-list-container">
             {notifications.map((item) => {
-              const isUnread = !readNotifyIds.includes(item.id);
+              const isUnread = !readNotifyIds.includes(getNotificationKey(item)) && !readNotifyIds.includes(item.id);
               const isDeepseek = item.summary_model === 'deepseek';
+              const isTelegram = item.source === 'telegram';
               return (
                 <div
-                  key={item.id}
-                  className={`notification-item ${isUnread ? 'unread' : ''}`}
+                  key={getNotificationKey(item)}
+                  className={`notification-item ${isUnread ? 'unread' : ''} ${isTelegram ? 'telegram' : ''}`}
                   onClick={() => onNotificationClick?.(item)}
                 >
-                  <span className={`notification-item-icon ${isDeepseek ? 'deepseek' : 'gemini'}`}>
-                    {isDeepseek ? '!' : '▲'}
+                  <span className={`notification-item-icon ${isTelegram ? 'telegram' : isDeepseek ? 'deepseek' : 'gemini'}`}>
+                    {isTelegram ? 'T' : isDeepseek ? '!' : '▲'}
                   </span>
                   <div className="notification-item-content">
                     <div className="notification-item-message">
                       {item.message}
                     </div>
                     <div className="notification-item-time">
-                      {formatRelativeTime(item.created_at)}
+                      {isTelegram ? '텔레그램 발송' : 'AI 요약'} · {formatRelativeTime(item.created_at)}
                     </div>
                   </div>
                 </div>
@@ -177,7 +184,7 @@ export function NotificationPopover({
             <span className="notification-status-dot" />
             <span>
               <strong>키워드 텔레그램 알림 활성화됨</strong>
-              <small>등록 키워드 {keywords?.length || 0}개</small>
+              <small>{isLoadingKeywords ? '키워드 확인 중' : `등록 키워드 ${keywords?.length || 0}개`}</small>
             </span>
           </div>
           {keywords?.length > 0 && (

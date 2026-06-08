@@ -11,6 +11,7 @@
  *   - /keywords, /keywords/sync
  *   - /favorites
  *   - /admin/metrics
+ *   - /external/api/reports/notifications, /external/api/reports/send-history
  *
  * 사용법:
  *   node test/integration/api.test.js
@@ -219,6 +220,38 @@ async function runTests() {
         }
       } catch (e) {
         console.log(`  ❌ FAIL: notifications 응답 파싱 실패 (${e.message})`);
+        failed++;
+      }
+    }
+  }
+
+
+  // ────────────────────────────────────────────
+  // Section 2.5: Telegram Send History API
+  // ────────────────────────────────────────────
+  console.log('\n─── [Section 2.5] Telegram Send History API ───');
+
+  const sendHistoryCheck = await assertHttpOk(
+    `${BASE_URL}/external/api/reports/send-history?limit=5`,
+    'GET /external/api/reports/send-history (텔레그램 발송 내역)'
+  );
+
+  if (sendHistoryCheck.status === 404) {
+    skip('GET /external/api/reports/send-history', '서버가 아직 신규 API 배포 전 상태입니다.');
+  } else {
+    assert(sendHistoryCheck.status === 200 || sendHistoryCheck.status === 401, 'GET /external/api/reports/send-history 응답 상태 확인', `HTTP ${sendHistoryCheck.status}`);
+    if (sendHistoryCheck.res && sendHistoryCheck.status === 200) {
+      try {
+        const data = await sendHistoryCheck.res.json();
+        assert(Array.isArray(data), 'send-history 응답: 배열 형태 확인', `length=${data.length}`);
+        if (data.length > 0) {
+          const item = data[0];
+          assert(typeof item.id === 'number', 'send-history 아이템: id는 숫자');
+          assert(typeof item.report_id === 'number', 'send-history 아이템: report_id는 숫자');
+          assert(item.sent_at || item.created_at, 'send-history 아이템: 발송 시각 존재');
+        }
+      } catch (e) {
+        console.log(`  ❌ FAIL: send-history 응답 파싱 실패 (${e.message})`);
         failed++;
       }
     }

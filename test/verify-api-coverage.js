@@ -98,6 +98,9 @@ function normalizeEndpoint(call) {
   if (u.includes('/admin/reports/') && u.includes('summarize')) {
     return { path: '/admin/reports/{id}/summarize', method: 'POST', note: 'AI 요약 생성' };
   }
+  if (u.includes('/reports/send-history')) {
+    return { path: '/external/api/reports/send-history', method: 'GET', note: '텔레그램 발송 내역' };
+  }
   if (u.includes('/admin/logs/view')) {
     return { path: '/admin/logs/view', method: 'GET', note: '로그 파일 보기' };
   }
