@@ -1,9 +1,10 @@
 /* FnGuideList container */
 .fnguide-container {
   padding: 16px;
+  width: 100% !important;
   max-width: 800px;
   margin: 0 auto 80px auto;
-  box-sizing: border-box;
+  box-sizing: border-box !important;
   animation: fadeIn 0.4s ease-out;
 }
 
@@ -440,6 +441,9 @@
   position: relative;
   overflow: hidden;
   scroll-margin-top: calc(88px + env(safe-area-inset-top, 0px));
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .fnguide-card:hover {
@@ -583,14 +587,20 @@ html[data-theme='dark'] .card-author-badge {
   letter-spacing: 0;
   color: var(--text-color);
   margin-bottom: 20px;
-  word-break: break-all;
-  overflow-wrap: break-word;
+  word-break: break-all !important;
+  overflow-wrap: break-word !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .card-summary-text p {
   margin: 0 0 12px 0;
-  word-break: break-all;
-  overflow-wrap: break-word;
+  word-break: break-all !important;
+  overflow-wrap: break-word !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .financial-highlight {

@@ -98,6 +98,9 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   transition: var(--transition-smooth);
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .report-container-item:hover {
@@ -120,6 +123,9 @@
   gap: 12px;
   position: relative;
   z-index: 2;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .report-container-item:hover .report {
@@ -455,8 +461,26 @@
   font-size: 0.95em;
   line-height: 1.6;
   color: var(--text-color);
-  word-break: break-all;
-  overflow-wrap: break-word;
+  word-break: break-all !important;
+  overflow-wrap: break-word !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.summary-text,
+.summary-text p,
+.summary-text ul,
+.summary-text ol,
+.summary-text li,
+.summary-text blockquote,
+.summary-text pre,
+.summary-text code {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  word-break: break-all !important;
+  overflow-wrap: break-word !important;
 }
 
 .report-content {
