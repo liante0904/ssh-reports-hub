@@ -5,6 +5,8 @@ import HamburgerMenu from './HamburgerMenu';
 import KeywordOverlay from './menu/KeywordOverlay';
 import { AccountPopover, BellIcon, NotificationPopover } from './HeaderPopovers';
 import { useReport } from '../context/useReport';
+import { request } from '../utils/api';
+import { CONFIG } from '../constants/config';
 import { HEADER_PATHS } from '../utils/headerNavigation';
 import { useHeaderSearchState } from '../hooks/useHeaderSearchState';
 import { useKeywords } from '../hooks/useKeywords';
@@ -94,6 +96,58 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     setActivePopover((current) => current === 'notifications' ? null : 'notifications');
   };
 
+  const [notifications, setNotifications] = useState([]);
+  const [readNotifyIds, setReadNotifyIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ssh_read_notifications');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const url = `${CONFIG.API.REPORT_API_URL}/reports/notifications?limit=30`;
+      const data = await request(url, { skipAuth: false });
+      if (Array.isArray(data)) {
+        setNotifications(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch summary notifications:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
+
+  const unreadCount = notifications.filter(
+    (item) => !readNotifyIds.includes(item.id)
+  ).length;
+
+  const handleMarkAllAsRead = useCallback(() => {
+    const allIds = notifications.map((item) => item.id);
+    setReadNotifyIds(allIds);
+    localStorage.setItem('ssh_read_notifications', JSON.stringify(allIds));
+  }, [notifications]);
+
+  const handleNotificationItemClick = useCallback((item) => {
+    if (!readNotifyIds.includes(item.id)) {
+      const nextReadIds = [...readNotifyIds, item.id];
+      setReadNotifyIds(nextReadIds);
+      localStorage.setItem('ssh_read_notifications', JSON.stringify(nextReadIds));
+    }
+    setActivePopover(null);
+
+    if (item.article_title) {
+      handleSearch(item.article_title);
+      navigate('/');
+    }
+  }, [readNotifyIds, handleSearch, navigate]);
+
   useEffect(() => {
     if (isTopMenuOpen || !isNavVisible) {
       setActivePopover(null);
@@ -141,6 +195,9 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
               aria-haspopup="dialog"
             >
               <BellIcon />
+              {unreadCount > 0 && (
+                <span className="notification-badge">{unreadCount}</span>
+              )}
             </button>
             <button type="button" className="hamburger-menu" onClick={toggleMenuTop} title="메뉴" aria-label="메뉴 열기">
               <div></div>
@@ -160,6 +217,10 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
           onOpenSettings={handleOpenKeywordSettings}
           onLogin={loginWithTelegram}
           isAuthenticating={isAuthenticating}
+          notifications={notifications}
+          readNotifyIds={readNotifyIds}
+          onMarkAllAsRead={handleMarkAllAsRead}
+          onNotificationClick={handleNotificationItemClick}
         />
       )}
 

@@ -41,6 +41,7 @@ function TelegramAuth({
             <button className="logout-small-btn" onClick={handleLogout}>로그아웃</button>
           </div>
 
+
           <div className="bot-connect-banner">
             <a
               href={`https://t.me/${botName}?start=${telegramUser.id}`}
@@ -51,10 +52,6 @@ function TelegramAuth({
               <span className="icon">🚀</span> 텔레그램 봇 연결하기 (최초 1회 필수)
             </a>
           </div>
-
-          <button type="button" className="open-keyword-overlay-btn" onClick={toggleKeywordOverlay}>
-            <span className="icon">⚙️</span> 키워드 알림 설정하기
-          </button>
         </div>
       )}
     </div>

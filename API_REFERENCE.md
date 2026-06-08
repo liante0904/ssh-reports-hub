@@ -222,6 +222,58 @@ GET {BASE}/external/api/boards?company={sec_firm_order}
 
 ---
 
+### 1.6 LLM 요약 노출 범위 설정 조회 (Public)
+
+```
+GET {BASE}/external/api/reports/llm-setting
+```
+
+**Response**:
+```json
+{
+  "visibility": "admin" // 또는 "telegram"
+}
+```
+
+**테스트**: `test/integration/api.test.js`에 추가됨
+**호출 위치**:
+- `src/context/ReportContext.jsx` 초기화 시 설정값 패치에 사용
+
+---
+
+### 1.7 AI 요약 완료 알림 목록 조회
+
+```
+GET {BASE}/external/api/reports/notifications?limit={limit}
+```
+
+| Param | Type | 필수 | 설명 |
+|-------|------|------|------|
+| `limit` | number | - | 최근 조회할 알림 개수 (기본값: 30) |
+
+**Response**:
+```json
+[
+  {
+    "id": 1,
+    "report_id": 12345,
+    "article_title": "리포트 제목",
+    "firm_nm": "증권사명",
+    "summary_model": "deepseek",
+    "message": "[증권사명] 리포트 제목의 AI 요약(DeepSeek)이 완료되었습니다!",
+    "created_at": "2026-06-08T15:54:40"
+  }
+]
+```
+
+**테스트**: `test/integration/api.test.js`에 추가됨
+**호출 위치**:
+- `src/components/Header.jsx`에서 30초 단위 주기적 폴링 및 초기 페칭 시 사용
+
+---
+
+
+
 ## 2. FastAPI — 인증 / 키워드 / 즐겨찾기 (API_PATH prefix 없음)
 
 > ⚠️ **주의**: 이 엔드포인트들은 `VITE_API_PATH` prefix(`/external/api`)를 사용하지 않고 `VITE_API_URL`에 직접 붙는다.
@@ -462,6 +514,42 @@ Timeout: 180000ms (3분)
 - `src/components/ReportList.jsx` line 249: `request(\`${baseUrl}/admin/reports/${reportId}/summarize\`, { method: 'POST', timeout: 180000 })`
 
 ---
+
+### 3.5 LLM 요약 노출 범위 설정 및 변경 (관리자)
+
+```
+GET  {BASE}/admin/llm-setting
+POST {BASE}/admin/llm-setting
+Authorization: Bearer {token}
+```
+
+**POST Request Body**:
+```json
+{
+  "visibility": "admin" // 또는 "telegram"
+}
+```
+
+**GET Response**:
+```json
+{
+  "visibility": "admin"
+}
+```
+
+**POST Response**:
+```json
+{
+  "status": "success",
+  "visibility": "telegram"
+}
+```
+
+**호출 위치**:
+- `src/components/AdminConsole.jsx`에서 노출 설정을 가져오고 변경할 때 사용
+
+---
+
 
 ### 3.5 Health Check
 

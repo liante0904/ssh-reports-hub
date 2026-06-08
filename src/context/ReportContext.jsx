@@ -31,6 +31,42 @@ export function ReportProvider({ children }) {
     }
   });
 
+  // LLM 요약 노출 범위 설정 ('admin' 또는 'telegram')
+  const [llmVisibility, setLlmVisibility] = useState('admin');
+
+  // 초기 설정 로딩
+  useEffect(() => {
+    const fetchLlmSetting = async () => {
+      try {
+        const data = await request(CONFIG.API.LLM_SETTING_URL);
+        if (data && data.visibility) {
+          setLlmVisibility(data.visibility);
+        }
+      } catch (error) {
+        console.error('Failed to fetch LLM visibility setting:', error);
+      }
+    };
+    fetchLlmSetting();
+  }, []);
+
+  // LLM 노출 설정 변경 (관리자 전용)
+  const updateLlmSetting = useCallback(async (newVisibility) => {
+    try {
+      const data = await request(CONFIG.API.ADMIN_LLM_SETTING_URL, {
+        method: 'POST',
+        body: JSON.stringify({ visibility: newVisibility })
+      });
+      if (data && data.status === 'success') {
+        setLlmVisibility(newVisibility);
+        return { success: true, visibility: newVisibility };
+      }
+      return { success: false, message: 'Invalid response' };
+    } catch (error) {
+      console.error('Failed to update LLM visibility setting:', error);
+      return { success: false, message: error.message };
+    }
+  }, []);
+
   const [sortBy, setSortBy] = useState('time');
   const [viewerReport, setViewerReport] = useState(null);
   // 회사 코드는 DB/필터 매핑과 1:1로 맞아야 하므로 고정 순서를 유지한다.
@@ -150,6 +186,8 @@ export function ReportProvider({ children }) {
     toggleTheme,
     telegramUser,
     setTelegramUser,
+    llmVisibility,
+    updateLlmSetting,
     logout
   };
 

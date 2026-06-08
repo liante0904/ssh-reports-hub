@@ -19,7 +19,7 @@ const ReportItem = ({
   summaryCompletedIds
 }) => {
   const { id, title, writer, gemini_summary, fnguide_summary, firm, pdf_url, tags, stock_names, sector } = report;
-  const { setViewerReport } = useReport();
+  const { setViewerReport, telegramUser, llmVisibility } = useReport();
   const [showConfirm, setShowConfirm] = useState(null);
   /* 기존 주석 유지: 요약 요청 및 완료 여부 파악 */
   const isSummaryRequested = summaryRequestedIds?.has(id);
@@ -58,7 +58,23 @@ const ReportItem = ({
     prefetchPdf(report, origin);
   };
   
-  const hasSummary = gemini_summary && gemini_summary.trim() !== "" && gemini_summary.trim() !== " ";
+  // LLM 요약 노출 범위에 따른 판단 (기존 주석 유지 및 추가 권한 마스킹)
+  const isLlmSummaryVisible = () => {
+    const rawHasSummary = gemini_summary && gemini_summary.trim() !== "" && gemini_summary.trim() !== " ";
+    if (!rawHasSummary) return false;
+    
+    // 설정 범위에 따른 마스킹 처리
+    if (llmVisibility === 'admin') {
+      return !!isAdmin;
+    }
+    if (llmVisibility === 'telegram') {
+      return !!telegramUser;
+    }
+    // 기본적으로는 관리자만 노출
+    return !!isAdmin;
+  };
+
+  const hasSummary = isLlmSummaryVisible();
   const hasFnguideSummary = !!fnguide_summary?.summary_text?.trim();
   const hasAnySummary = hasSummary || hasFnguideSummary;
 
@@ -178,20 +194,16 @@ const ReportItem = ({
                     onClick={() => setShowConfirm(showConfirm === 'deepseek' ? null : 'deepseek')}
                     title={hasSummary ? "DeepSeek AI 요약 재처리 요청" : "DeepSeek AI 요약 생성"}
                   >
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                      {/* DeepSeek - 미래지향적 인공지능 정보망 기하학 심볼 */}
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-                    </svg>
+                    <span className="summary-btn-icon" style={{ fontSize: '14px', fontWeight: '900', lineHeight: 1, marginRight: '2px' }}>!</span>
+                    <span>DeepSeek</span>
                   </button>
                   <button 
                     className={`admin-summary-btn antigravity-btn ${showConfirm === 'ag' ? 'active' : ''}`}
                     onClick={() => setShowConfirm(showConfirm === 'ag' ? null : 'ag')}
-                    title={hasSummary ? "Antigravity AI 요약 재처리 요청" : "Antigravity AI 요약 생성"}
+                    title={hasSummary ? "Gemini AI 요약 재처리 요청" : "Gemini AI 요약 생성"}
                   >
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                      {/* Antigravity - 반중력/우주선 기하학적 상승 포탈 */}
-                      <path d="M12 3L2 21h20L12 3zm0 4.5L18.5 19H5.5L12 7.5zM12 11l-3 5h6l-3-5z"/>
-                    </svg>
+                    <span className="summary-btn-icon" style={{ fontSize: '11px', lineHeight: 1, marginRight: '2px' }}>▲</span>
+                    <span>Gemini</span>
                   </button>
                   {showConfirm && (
                     <span className="admin-summary-confirm-btns-wrapper" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>

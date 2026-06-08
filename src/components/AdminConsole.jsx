@@ -11,7 +11,7 @@ import './AdminConsole.css';
 
 function AdminConsole() {
   const navigate = useNavigate();
-  const { telegramUser } = useReport();
+  const { telegramUser, llmVisibility, updateLlmSetting } = useReport();
 
   // Redirect if not admin
   useEffect(() => {
@@ -35,6 +35,23 @@ function AdminConsole() {
   const [refreshIntervalMs, setRefreshIntervalMs] = useState(60000);
   const [manualRefreshKey, setManualRefreshKey] = useState(0);
   const [firmHealth, setFirmHealth] = useState(null);
+
+  const [updatingLlm, setUpdatingLlm] = useState(false);
+  const [llmFeedback, setLlmFeedback] = useState('');
+
+  const handleLlmVisibilityChange = async (newVisibility) => {
+    setUpdatingLlm(true);
+    setLlmFeedback('');
+    const result = await updateLlmSetting(newVisibility);
+    setUpdatingLlm(false);
+    if (result.success) {
+      setLlmFeedback('✅ 성공적으로 저장되었습니다.');
+      setTimeout(() => setLlmFeedback(''), 3000);
+    } else {
+      setLlmFeedback(`❌ 실패: ${result.message}`);
+    }
+  };
+
 
   const REFRESH_OPTIONS = [
     { label: '30초', value: 30000 },
@@ -438,6 +455,138 @@ function AdminConsole() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* ===== LLM Summary Visibility Settings (Premium Glassmorphic Panel) ===== */}
+      <div className="section-card llm-visibility-settings" style={{
+        background: 'rgba(255, 255, 255, 0.03)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)',
+        borderRadius: '16px',
+        padding: '20px',
+        marginBottom: '20px'
+      }}>
+        <div className="section-title" style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '1.2rem',
+          fontWeight: '700',
+          color: '#fff',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          paddingBottom: '12px',
+          marginBottom: '16px'
+        }}>
+          🧠 LLM 핵심 요약 노출 설정
+          <span className="badge" style={{
+            background: 'linear-gradient(135deg, #a777e3, #6e8efb)',
+            color: '#fff',
+            fontSize: '11px',
+            padding: '2px 8px',
+            borderRadius: '12px'
+          }}>
+            Global Policy
+          </span>
+        </div>
+        
+        <p style={{
+          fontSize: '0.88rem',
+          color: '#aaa',
+          lineHeight: '1.5',
+          marginBottom: '20px'
+        }}>
+          증권사 리포트 카드 하단에 노출되는 <strong>AI 요약(Gemini/DeepSeek 핵심 요약)</strong>의 공개 대상을 설정합니다. 
+          이 설정은 전역적으로 적용되며 즉각적으로 화면에 반영됩니다.
+        </p>
+
+        <div style={{
+          display: 'flex',
+          gap: '16px',
+          flexWrap: 'wrap'
+        }}>
+          <label style={{
+            flex: '1',
+            minWidth: '240px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '16px',
+            background: llmVisibility === 'admin' ? 'rgba(110, 142, 251, 0.15)' : 'rgba(255, 255, 255, 0.02)',
+            border: llmVisibility === 'admin' ? '1px solid rgba(110, 142, 251, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease'
+          }}>
+            <input
+              type="radio"
+              name="llmVisibility"
+              value="admin"
+              checked={llmVisibility === 'admin'}
+              onChange={() => handleLlmVisibilityChange('admin')}
+              disabled={updatingLlm}
+              style={{
+                accentColor: '#6e8efb',
+                width: '18px',
+                height: '18px',
+                cursor: 'pointer'
+              }}
+            />
+            <div>
+              <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.95rem' }}>관리자만 보기 (Admin Only)</div>
+              <div style={{ fontSize: '0.78rem', color: '#888', marginTop: '4px' }}>
+                오직 텔레그램 관리자(Admin) 권한을 가진 계정에게만 AI 요약 영역이 노출됩니다. (보안 극대화)
+              </div>
+            </div>
+          </label>
+
+          <label style={{
+            flex: '1',
+            minWidth: '240px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '16px',
+            background: llmVisibility === 'telegram' ? 'rgba(167, 119, 227, 0.15)' : 'rgba(255, 255, 255, 0.02)',
+            border: llmVisibility === 'telegram' ? '1px solid rgba(167, 119, 227, 0.4)' : '1px solid rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease'
+          }}>
+            <input
+              type="radio"
+              name="llmVisibility"
+              value="telegram"
+              checked={llmVisibility === 'telegram'}
+              onChange={() => handleLlmVisibilityChange('telegram')}
+              disabled={updatingLlm}
+              style={{
+                accentColor: '#a777e3',
+                width: '18px',
+                height: '18px',
+                cursor: 'pointer'
+              }}
+            />
+            <div>
+              <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.95rem' }}>텔레그램 로그인 사용자 모두 보기</div>
+              <div style={{ fontSize: '0.78rem', color: '#888', marginTop: '4px' }}>
+                텔레그램으로 로그인한 모든 사용자에게 AI 요약 보기 기능이 노출됩니다. 비로그인 유저에게는 완벽히 숨겨집니다.
+              </div>
+            </div>
+          </label>
+        </div>
+
+        {llmFeedback && (
+          <div style={{
+            marginTop: '16px',
+            fontSize: '0.85rem',
+            color: llmFeedback.includes('✅') ? '#34c759' : '#ff3b30',
+            fontWeight: '600',
+            animation: 'fadeIn 0.3s ease'
+          }}>
+            {llmFeedback}
+          </div>
+        )}
       </div>
 
       {/* ===== Firm Health ===== */}

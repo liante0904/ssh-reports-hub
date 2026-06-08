@@ -50,6 +50,24 @@ function HeaderPopoverShell({ labelledBy, children, onClose }) {
   );
 }
 
+function formatRelativeTime(dateString) {
+  try {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 1000 / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return '방금 전';
+    if (diffMins < 60) return `${diffMins}분 전`;
+    if (diffHours < 24) return `${diffHours}시간 전`;
+    return `${diffDays}일 전`;
+  } catch (e) {
+    return '방금 전';
+  }
+}
+
 export function NotificationPopover({
   telegramUser,
   keywords,
@@ -58,7 +76,13 @@ export function NotificationPopover({
   onOpenSettings,
   onLogin,
   isAuthenticating,
+  notifications = [],
+  readNotifyIds = [],
+  onMarkAllAsRead,
+  onNotificationClick,
 }) {
+  const hasUnread = notifications.some(item => !readNotifyIds.includes(item.id));
+
   return (
     <HeaderPopoverShell labelledBy="notification-popover-title" onClose={onClose}>
       <div className="header-popover-heading">
@@ -88,52 +112,85 @@ export function NotificationPopover({
         </div>
       </div>
 
-      {!telegramUser ? (
+      {notifications.length > 0 ? (
+        <>
+          <div className="notification-list-container">
+            {notifications.map((item) => {
+              const isUnread = !readNotifyIds.includes(item.id);
+              const isDeepseek = item.summary_model === 'deepseek';
+              return (
+                <div
+                  key={item.id}
+                  className={`notification-item ${isUnread ? 'unread' : ''}`}
+                  onClick={() => onNotificationClick?.(item)}
+                >
+                  <span className={`notification-item-icon ${isDeepseek ? 'deepseek' : 'gemini'}`}>
+                    {isDeepseek ? '!' : '▲'}
+                  </span>
+                  <div className="notification-item-content">
+                    <div className="notification-item-message">
+                      {item.message}
+                    </div>
+                    <div className="notification-item-time">
+                      {formatRelativeTime(item.created_at)}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="notification-actions-footer">
+            <span style={{ color: 'var(--text-muted)' }}>
+              알림 {notifications.length}개
+            </span>
+            {hasUnread && (
+              <button
+                type="button"
+                className="notification-clear-btn"
+                onClick={onMarkAllAsRead}
+              >
+                모두 읽음으로 표시
+              </button>
+            )}
+          </div>
+        </>
+      ) : (
         <div className="header-popover-empty">
           <span className="header-popover-empty-icon"><BellIcon /></span>
-          <strong>로그인 후 알림을 확인할 수 있습니다</strong>
-          <p>관심 종목과 애널리스트 키워드를 등록하면 텔레그램으로 알려드립니다.</p>
-          <button type="button" className="header-popover-primary" onClick={onLogin} disabled={isAuthenticating}>
+          <strong>새로 확인할 요약 완료 알림이 없습니다</strong>
+          <p>리포트 AI 요약이 백그라운드에서 완료되면 이곳에 실시간으로 표시됩니다.</p>
+        </div>
+      )}
+
+      {/* 텔레그램 연동 정보 및 키워드 감시 기능 가이드 */}
+      {!telegramUser ? (
+        <div className="header-popover-empty" style={{ borderTop: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.02)', padding: '20px 22px' }}>
+          <strong>실시간 키워드 감시 서비스</strong>
+          <p>텔레그램 로그인 후 알림 키워드를 감시해 보세요.</p>
+          <button type="button" className="header-popover-primary" onClick={onLogin} disabled={isAuthenticating} style={{ marginTop: '10px' }}>
             {isAuthenticating ? '인증 중...' : '텔레그램 로그인'}
           </button>
         </div>
       ) : (
-        <>
-          <div className="notification-status">
+        <div style={{ borderTop: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.02)', padding: '12px 16px' }}>
+          <div className="notification-status" style={{ borderBottom: 'none', padding: 0 }}>
             <span className="notification-status-dot" />
             <span>
-              <strong>알림 연결됨</strong>
+              <strong>키워드 텔레그램 알림 활성화됨</strong>
               <small>등록 키워드 {keywords?.length || 0}개</small>
             </span>
           </div>
-
-          {isLoadingKeywords ? (
-            <div className="header-popover-loading">알림 설정을 불러오는 중...</div>
-          ) : (keywords?.length || 0) > 0 ? (
-            <div className="notification-keywords">
-              <div className="notification-keywords-title">감시 중인 키워드</div>
+          {keywords?.length > 0 && (
+            <div className="notification-keywords" style={{ padding: '8px 0 0 0', borderBottom: 'none' }}>
               <div className="notification-keyword-list">
-                {(keywords || []).slice(0, 6).map((item) => (
-                  <span key={item?.keyword}>{item?.keyword}</span>
+                {(keywords || []).slice(0, 4).map((item) => (
+                  <span key={item?.keyword} style={{ padding: '3px 7px', fontSize: '0.68rem' }}>{item?.keyword}</span>
                 ))}
-                {(keywords?.length || 0) > 6 && <span>+{keywords.length - 6}</span>}
+                {(keywords?.length || 0) > 4 && <span style={{ padding: '3px 7px', fontSize: '0.68rem' }}>+{keywords.length - 4}</span>}
               </div>
             </div>
-          ) : (
-            <div className="header-popover-empty compact">
-              <strong>등록된 알림 키워드가 없습니다</strong>
-              <p>오른쪽 위 톱니바퀴에서 관심 키워드를 추가하세요.</p>
-            </div>
           )}
-
-          <div className="notification-latest">
-            <span className="notification-latest-icon"><BellIcon /></span>
-            <span>
-              <strong>새로 확인할 알림이 없습니다</strong>
-              <small>새 리포트 알림은 텔레그램으로 전송됩니다.</small>
-            </span>
-          </div>
-        </>
+        </div>
       )}
     </HeaderPopoverShell>
   );

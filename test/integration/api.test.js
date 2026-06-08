@@ -168,6 +168,64 @@ async function runTests() {
   }
 
   // ────────────────────────────────────────────
+  // Section 2.3: LLM Setting (Public) API
+  // ────────────────────────────────────────────
+  console.log('\n─── [Section 2.3] LLM Setting (Public) API ───');
+
+  const llmSettingCheck = await assertHttpOk(
+    `${BASE_URL}/external/api/reports/llm-setting`,
+    'GET /external/api/reports/llm-setting (LLM 요약 설정)'
+  );
+
+  if (llmSettingCheck.status === 404) {
+    skip('GET /external/api/reports/llm-setting', '서버가 아직 신규 API 배포 전 상태입니다.');
+  } else {
+    assert(llmSettingCheck.status === 200, 'GET /external/api/reports/llm-setting 응답 성공', `HTTP ${llmSettingCheck.status}`);
+    if (llmSettingCheck.res && llmSettingCheck.status === 200) {
+      try {
+        const data = await llmSettingCheck.res.json();
+        assert(typeof data.visibility === 'string', 'llm-setting 응답: visibility 문자열 존재', `visibility=${data.visibility}`);
+        assert(['admin', 'telegram'].includes(data.visibility), 'llm-setting 응답: visibility 값 범위 확인');
+      } catch (e) {
+        console.log(`  ❌ FAIL: llm-setting 응답 파싱 실패 (${e.message})`);
+        failed++;
+      }
+    }
+  }
+
+  // ────────────────────────────────────────────
+  // Section 2.4: AI Summary Notifications API
+  // ────────────────────────────────────────────
+  console.log('\n─── [Section 2.4] AI Summary Notifications API ───');
+
+  const notificationsCheck = await assertHttpOk(
+    `${BASE_URL}/external/api/reports/notifications?limit=5`,
+    'GET /external/api/reports/notifications (알림 목록)'
+  );
+
+  if (notificationsCheck.status === 404) {
+    skip('GET /external/api/reports/notifications', '서버가 아직 신규 API 배포 전 상태입니다.');
+  } else {
+    assert(notificationsCheck.status === 200, 'GET /external/api/reports/notifications 응답 성공', `HTTP ${notificationsCheck.status}`);
+    if (notificationsCheck.res && notificationsCheck.status === 200) {
+      try {
+        const data = await notificationsCheck.res.json();
+        assert(Array.isArray(data), 'notifications 응답: 배열 형태 확인', `length=${data.length}`);
+        if (data.length > 0) {
+          const item = data[0];
+          assert(typeof item.id === 'number', 'notification 아이템: id는 숫자');
+          assert(typeof item.report_id === 'number', 'notification 아이템: report_id는 숫자');
+          assert(typeof item.message === 'string', 'notification 아이템: message는 문자열');
+        }
+      } catch (e) {
+        console.log(`  ❌ FAIL: notifications 응답 파싱 실패 (${e.message})`);
+        failed++;
+      }
+    }
+  }
+
+
+  // ────────────────────────────────────────────
   // Section 2: Public Search API (existing)
   // ────────────────────────────────────────────
   console.log('\n─── [Section 2] Public API ───');
@@ -289,6 +347,26 @@ async function runTests() {
     assert([401, 403, 404].includes(agSummarizeRes.status),
       '/admin/reports/{id}/summarize?engine=ag 미인증 401/403/404 통제 검증', `HTTP ${agSummarizeRes.status}`);
   }
+  {
+    const adminLlmGetRes = await assertHttpOk(`${BASE_URL}/admin/llm-setting`, 'GET /admin/llm-setting (미인증)');
+    if (adminLlmGetRes.status === 404) {
+      skip('/admin/llm-setting GET 미인증 401/403 통제 검증', '서버가 아직 신규 API 배포 전 상태입니다.');
+    } else {
+      assert([401, 403].includes(adminLlmGetRes.status),
+        '/admin/llm-setting GET 미인증 401/403 통제 검증', `HTTP ${adminLlmGetRes.status}`);
+    }
+  }
+  {
+    const adminLlmPostRes = await assertHttpOk(`${BASE_URL}/admin/llm-setting`, 'POST /admin/llm-setting (미인증)',
+      { method: 'POST', body: JSON.stringify({ visibility: 'telegram' }) });
+    if (adminLlmPostRes.status === 404) {
+      skip('/admin/llm-setting POST 미인증 401/403 통제 검증', '서버가 아직 신규 API 배포 전 상태입니다.');
+    } else {
+      assert([401, 403].includes(adminLlmPostRes.status),
+        '/admin/llm-setting POST 미인증 401/403 통제 검증', `HTTP ${adminLlmPostRes.status}`);
+    }
+  }
+
 
   // ────────────────────────────────────────────
   // Section 3: 응답 시간 성능

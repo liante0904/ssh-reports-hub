@@ -25,6 +25,8 @@ export const CONFIG = {
     REPORT_API_URL: REPORT_API_URL.replace(/\/$/, ''),
     COMPANIES_URL: `${API_BASE_URL}${API_PATH}/companies`,
     BOARDS_URL: `${API_BASE_URL}${API_PATH}/boards`,
+    LLM_SETTING_URL: `${API_BASE_URL}${API_PATH}/reports/llm-setting`,
+    ADMIN_LLM_SETTING_URL: `${API_BASE_URL}/admin/llm-setting`,
     TABLE_NAME: TABLE_NAME.replace(/^\//, '').replace(/\/$/, ''),
   },
   
