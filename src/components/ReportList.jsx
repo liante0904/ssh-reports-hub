@@ -185,7 +185,7 @@ function ReportList({ onWriterClick }) {
 
   // 모든 날짜 그룹이 닫혀있고 다음 데이터가 있다면 자동으로 더 불러오기
   useEffect(() => {
-    const reportDates = Object.keys(reports);
+    const reportDates = Object.keys(reports || {});
     if (reportDates.length === 0 && !isLoading) return;
 
     const allCollapsed = reportDates.every(date => collapsedDates[date] === true);
@@ -281,10 +281,10 @@ function ReportList({ onWriterClick }) {
 
   // 즐겨찾기 페이지: 서버 JOIN 데이터 우선, fallback으로 useReportFetch 데이터 사용
   const displayReports = isFavoritesPage && favoriteReports ? favoriteReports : reports;
-  const sortedDates = Object.keys(displayReports).sort((a, b) => b.localeCompare(a));
+  const sortedDates = Object.keys(displayReports || {}).sort((a, b) => b.localeCompare(a));
 
   const hasSummaryContent = (report) => {
-    return report.gemini_summary && report.gemini_summary.trim() !== "" && report.gemini_summary.trim() !== " ";
+    return report?.gemini_summary && report.gemini_summary.trim() !== "" && report.gemini_summary.trim() !== " ";
   };
 
   // 필터링된 날짜 리스트
@@ -294,22 +294,22 @@ function ReportList({ onWriterClick }) {
     ? sortedDates  // 서버에서 이미 유효한 데이터만 보내줌
     : isFavoritesPage
     ? sortedDates.filter(date => {
-        const items = displayReports[date];
+        const items = displayReports?.[date] || [];
         if (Array.isArray(items)) {
-          return items.some(report => !!favorites[report.id]);
+          return items.some(report => !!favorites[report?.id]);
         }
-        return Object.values(items).some(firmReports => 
-          firmReports.some(report => !!favorites[report.id])
+        return Object.values(items || {}).some(firmReports => 
+          Array.isArray(firmReports) && firmReports.some(report => !!favorites[report?.id])
         );
       })
     : isAiSummary
     ? sortedDates.filter(date => {
-        const items = displayReports[date];
+        const items = displayReports?.[date] || [];
         if (Array.isArray(items)) {
           return items.some(hasSummaryContent);
         }
-        return Object.values(items).some(firmReports =>
-          firmReports.some(hasSummaryContent)
+        return Object.values(items || {}).some(firmReports =>
+          Array.isArray(firmReports) && firmReports.some(hasSummaryContent)
         );
       })
     : sortedDates;
@@ -321,8 +321,8 @@ function ReportList({ onWriterClick }) {
       .slice(0, 2)
       .flatMap((date) => {
         if (collapsedDates[date]) return [];
-        const items = displayReports[date];
-        const list = Array.isArray(items) ? items : Object.values(items).flat();
+        const items = displayReports?.[date] || [];
+        const list = Array.isArray(items) ? items : Object.values(items || {}).flat();
         return list.filter((report) => {
           if (isFavoritesPage && !favoriteReports && !favorites[report.id]) return false;
           if (isAiSummary && !hasSummaryContent(report)) return false;
