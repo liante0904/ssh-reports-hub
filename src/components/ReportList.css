@@ -449,6 +449,8 @@
   font-size: 0.95em;
   line-height: 1.6;
   color: var(--text-color);
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .report-content {

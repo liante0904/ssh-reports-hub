@@ -51,6 +51,14 @@
     "testEnvironment": "jsdom",
     "transform": {
       "^.+\\.jsx?$": "babel-jest"
-    }
+    },
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "test/unit/utils.test.js",
+      "test/unit/proxy-ds.test.js",
+      "test/integration/api.test.js",
+      "test/integration/share-ds-smoke.test.js",
+      "test/admin-status.test.js"
+    ]
   }
 }

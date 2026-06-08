@@ -48,7 +48,7 @@ const ReportItem = ({
   };
   
   const hasSummary = gemini_summary && gemini_summary.trim() !== "" && gemini_summary.trim() !== " ";
-  const hasFnguideSummary = fnguide_summary && fnguide_summary.summary_text && fnguide_summary.summary_text.trim() !== "";
+  const hasFnguideSummary = !!fnguide_summary?.summary_text?.trim();
   const hasAnySummary = hasSummary || hasFnguideSummary;
 
   return (
@@ -208,7 +208,7 @@ const ReportItem = ({
                     <span style={{ fontWeight: 'bold' }}>FnGuide 요약</span>
                   </div>
                   <div className="fnguide-meta-badges" style={{ display: 'flex', gap: '6px' }}>
-                    {fnguide_summary.opinion && (
+                    {fnguide_summary?.opinion && (
                       <span className={`fnguide-badge opinion-badge`} style={{
                         fontSize: '11px',
                         padding: '2px 8px',
@@ -218,10 +218,10 @@ const ReportItem = ({
                         color: '#2e7d32',
                         border: '1px solid rgba(46, 125, 50, 0.3)'
                       }}>
-                        의견: {fnguide_summary.opinion}
+                        의견: {fnguide_summary?.opinion}
                       </span>
                     )}
-                    {fnguide_summary.target_price && fnguide_summary.target_price !== '0' && fnguide_summary.target_price !== '-' && (
+                    {fnguide_summary?.target_price && fnguide_summary?.target_price !== '0' && fnguide_summary?.target_price !== '-' && (
                       <span className="fnguide-badge target-price-badge" style={{
                         fontSize: '11px',
                         padding: '2px 8px',
@@ -231,12 +231,12 @@ const ReportItem = ({
                         color: '#7b1fa2',
                         border: '1px solid rgba(123, 31, 162, 0.3)'
                       }}>
-                        목표가: {fnguide_summary.target_price}
+                        목표가: {fnguide_summary?.target_price}
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="summary-text" style={{ marginTop: '8px', color: 'var(--text-color-secondary, #666)', fontSize: '13.5px', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                <div className="summary-text" style={{ marginTop: '8px', color: 'var(--text-color-secondary, #666)', fontSize: '13.5px', lineHeight: '1.6', whiteSpace: 'pre-wrap', wordBreak: 'break-all', overflowWrap: 'break-word' }}>
                   {fnguide_summary.summary_text}
                 </div>
               </div>
