@@ -7,7 +7,7 @@ import './BoardSelect.css';
 function BoardSelect({ value, boards = [], onChange, className = '' }) {
   const { isOpen, searchTerm, setSearchTerm, toggleOverlay, closeOverlay } = useGridOverlay();
 
-  const selectedBoard = boards.find(board => board.article_board_order?.toString() === value?.toString());
+  const selectedBoard = (boards || []).find(board => board?.article_board_order?.toString() === value?.toString());
   const selectedName = hasGridSelection(value)
     ? (selectedBoard?.board_nm || '게시판 필터')
     : '게시판 필터';
@@ -17,13 +17,13 @@ function BoardSelect({ value, boards = [], onChange, className = '' }) {
     closeOverlay();
   };
 
-  const filteredBoards = boards
+  const filteredBoards = (boards || [])
     .map((board) => ({
-      name: board.board_nm,
-      order: board.article_board_order,
-      count: board.report_count
+      name: board?.board_nm || '',
+      order: board?.article_board_order,
+      count: board?.report_count || 0
     }))
-    .filter(item => item.name.includes(searchTerm));
+    .filter(item => item.name?.includes(searchTerm));
 
   const overlay = (
     <div className="grid-overlay-portal board-grid-overlay">

@@ -583,12 +583,14 @@ html[data-theme='dark'] .card-author-badge {
   letter-spacing: 0;
   color: var(--text-color);
   margin-bottom: 20px;
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .card-summary-text p {
   margin: 0 0 12px 0;
-  word-break: keep-all;
-  overflow-wrap: anywhere;
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .financial-highlight {

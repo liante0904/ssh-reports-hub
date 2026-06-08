@@ -103,20 +103,20 @@ export function NotificationPopover({
             <span className="notification-status-dot" />
             <span>
               <strong>알림 연결됨</strong>
-              <small>등록 키워드 {keywords.length}개</small>
+              <small>등록 키워드 {keywords?.length || 0}개</small>
             </span>
           </div>
 
           {isLoadingKeywords ? (
             <div className="header-popover-loading">알림 설정을 불러오는 중...</div>
-          ) : keywords.length > 0 ? (
+          ) : (keywords?.length || 0) > 0 ? (
             <div className="notification-keywords">
               <div className="notification-keywords-title">감시 중인 키워드</div>
               <div className="notification-keyword-list">
-                {keywords.slice(0, 6).map((item) => (
-                  <span key={item.keyword}>{item.keyword}</span>
+                {(keywords || []).slice(0, 6).map((item) => (
+                  <span key={item?.keyword}>{item?.keyword}</span>
                 ))}
-                {keywords.length > 6 && <span>+{keywords.length - 6}</span>}
+                {(keywords?.length || 0) > 6 && <span>+{keywords.length - 6}</span>}
               </div>
             </div>
           ) : (
