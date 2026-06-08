@@ -87,22 +87,68 @@ const ReportItem = ({
                 ))}
             </div>
           )}
+          
+          {/* 요약 토글 버튼 영역 (태그 영역 아래 배치하여 작성자 뭉개짐 방지 및 개별 요약 가시성 증대) */}
+          {hasAnySummary && (
+            <div className="report-summary-buttons" style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+              {hasSummary && (
+                <button 
+                  className={`summary-toggle-btn ai-summary-btn ${isSummaryExpanded ? 'active' : ''}`}
+                  onClick={() => onToggleSummary(id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontSize: '0.82em',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    background: isSummaryExpanded ? 'linear-gradient(135deg, #6e8efb, #a777e3)' : 'rgba(110, 142, 251, 0.1)',
+                    color: isSummaryExpanded ? '#fff' : '#6e8efb',
+                    border: '1px solid rgba(110, 142, 251, 0.3)'
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                    <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86l-3 3.87L9 13.14 6 17h12l-3.86-5.14z"/>
+                  </svg>
+                  {isSummaryExpanded ? 'AI 요약 닫기 ▲' : 'AI 요약 보기 ▼'}
+                </button>
+              )}
+              {hasFnguideSummary && (
+                <button 
+                  className={`summary-toggle-btn fnguide-summary-btn ${isSummaryExpanded ? 'active' : ''}`}
+                  onClick={() => onToggleSummary(id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontSize: '0.82em',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    background: isSummaryExpanded ? '#2e7d32' : 'rgba(46, 125, 50, 0.1)',
+                    color: isSummaryExpanded ? '#fff' : '#2e7d32',
+                    border: '1px solid rgba(46, 125, 50, 0.3)'
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                  </svg>
+                  {isSummaryExpanded ? 'FnGuide 요약 닫기 ▲' : 'FnGuide 요약 보기 ▼'}
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="report-footer">
             <p className="report-writer" onClick={() => onWriterClick?.(writer)} style={{cursor: onWriterClick ? 'pointer' : 'default'}}>
               작성자: {writer} <span className="writer-search-icon">🔍</span>
             </p>
             <div className="report-actions">
-              {hasAnySummary && (
-                <button 
-                  className={`summary-toggle-btn ${isSummaryExpanded ? 'active' : ''}`}
-                  onClick={() => onToggleSummary(id)}
-                >
-                  {isSummaryExpanded ? '요약 닫기' : (hasSummary ? 'AI 요약 보기' : 'FnGuide 요약 보기')}
-                  <svg className="chevron-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                    <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-                  </svg>
-                </button>
-              )}
               <button 
                 className="viewer-button" 
                 onClick={handleViewerClick}
@@ -179,7 +225,7 @@ const ReportItem = ({
         <div className={`summary-content ${isSummaryExpanded ? 'expanded' : 'collapsed'}`}>
           <div className="summary-inner-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '14px', padding: '12px' }}>
             {hasSummary && (
-              <div className="summary-inner" style={{ width: '100%' }}>
+              <div className="summary-inner" style={{ width: 'auto' }}>
                 <div className="summary-title-row">
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="var(--primary-color)" style={{marginRight: '6px'}}>
                     <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86l-3 3.87L9 13.14 6 17h12l-3.86-5.14z"/>
@@ -198,7 +244,7 @@ const ReportItem = ({
               <div className="summary-inner fnguide-summary-section" style={{ 
                 borderTop: hasSummary ? '1px dashed var(--border-color, #e0e0e0)' : 'none', 
                 paddingTop: hasSummary ? '14px' : '0',
-                width: '100%'
+                width: 'auto'
               }}>
                 <div className="summary-title-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
