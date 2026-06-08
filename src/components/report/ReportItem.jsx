@@ -115,6 +115,80 @@ const ReportItem = ({
             </div>
           )}
           
+          {/* 관리자 요약 요청 버튼 영역 (report-tags 아래 배치하여 가시성 및 사용성 개선) */}
+          {isAdmin && (
+            <div className="admin-summary-section" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-color-secondary, #888)', fontWeight: 'bold' }}>AI 요약 요청:</span>
+              {!isSummaryRequested && !isSummaryCompleted && (
+                <span className="admin-summary-confirm">
+                  <button 
+                    className={`admin-summary-btn deepseek-btn ${showConfirm === 'deepseek' ? 'active' : ''}`}
+                    onClick={() => setShowConfirm(showConfirm === 'deepseek' ? null : 'deepseek')}
+                    title={hasSummary ? "DeepSeek AI 요약 재처리 요청" : "DeepSeek AI 요약 생성"}
+                  >
+                    <span className="summary-btn-icon" style={{ fontSize: '14px', fontWeight: '900', lineHeight: 1, marginRight: '2px' }}>!</span>
+                    <span>DeepSeek</span>
+                  </button>
+                  <button 
+                    className={`admin-summary-btn antigravity-btn ${showConfirm === 'ag' ? 'active' : ''}`}
+                    onClick={() => setShowConfirm(showConfirm === 'ag' ? null : 'ag')}
+                    title={hasSummary ? "Gemini AI 요약 재처리 요청" : "Gemini AI 요약 생성"}
+                  >
+                    <span className="summary-btn-icon" style={{ fontSize: '11px', lineHeight: 1, marginRight: '2px' }}>▲</span>
+                    <span>Gemini</span>
+                  </button>
+                  {showConfirm && (
+                    <span className="admin-summary-confirm-btns-wrapper" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      {hasSummary && (
+                        <span className="re-summarize-tooltip" style={{
+                          position: 'absolute',
+                          bottom: '100%',
+                          left: '50%',
+                          transform: 'translateX(-50%) translateY(-6px)',
+                          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                          color: '#fff',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          whiteSpace: 'nowrap',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                          zIndex: 10,
+                          fontWeight: 'normal'
+                        }}>
+                          ⚠️ 이미 요약이 존재합니다. 재처리하시겠습니까?
+                        </span>
+                      )}
+                      <span className="admin-summary-confirm-btns" style={{ display: 'inline-flex', gap: '4px' }}>
+                        <button 
+                          className="confirm-yes" 
+                          onClick={() => { 
+                            const engine = showConfirm; 
+                            setShowConfirm(null); 
+                            if (hasSummary) {
+                              showToast("기존 요약이 존재하여 AI 재처리 요약을 요청합니다...");
+                            } else {
+                              showToast("AI 요약 요청을 시작합니다...");
+                            }
+                            onTriggerSummary(id, engine, hasSummary); 
+                          }}
+                        >
+                          ✓
+                        </button>
+                        <button className="confirm-no" onClick={() => setShowConfirm(null)}>✗</button>
+                      </span>
+                    </span>
+                  )}
+                </span>
+              )}
+              {isSummaryRequested && !isSummaryCompleted && (
+                <span className="summary-requested-badge">요청됨</span>
+              )}
+              {isSummaryCompleted && (
+                <span className="summary-completed-badge">✓</span>
+              )}
+            </div>
+          )}
+          
           {/* 요약 토글 버튼 영역 (태그 영역 아래 배치하여 작성자 뭉개짐 방지 및 개별 요약 가시성 증대) */}
           {hasAnySummary && (
             <div className="report-summary-buttons" style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
@@ -187,73 +261,6 @@ const ReportItem = ({
                   <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                 </svg>
               </button>
-              {isAdmin && !isSummaryRequested && !isSummaryCompleted && (
-                <span className="admin-summary-confirm">
-                  <button 
-                    className={`admin-summary-btn deepseek-btn ${showConfirm === 'deepseek' ? 'active' : ''}`}
-                    onClick={() => setShowConfirm(showConfirm === 'deepseek' ? null : 'deepseek')}
-                    title={hasSummary ? "DeepSeek AI 요약 재처리 요청" : "DeepSeek AI 요약 생성"}
-                  >
-                    <span className="summary-btn-icon" style={{ fontSize: '14px', fontWeight: '900', lineHeight: 1, marginRight: '2px' }}>!</span>
-                    <span>DeepSeek</span>
-                  </button>
-                  <button 
-                    className={`admin-summary-btn antigravity-btn ${showConfirm === 'ag' ? 'active' : ''}`}
-                    onClick={() => setShowConfirm(showConfirm === 'ag' ? null : 'ag')}
-                    title={hasSummary ? "Gemini AI 요약 재처리 요청" : "Gemini AI 요약 생성"}
-                  >
-                    <span className="summary-btn-icon" style={{ fontSize: '11px', lineHeight: 1, marginRight: '2px' }}>▲</span>
-                    <span>Gemini</span>
-                  </button>
-                  {showConfirm && (
-                    <span className="admin-summary-confirm-btns-wrapper" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      {hasSummary && (
-                        <span className="re-summarize-tooltip" style={{
-                          position: 'absolute',
-                          bottom: '100%',
-                          left: '50%',
-                          transform: 'translateX(-50%) translateY(-6px)',
-                          backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                          color: '#fff',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          fontSize: '11px',
-                          whiteSpace: 'nowrap',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                          zIndex: 10,
-                          fontWeight: 'normal'
-                        }}>
-                          ⚠️ 이미 요약이 존재합니다. 재처리하시겠습니까?
-                        </span>
-                      )}
-                      <span className="admin-summary-confirm-btns" style={{ display: 'inline-flex', gap: '4px' }}>
-                        <button 
-                          className="confirm-yes" 
-                          onClick={() => { 
-                            const engine = showConfirm; 
-                            setShowConfirm(null); 
-                            if (hasSummary) {
-                              showToast("기존 요약이 존재하여 AI 재처리 요약을 요청합니다...");
-                            } else {
-                              showToast("AI 요약 요청을 시작합니다...");
-                            }
-                            onTriggerSummary(id, engine, hasSummary); 
-                          }}
-                        >
-                          ✓
-                        </button>
-                        <button className="confirm-no" onClick={() => setShowConfirm(null)}>✗</button>
-                      </span>
-                    </span>
-                  )}
-                </span>
-              )}
-              {isAdmin && isSummaryRequested && !isSummaryCompleted && (
-                <span className="summary-requested-badge">요청됨</span>
-              )}
-              {isAdmin && isSummaryCompleted && (
-                <span className="summary-completed-badge">✓</span>
-              )}
               <button 
                 className={`favorite-button ${isFavorite ? 'active' : ''}`}
                 onClick={() => onToggleFavorite(id)}
