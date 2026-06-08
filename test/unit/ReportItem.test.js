@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
 import ReportItem from '../../src/components/report/ReportItem';
 
 // context 모킹
@@ -66,4 +66,58 @@ describe('ReportItem Component', () => {
     expect(style.overflowWrap).toBe('break-word');
     expect(fnguideSummaryContainer.textContent).toContain('FnGuide 요약 내용입니다.');
   });
+
+  it('should render re-summarize options for admin when summary already exists', () => {
+    const mockOnTriggerSummary = jest.fn();
+    const { container } = render(
+      <ReportItem
+        report={mockReport}
+        isFavorite={false}
+        isSummaryExpanded={true}
+        onToggleFavorite={jest.fn()}
+        onToggleSummary={jest.fn()}
+        onOpenShareMenu={jest.fn()}
+        showFirmTag={true}
+        isAdmin={true}
+        onTriggerSummary={mockOnTriggerSummary}
+      />
+    );
+
+    // 이미 요약이 존재함 (mockReport.gemini_summary가 있으므로)
+    // admin-summary-confirm 영역 확인
+    const adminSummaryConfirm = container.querySelector('.admin-summary-confirm');
+    expect(adminSummaryConfirm).not.toBeNull();
+
+    // DeepSeek 및 Antigravity 재처리 버튼 존재 여부 확인
+    const deepseekBtn = container.querySelector('.deepseek-btn');
+    const antigravityBtn = container.querySelector('.antigravity-btn');
+    expect(deepseekBtn).not.toBeNull();
+    expect(antigravityBtn).not.toBeNull();
+
+    // Antigravity 재처리 버튼 클릭
+    act(() => {
+      fireEvent.click(antigravityBtn);
+    });
+
+    // ⚠️ 이미 요약이 존재합니다. 재처리하시겠습니까? 툴팁이 렌더링되는지 검증
+    const tooltip = container.querySelector('.re-summarize-tooltip');
+    expect(tooltip).not.toBeNull();
+    expect(tooltip.textContent).toContain('이미 요약이 존재합니다. 재처리하시겠습니까?');
+
+    // 확인 버튼(✓) 클릭
+    const confirmYesBtn = container.querySelector('.confirm-yes');
+    expect(confirmYesBtn).not.toBeNull();
+    act(() => {
+      fireEvent.click(confirmYesBtn);
+    });
+
+    // onTriggerSummary가 올바른 파라미터(id=1, engine='ag', force=true)로 호출되었는지 검증
+    expect(mockOnTriggerSummary).toHaveBeenCalledWith(1, 'ag', true);
+
+    // 토스트 UI가 노출되었는지 검증
+    const toastContainer = container.querySelector('.toast-container');
+    expect(toastContainer).not.toBeNull();
+    expect(toastContainer.textContent).toContain('기존 요약이 존재하여 AI 재처리 요약을 요청합니다...');
+  });
 });
+
