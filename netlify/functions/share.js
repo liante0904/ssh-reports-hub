@@ -71,6 +71,23 @@ export const handler = async (event) => {
 
   if (!id) return { statusCode: 400, body: 'ID missing' };
 
+  // ★ 변경: 봇이 아닌 일반 사용자에게는 즉시 로딩 페이지를 반환하고,
+  //   실제 데이터 처리는 비동기로 진행하여 리다이렉트
+  const isBot = /kakaotalk|telegram|facebook|twitter|slack|bot|crawler|spider/i.test(userAgent);
+
+  if (!isBot) {
+    // 일반 사용자: 즉시 로딩 페이지 반환 (스켈레톤 UI + 자동 리다이렉트)
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      },
+      body: generateLoadingPage(id, requestOrigin, SITE_URL),
+    };
+  }
+
+  // 봇인 경우: 기존 로직 그대로 실행 (OG 태그 포함 HTML 반환)
   try {
     const apiUrl = buildReportSearchUrl(id);
     
@@ -181,22 +198,7 @@ export const handler = async (event) => {
       }
     }
 
-    // 3. 봇(카카오톡, 텔레그램 등) 여부 확인하여 분기 처리
-    const isBot = /kakaotalk|telegram|facebook|twitter|slack|bot|crawler|spider/i.test(userAgent);
-
-    if (!isBot) {
-      // 일반 사용자는 302 리다이렉트로 즉시 이동 (성능 최적화)
-      return {
-        statusCode: 302,
-        headers: {
-          'Location': finalUrl,
-          'Cache-Control': 'no-cache',
-        },
-        body: '',
-      };
-    }
-
-    // 봇인 경우에만 OG 태그가 포함된 HTML 반환
+    // 3. 봇인 경우에만 OG 태그가 포함된 HTML 반환
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
@@ -213,3 +215,107 @@ export const handler = async (event) => {
     return { statusCode: 500, body: e.message };
   }
 };
+
+/**
+ * 로딩 페이지 HTML 생성 (스켈레톤 UI + 자바스크립트로 리다이렉트)
+ */
+function generateLoadingPage(reportId, requestOrigin, siteUrl) {
+  return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>리포트 로딩 중...</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #e0e0e0;
+      border-top-color: #1976d2;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 24px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .skeleton {
+      background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .skeleton-title { height: 24px; width: 70%; margin: 0 auto 16px; }
+    .skeleton-text { height: 16px; width: 50%; margin: 0 auto 8px; }
+    .skeleton-button { height: 48px; width: 100%; margin-top: 24px; }
+    .loading-text {
+      color: #666;
+      font-size: 14px;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="spinner"></div>
+    <div class="skeleton skeleton-title"></div>
+    <div class="skeleton skeleton-text"></div>
+    <div class="skeleton skeleton-text" style="width: 60%;"></div>
+    <div class="skeleton skeleton-button"></div>
+    <p class="loading-text">리포트를 불러오는 중입니다...</p>
+  </div>
+  <script>
+    // 페이지 로드 후 즉시 리다이렉트 시작
+    (function() {
+      var id = "${reportId}";
+      var origin = "${requestOrigin}";
+      var apiUrl = origin + "/.netlify/functions/share-redirect?id=" + encodeURIComponent(id);
+      
+      // fetch로 실제 리다이렉트 URL을 받아서 이동
+      fetch(apiUrl)
+        .then(function(res) {
+          if (res.redirected) {
+            window.location.href = res.url;
+          } else if (res.ok) {
+            return res.text();
+          } else {
+            throw new Error('Failed to load report');
+          }
+        })
+        .then(function(body) {
+          // JSON 응답에서 URL 추출 시도
+          try {
+            var data = JSON.parse(body);
+            if (data.url) {
+              window.location.href = data.url;
+            } else {
+              document.querySelector('.loading-text').textContent = '리포트를 찾을 수 없습니다.';
+            }
+          } catch(e) {
+            document.querySelector('.loading-text').textContent = '리포트 로딩 중 오류가 발생했습니다.';
+          }
+        })
+        .catch(function(err) {
+          document.querySelector('.loading-text').textContent = '네트워크 오류가 발생했습니다.';
+          console.error('Redirect fetch error:', err);
+        });
+    })();
+  </script>
+</body>
+</html>`;
+}
