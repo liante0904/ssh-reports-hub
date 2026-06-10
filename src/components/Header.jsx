@@ -277,6 +277,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
             🏠 ssh-reports-hub
           </div>
           <div className="header-actions">
+            {renderTelegramBadge()}
             <button
               type="button"
               className="header-search-button"
@@ -289,7 +290,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
                 <line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
             </button>
-            {renderTelegramBadge()}
             <button
               type="button"
               className="header-notification-button"
