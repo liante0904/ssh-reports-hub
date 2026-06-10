@@ -174,6 +174,9 @@ GET {BASE}/api/fnguide/report-summaries?{params}
 ]
 ```
 
+> `pdf_url`은 `tbl_fnguide_report_summaries` 테이블에서 직접 조회한 원본 PDF URL.
+> 프론트엔드 `FnGuideList.jsx` → `card-actions` 영역에 `PDF 보기` 버튼으로 렌더링됨 (빨간색, `FnGuide 원문 보기` 왼쪽).
+
 **테스트**: `test/integration/api.test.js` Section 2.2
 **호출 위치**:
 - `src/components/FnGuideList.jsx` → 종목요약 목록 조회

@@ -311,6 +311,22 @@ function FnGuideList() {
         )}
 
         <div className="card-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '14px' }}>
+          {/* PDF 보기 버튼 (pdf_url이 있을 때만) */}
+          {item.pdf_url && (
+            <a
+              href={item.pdf_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pdf-action-btn"
+              style={{ padding: '8px 14px', fontSize: '13px', borderRadius: '8px', backgroundColor: 'rgba(211, 47, 47, 0.08)', color: '#d32f2f', border: '1px solid rgba(211, 47, 47, 0.25)', fontWeight: '500', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', transition: 'all 0.2s ease' }}
+              title="PDF 원문 보기"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style={{ marginRight: '6px' }}>
+                <path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 10h1V8.5H9V10zm5.5 2H15V8.5h-.5V12zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z"/>
+              </svg>
+              PDF 보기
+            </a>
+          )}
           {(item.pdf_url || item.article_url) && (
             <a
               href={item.pdf_url || item.article_url}

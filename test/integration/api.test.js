@@ -161,6 +161,12 @@ async function runTests() {
         const item = data[0];
         assert(item.summary_id !== undefined, 'fnguide 아이템: summary_id 있음');
         assert(typeof item.report_title === 'string', 'fnguide 아이템: report_title 있음');
+        // pdf_url 필드 존재 검증 (PDF 보기 버튼용)
+        const hasPdfUrl = item.pdf_url !== undefined;
+        assert(hasPdfUrl, 'fnguide 아이템: pdf_url 필드 있음');
+        if (item.pdf_url) {
+          assert(typeof item.pdf_url === 'string', 'fnguide 아이템: pdf_url이 문자열');
+        }
       }
     } catch (e) {
       console.log(`  ❌ FAIL: fnguide report-summaries 응답 파싱 실패 (${e.message})`);
