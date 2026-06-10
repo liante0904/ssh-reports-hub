@@ -339,7 +339,7 @@ function ReportList({ onWriterClick }) {
   const isRecent = location.pathname === '/recent';
 
   const handleTagClick = (keyword) => {
-    handleSearch({ query: keyword, category: 'tag' });
+    handleSearch({ query: keyword, category: 'tags' });
   };
 
   const sectionMeta = getReportSectionByPath(location.pathname);

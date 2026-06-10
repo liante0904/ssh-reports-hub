@@ -37,7 +37,7 @@ GET {BASE}/external/api/search/?{params}
 | `sort` | `"company"` | - | 증권사별 정렬 |
 | `title` | string | - | 제목 검색 |
 | `writer` | string | - | 작성자 검색 |
-| `tag` | string | - | 태그 검색 |
+| `tags` | string | - | 태그 검색 |
 | `sector` | string | - | 산업(섹터) 검색 |
 | `stock` | string | - | 종목명 검색 |
 | `company` | string | - | 증권사 order 번호 필터 |

@@ -528,7 +528,7 @@ assert(allSameSize, '빈도가 모두 같으면 fontSize도 모두 같음');
 // createTagSearch
 const tagSearch = createTagSearch('반도체');
 assertEqual(tagSearch.query, '반도체', 'query = 키워드');
-assertEqual(tagSearch.category, 'tag', 'category = "tag"');
+assertEqual(tagSearch.category, 'tags', 'category = "tags"');
 
 // ─── 결과 요약 ───
 console.log('\n════════════════════════════════════════════');

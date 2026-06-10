@@ -79,5 +79,5 @@ export function buildDateTagCloud(reports) {
  * @returns {{ query: string, category: string }}
  */
 export function createTagSearch(keyword) {
-  return { query: keyword, category: 'tag' };
+  return { query: keyword, category: 'tags' };
 }
