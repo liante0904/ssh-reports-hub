@@ -166,7 +166,7 @@ function FnGuideList() {
     if (!container || !selectedChip) return;
 
     container.scrollTo({
-      left: selectedChip.offsetLeft - container.offsetLeft,
+      left: selectedChip.offsetLeft - container.offsetLeft - 72,
       behavior: 'smooth',
     });
   }, [selectedDate, dates]);
