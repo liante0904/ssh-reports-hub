@@ -160,7 +160,7 @@ function SearchOverlay() {
           >
             <option value="title">제목</option>
             <option value="writer">작성자</option>
-            <option value="tag">태그</option>
+            <option value="tags">태그</option>
             <option value="sector">산업</option>
             <option value="stock">종목명</option>
             <option value="company">증권사</option>

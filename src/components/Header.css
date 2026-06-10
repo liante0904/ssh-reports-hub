@@ -147,6 +147,7 @@ header.nav-hidden {
 }
 
 .header-notification-button,
+.header-search-button,
 .header-icon-button {
   position: relative;
   display: inline-flex;
@@ -164,6 +165,7 @@ header.nav-hidden {
 }
 
 .header-notification-button:hover,
+.header-search-button:hover,
 .header-icon-button:hover {
   border-color: color-mix(in srgb, var(--primary-color) 45%, transparent);
   background: color-mix(in srgb, var(--primary-color) 8%, var(--secondary-background-color));
