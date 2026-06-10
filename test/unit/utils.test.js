@@ -22,6 +22,10 @@ import {
   matchesFnGuideFacet,
   tokenizeFinancialHighlights,
 } from '../../src/utils/fnguide.js';
+import {
+  buildDateTagCloud,
+  createTagSearch,
+} from '../../src/utils/tagCloud.js';
 
 // ─── 테스트 헬퍼 ───
 let passed = 0;
@@ -477,6 +481,54 @@ assertEqual(getFnGuideFacetScale(4, 4), 1.7, '최다 발간 태그 1.7배 확대
 assertEqual(getFnGuideFacetScale(1, 4), 1, '단일 발간 태그 기본 크기');
 assert(matchesFnGuideFacet(facetSource[0], { type: 'author', value: '이리서치' }), '작성자 태그 필터');
 assert(!matchesFnGuideFacet(facetSource[2], { type: 'provider', value: 'KB증권' }), '증권사 태그 필터 제외');
+
+// ─── Test 14: buildDateTagCloud & createTagSearch (tagCloud.js) ───
+console.log('\n─── [Test 14] buildDateTagCloud & createTagSearch ───');
+
+// 빈 배열
+assertEqual(buildDateTagCloud([]), [], '빈 배열 → 빈 배열');
+assertEqual(buildDateTagCloud(null), [], 'null → 빈 배열');
+assertEqual(buildDateTagCloud(undefined), [], 'undefined → 빈 배열');
+
+// 태그 없는 레포트
+const noTagsReport = { sector: '', stock_names: [], tags: [] };
+assertEqual(buildDateTagCloud([noTagsReport]), [], '태그가 없는 레포트 → 빈 배열');
+
+// 기본 태그 집계
+const reports = [
+  { sector: '반도체', stock_names: ['삼성전자', 'SK하이닉스'], tags: ['AI', '메모리'] },
+  { sector: '반도체', stock_names: ['삼성전자'], tags: ['AI', 'HBM'] },
+  { sector: '건설', stock_names: ['현대건설'], tags: ['메자닌', '전환사채'] },
+];
+
+const cloud = buildDateTagCloud(reports);
+// 빈도: 반도체(2), 삼성전자(2), AI(2), 건설(1), SK하이닉스(1), 메모리(1), HBM(1), 현대건설(1), 메자닌(1), 전환사채(1)
+assert(cloud.length > 0, '태그 집계 결과가 비어있지 않음');
+assert(cloud.length === 10, '고유 태그 10개');
+
+// 빈도 내림차순 확인 (상위는 count=2인 3개)
+assert(cloud[0].count >= cloud[1].count, '빈도 내림차순 정렬됨');
+assert(cloud[0].count === 2, '최빈 태그 count = 2');
+assert(cloud[cloud.length - 1].count === 1, '최소 빈도 count = 1');
+
+// fontSize 범위 확인
+assert(cloud[0].fontSize > cloud[cloud.length - 1].fontSize, '빈도 높은 태그가 더 큰 fontSize');
+for (const entry of cloud) {
+  assert(entry.fontSize >= 0.7 && entry.fontSize <= 1.5, `${entry.keyword} fontSize(${entry.fontSize})가 0.7~1.5 범위 내`);
+}
+
+// 단일 레포트 (모든 태그 동일 빈도)
+const singleReport = [{ sector: 'IT', stock_names: ['네이버'], tags: ['클라우드'] }];
+const singleCloud = buildDateTagCloud(singleReport);
+assert(singleCloud.length === 3, '단일 레포트: sector + stock + tag = 3개');
+// 모든 빈도가 같으면 fontSize도 모두 같음
+const allSameSize = singleCloud.every(e => e.fontSize === singleCloud[0].fontSize);
+assert(allSameSize, '빈도가 모두 같으면 fontSize도 모두 같음');
+
+// createTagSearch
+const tagSearch = createTagSearch('반도체');
+assertEqual(tagSearch.query, '반도체', 'query = 키워드');
+assertEqual(tagSearch.category, 'tag', 'category = "tag"');
 
 // ─── 결과 요약 ───
 console.log('\n════════════════════════════════════════════');

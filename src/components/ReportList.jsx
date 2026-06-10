@@ -26,7 +26,7 @@ function emitSummaryNotification(detail) {
 }
 
 function ReportList({ onWriterClick }) {
-  const { searchQuery, sortBy, setSortBy, telegramUser } = useReport();
+  const { searchQuery, sortBy, setSortBy, telegramUser, handleSearch } = useReport();
   const isAdmin = telegramUser?.is_admin === true;
   const location = useLocation();
   const isOutlook = location.pathname.includes('outlook');
@@ -337,6 +337,11 @@ function ReportList({ onWriterClick }) {
   const isFavoritesPage = location.pathname.includes('favorites');
   const isAiSummary = location.pathname.includes('ai-summary');
   const isRecent = location.pathname === '/recent';
+
+  const handleTagClick = (keyword) => {
+    handleSearch({ query: keyword, category: 'tag' });
+  };
+
   const sectionMeta = getReportSectionByPath(location.pathname);
   const menuTitle = sectionMeta?.title || '레포트';
 
@@ -498,6 +503,8 @@ function ReportList({ onWriterClick }) {
                 summaryCompletedIds={summaryCompletedIds}
                 isAiSummary={isAiSummary}
                 hasSummaryContent={hasSummaryContent}
+                showTagCloud={isRecent && !isSearchActive}
+                onTagClick={handleTagClick}
               />
             ))}
           </InfiniteScroll>

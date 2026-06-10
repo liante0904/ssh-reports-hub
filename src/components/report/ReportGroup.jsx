@@ -1,5 +1,6 @@
 import React from 'react';
 import ReportItem from './ReportItem';
+import TagCloud from './TagCloud';
 import { getFirmOrderByName } from '../../constants/firms';
 
 function getReportsArray(items) {
@@ -46,7 +47,9 @@ function ReportGroup({
   summaryRequestedIds,
   summaryCompletedIds,
   isAiSummary,
-  hasSummaryContent
+  hasSummaryContent,
+  showTagCloud,
+  onTagClick
 }) {
   const isTimeSort = sortBy === 'time' || isFavoritesPage;
   const reportsArray = getReportsArray(items);
@@ -78,6 +81,10 @@ function ReportGroup({
           </div>
         )}
       </div>
+
+      {!isCollapsed && showTagCloud && (
+        <TagCloud reports={reportsArray} onTagClick={onTagClick} />
+      )}
 
       <div className={`company-group-wrapper ${isCollapsed ? 'collapsed' : ''}`}>
         {isTimeSort ? (
