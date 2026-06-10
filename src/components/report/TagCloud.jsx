@@ -5,7 +5,7 @@ import { buildDateTagCloud } from '../../utils/tagCloud';
  * 일자별 태그 클라우드 컴포넌트
  *
  * 레포트들의 태그/섹터/종목명을 집계해 빈도가 높을수록 큰 글씨로 표시한다.
- * 태그 클릭 시 onTagClick(keyword)를 호출한다.
+ * 태그 클릭 시 onTagClick(keyword, isSector)를 호출한다.
  */
 function TagCloud({ reports, onTagClick }) {
   const tags = buildDateTagCloud(reports);
@@ -14,19 +14,19 @@ function TagCloud({ reports, onTagClick }) {
 
   return (
     <div className="tag-cloud">
-      {tags.map(({ keyword, count, fontSize }) => (
+      {tags.map(({ keyword, count, fontSize, isSector }) => (
         <span
           key={keyword}
-          className="tag-cloud-item"
+          className={`tag-cloud-item${isSector ? ' tag-cloud-sector' : ''}`}
           style={{ fontSize: `${fontSize}em` }}
-          onClick={() => onTagClick?.(keyword)}
-          title={`${keyword} (${count}건)`}
+          onClick={() => onTagClick?.(keyword, isSector)}
+          title={`${keyword} (${count}건)${isSector ? ' · 섹터' : ''}`}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              onTagClick?.(keyword);
+              onTagClick?.(keyword, isSector);
             }
           }}
         >

@@ -511,6 +511,19 @@ assert(cloud[0].count >= cloud[1].count, '빈도 내림차순 정렬됨');
 assert(cloud[0].count === 2, '최빈 태그 count = 2');
 assert(cloud[cloud.length - 1].count === 1, '최소 빈도 count = 1');
 
+// isSector 검증
+const sectorEntry = cloud.find(e => e.keyword === '반도체');
+assert(sectorEntry !== undefined, '반도체 키워드 존재');
+assert(sectorEntry.isSector === true, '반도체는 sector 출신 → isSector=true');
+
+const tagEntry = cloud.find(e => e.keyword === 'AI');
+assert(tagEntry !== undefined, 'AI 키워드 존재');
+assert(tagEntry.isSector === false, 'AI는 tag 출신 → isSector=false');
+
+const stockEntry = cloud.find(e => e.keyword === '삼성전자');
+assert(stockEntry !== undefined, '삼성전자 키워드 존재');
+assert(stockEntry.isSector === false, '삼성전자는 stock 출신 → isSector=false');
+
 // fontSize 범위 확인
 assert(cloud[0].fontSize > cloud[cloud.length - 1].fontSize, '빈도 높은 태그가 더 큰 fontSize');
 for (const entry of cloud) {
@@ -525,10 +538,19 @@ assert(singleCloud.length === 3, '단일 레포트: sector + stock + tag = 3개'
 const allSameSize = singleCloud.every(e => e.fontSize === singleCloud[0].fontSize);
 assert(allSameSize, '빈도가 모두 같으면 fontSize도 모두 같음');
 
-// createTagSearch
-const tagSearch = createTagSearch('반도체');
-assertEqual(tagSearch.query, '반도체', 'query = 키워드');
-assertEqual(tagSearch.category, 'tags', 'category = "tags"');
+// createTagSearch (isSector=true → category='sector')
+const sectorSearch = createTagSearch('반도체', true);
+assertEqual(sectorSearch.query, '반도체', 'sector: query = 키워드');
+assertEqual(sectorSearch.category, 'sector', 'sector: category = "sector"');
+
+// createTagSearch (isSector=false → category='title')
+const titleSearch = createTagSearch('AI', false);
+assertEqual(titleSearch.query, 'AI', 'title: query = 키워드');
+assertEqual(titleSearch.category, 'title', 'title: category = "title"');
+
+// createTagSearch 기본값 (isSector 생략 → 'title')
+const defaultSearch = createTagSearch('메자닌');
+assertEqual(defaultSearch.category, 'title', '기본: category = "title"');
 
 // ─── 결과 요약 ───
 console.log('\n════════════════════════════════════════════');

@@ -338,8 +338,38 @@ function ReportList({ onWriterClick }) {
   const isAiSummary = location.pathname.includes('ai-summary');
   const isRecent = location.pathname === '/recent';
 
-  const handleTagClick = (keyword) => {
-    handleSearch({ query: keyword, category: 'tags' });
+  // 태그 클라우드 필터 상태 (현재 활성화된 태그 필터)
+  const [tagFilter, setTagFilter] = useState(null);
+  // 이전 검색 상태 저장 (필터 해제 시 복원용)
+  const [previousSearch, setPreviousSearch] = useState(null);
+
+  const handleTagClick = (keyword, isSector) => {
+    // 현재 검색 상태를 저장해둠 (필터 해제 시 복원)
+    setPreviousSearch({
+      query: searchQuery.query,
+      category: searchQuery.category,
+      board: searchQuery.board,
+      companyOrder: searchQuery.companyOrder,
+    });
+    const category = isSector ? 'sector' : 'title';
+    setTagFilter({ keyword, category });
+    handleSearch({ query: keyword, category });
+  };
+
+  const clearTagFilter = () => {
+    setTagFilter(null);
+    if (previousSearch) {
+      handleSearch({
+        query: previousSearch.query,
+        category: previousSearch.category,
+        board: previousSearch.board,
+        companyOrder: previousSearch.companyOrder,
+      });
+      setPreviousSearch(null);
+    } else {
+      // 저장된 이전 검색이 없으면 전체 해제
+      handleSearch({ query: '', category: '', board: null, companyOrder: null });
+    }
   };
 
   const sectionMeta = getReportSectionByPath(location.pathname);
@@ -432,6 +462,22 @@ function ReportList({ onWriterClick }) {
           ]}
           variant="compact"
         />
+        {/* 태그 클라우드 필터 표시줄 */}
+        {tagFilter && (
+          <div className="tag-filter-bar">
+            <span className="tag-filter-label">
+              🔍 필터: <strong>{tagFilter.keyword}</strong>
+              <span className="tag-filter-type">({tagFilter.category})</span>
+            </span>
+            <button
+              className="tag-filter-clear-btn"
+              onClick={clearTagFilter}
+              title="필터 해제"
+            >
+              ✕ 해제
+            </button>
+          </div>
+        )}
         {isOutlook && !isLoading && (
           <div className="outlook-year-filter">
             <button

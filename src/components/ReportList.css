@@ -648,3 +648,58 @@
   outline-offset: 2px;
   border-radius: 2px;
 }
+
+/* sector 출신 태그는 다른 색상으로 구분 */
+.tag-cloud-sector {
+  color: #2e7d32;
+}
+
+.tag-cloud-sector:hover {
+  color: #1b5e20;
+}
+
+/* ── Tag Filter Bar ── */
+.tag-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  background: color-mix(in srgb, var(--primary-color) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-color) 25%, transparent);
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.9em;
+}
+
+.tag-filter-label {
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.tag-filter-label strong {
+  color: var(--primary-color);
+}
+
+.tag-filter-type {
+  font-size: 0.8em;
+  color: var(--text-muted, #999);
+  margin-left: 4px;
+}
+
+.tag-filter-clear-btn {
+  background: none;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm, 4px);
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 4px 10px;
+  font-size: 0.85em;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.tag-filter-clear-btn:hover {
+  background: rgba(255, 77, 79, 0.1);
+  color: #ff4d4f;
+  border-color: #ff4d4f;
+}
