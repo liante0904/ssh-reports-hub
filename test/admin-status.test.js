@@ -178,7 +178,8 @@ async function runTests() {
       const data = await freshRes.json();
       const latest = data.items?.[0];
       if (latest?.save_time) {
-        const savedAt = new Date(latest.save_time);
+        // save_time은 KST 기준 문자열이므로 timezone 보정 (+09:00)
+        const savedAt = new Date(latest.save_time + '+09:00');
         const now = new Date();
         assert(!isNaN(savedAt.getTime()), 'save_time이 유효한 Date로 파싱됨');
         assert(savedAt <= now, 'save_time이 현재 시각 이전');
