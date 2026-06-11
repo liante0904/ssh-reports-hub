@@ -83,7 +83,7 @@ export const handler = async (event) => {
         'Content-Type': 'text/html; charset=utf-8',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
       },
-      body: generateLoadingPage(id, requestOrigin, SITE_URL),
+      body: generateLoadingPage(id, requestOrigin),
     };
   }
 
@@ -219,7 +219,7 @@ export const handler = async (event) => {
 /**
  * 로딩 페이지 HTML 생성 (스켈레톤 UI + 자바스크립트로 리다이렉트)
  */
-function generateLoadingPage(reportId, requestOrigin, siteUrl) {
+function generateLoadingPage(reportId, requestOrigin) {
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
