@@ -55,20 +55,25 @@ console.log(`  share: ${SHARE_BASE_URL}/share?id=${DS_SHARE_REPORT_ID}`);
 let location = '';
 try {
   const shareRes = await fetchWithTimeout(`${SHARE_BASE_URL}/share?id=${DS_SHARE_REPORT_ID}`, {
-    redirect: 'manual',
+    redirect: 'follow',
   });
 
-  if (shareRes.status === 302) {
-    pass('/share returns 302');
+  // share 함수는 OG 태그를 위해 200 + JS 리다이렉트를 반환
+  if (shareRes.status === 200) {
+    pass('/share returns 200');
   } else {
-    fail('/share returns 302', `HTTP ${shareRes.status}`);
+    fail('/share returns 200', `HTTP ${shareRes.status}`);
   }
 
-  location = shareRes.headers.get('location') || '';
+  const body = await shareRes.text();
+  // JS 리다이렉트에서 proxy-ds URL 추출
+  const match = body.match(/location\.replace\("([^"]+)"\)/);
+  location = match ? match[1] : '';
+
   if (location.includes('/.netlify/functions/proxy-ds?')) {
     pass('/share redirects to proxy-ds');
   } else {
-    fail('/share redirects to proxy-ds', location || 'missing Location');
+    fail('/share redirects to proxy-ds', location || 'missing proxy-ds URL in body');
   }
 
   if (location.includes('referer=')) {
