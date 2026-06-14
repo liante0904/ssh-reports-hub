@@ -12,6 +12,7 @@ import { ReportProvider } from './context/ReportContext';
 import { useReport } from './context/useReport';
 import { useAppLayout } from './hooks/useAppLayout';
 import PDFViewerModal from './components/report/PDFViewerModal';
+import RequireAuth from './components/RequireAuth';
 import './index.css';
 
 function AppContent() {
@@ -85,7 +86,11 @@ function AppContent() {
         }}
       >
         <Routes>
-          <Route path="/" element={<HomeDashboard />} />
+          {/* 점진적 auth 적용: 모든 route를 <RequireAuth>로 감싸면 됨 */}
+          <Route path="/" element={<RequireAuth><HomeDashboard /></RequireAuth>} />
+          {/* TODO: 2차 적용 — 아래 라우트들도 RequireAuth로 감싸기
+          <Route path="/recent" element={<RequireAuth><ReportList key="recent" onWriterClick={handleWriterSearch} /></RequireAuth>} />
+          */}
           <Route path="/recent" element={<ReportList key="recent" onWriterClick={handleWriterSearch} />} />
           <Route path="/global" element={<ReportList key="global" onWriterClick={handleWriterSearch} />} />
           <Route path="/industry" element={<ReportList key="industry" onWriterClick={handleWriterSearch} />} />
