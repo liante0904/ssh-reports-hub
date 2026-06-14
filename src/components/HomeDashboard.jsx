@@ -5,6 +5,7 @@ import { HOME_SECTIONS } from '../constants/reportSections';
 import { request } from '../utils/api';
 import { normalizeReportItem } from '../utils/reportNormalizer';
 import { getDirectUrl } from '../utils/reportLinks';
+import { useReport } from '../context/useReport';
 import './HomeDashboard.css';
 
 const PREVIEW_LIMIT = 5;
@@ -42,6 +43,16 @@ function normalizeReportPreview(item) {
 
 function HomeDashboard() {
   const navigate = useNavigate();
+  const { telegramUser } = useReport();
+  const isLoggedIn = !!(telegramUser && telegramUser.id && telegramUser.status === 'active');
+
+  const requireAuth = (fallbackRoute = '/recent') => {
+    if (!isLoggedIn) {
+      navigate(fallbackRoute); // RequireAuth가 로그인 페이지 표시
+      return false;
+    }
+    return true;
+  };
   const [sections, setSections] = useState(() => ({
     fnguide: { items: [], isLoading: true, error: '' },
     recent: { items: [], isLoading: true, error: '' },
@@ -153,7 +164,7 @@ function HomeDashboard() {
                 <h2>{section.title}</h2>
                 <p>{section.description}</p>
               </div>
-              <button type="button" onClick={() => navigate(section.path)}>
+              <button type="button" onClick={() => { if (requireAuth(section.path)) navigate(section.path); }}>
                 더보기
               </button>
             </div>
@@ -174,7 +185,7 @@ function HomeDashboard() {
                         key={item.id}
                         type="button"
                         className="home-preview-row"
-                        onClick={() => navigate(`${section.path}?summary_id=${item.id}`)}
+                        onClick={() => { if (requireAuth(section.path)) navigate(`${section.path}?summary_id=${item.id}`); }}
                       >
                         <span className="home-preview-main">
                           <span className="home-preview-title">{item.title}</span>
@@ -187,19 +198,20 @@ function HomeDashboard() {
 
                   const directUrl = getDirectUrl(item.rawReport);
                   return (
-                    <a
+                    <button
                       key={item.id}
-                      href={directUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      type="button"
                       className="home-preview-row"
+                      onClick={() => {
+                        if (requireAuth()) window.open(directUrl, '_blank', 'noopener,noreferrer');
+                      }}
                     >
                       <span className="home-preview-main">
                         <span className="home-preview-title">{item.title}</span>
                         {item.meta && <span className="home-preview-meta">{item.meta}</span>}
                       </span>
                       {item.date && <span className="home-preview-date">{item.date}</span>}
-                    </a>
+                    </button>
                   );
                 })
               )}
@@ -209,7 +221,7 @@ function HomeDashboard() {
       </section>
 
       <div className="home-secondary-actions">
-        <button type="button" onClick={() => navigate('/recent')}>
+        <button type="button" onClick={() => { if (requireAuth()) navigate('/recent'); }}>
           최신 레포트 전체 보기
         </button>
       </div>
