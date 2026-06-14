@@ -3,7 +3,7 @@ function buildReportRoute(pathname, baseUrl) {
   const params = new URLSearchParams();
 
   if (pathname.includes('global')) {
-    params.append('mkt_tp', 'global');
+    return { apiUrl: `${apiUrl}/global`, params };
   }
   // 산업 페이지 → 전용 /industry 엔드포인트 사용
   if (pathname.includes('industry')) {
