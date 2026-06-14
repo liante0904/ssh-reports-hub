@@ -86,20 +86,17 @@ function AppContent() {
         }}
       >
         <Routes>
-          {/* 점진적 auth 적용: 모든 route를 <RequireAuth>로 감싸면 됨 */}
-          <Route path="/" element={<RequireAuth><HomeDashboard /></RequireAuth>} />
-          {/* TODO: 2차 적용 — 아래 라우트들도 RequireAuth로 감싸기
+          {/* 메인 페이지만 공개, 나머지는 인증 필요 */}
+          <Route path="/" element={<HomeDashboard />} />
           <Route path="/recent" element={<RequireAuth><ReportList key="recent" onWriterClick={handleWriterSearch} /></RequireAuth>} />
-          */}
-          <Route path="/recent" element={<ReportList key="recent" onWriterClick={handleWriterSearch} />} />
-          <Route path="/global" element={<ReportList key="global" onWriterClick={handleWriterSearch} />} />
-          <Route path="/industry" element={<ReportList key="industry" onWriterClick={handleWriterSearch} />} />
-          <Route path="/favorites" element={<ReportList key="favorites" onWriterClick={handleWriterSearch} />} />
-          <Route path="/outlook" element={<ReportList key="outlook" onWriterClick={handleWriterSearch} />} />
-          <Route path="/ai-summary" element={<ReportList key="ai-summary" onWriterClick={handleWriterSearch} />} />
-          <Route path="/fnguide" element={<FnGuideList />} />
-          <Route path="/admin-console" element={<AdminConsole />} />
-          <Route path="/search-new" element={<SearchPageNew />} />
+          <Route path="/global" element={<RequireAuth><ReportList key="global" onWriterClick={handleWriterSearch} /></RequireAuth>} />
+          <Route path="/industry" element={<RequireAuth><ReportList key="industry" onWriterClick={handleWriterSearch} /></RequireAuth>} />
+          <Route path="/favorites" element={<RequireAuth><ReportList key="favorites" onWriterClick={handleWriterSearch} /></RequireAuth>} />
+          <Route path="/outlook" element={<RequireAuth><ReportList key="outlook" onWriterClick={handleWriterSearch} /></RequireAuth>} />
+          <Route path="/ai-summary" element={<RequireAuth><ReportList key="ai-summary" onWriterClick={handleWriterSearch} /></RequireAuth>} />
+          <Route path="/fnguide" element={<RequireAuth><FnGuideList /></RequireAuth>} />
+          <Route path="/admin-console" element={<RequireAuth><AdminConsole /></RequireAuth>} />
+          <Route path="/search-new" element={<RequireAuth><SearchPageNew /></RequireAuth>} />
         </Routes>
       </main>
       <SearchOverlay />
