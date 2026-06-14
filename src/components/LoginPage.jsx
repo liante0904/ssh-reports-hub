@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { CONFIG } from '../constants/config';
+import React, { useEffect } from 'react';
+import { useTelegramAuth } from '../hooks/useTelegramAuth';
 import { useReport } from '../context/useReport';
+import { CONFIG } from '../constants/config';
 
 /**
- * 로그인 페이지 — Telegram 인증 또는 승인 대기 화면.
+ * 로그인 페이지 — Header의 '로그인' 버튼과 동일한 loginWithTelegram 사용.
  * RequireAuth에서 미인증 시 자동 노출.
  */
 export default function LoginPage({ reason, user }) {
-  const BOT = CONFIG.TELEGRAM_BOT_NAME || 'ebest_noti_bot';
-  const BOT_LINK = `https://t.me/${BOT}`;
+  const { loginWithTelegram, isAuthenticating } = useTelegramAuth();
 
   // 승인 대기 중 주기적 확인
   useEffect(() => {
@@ -16,15 +16,12 @@ export default function LoginPage({ reason, user }) {
     const interval = setInterval(() => {
       const stored = localStorage.getItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
       if (stored) {
-        try {
-          if (JSON.parse(stored).status === 'active') window.location.reload();
-        } catch {}
+        try { if (JSON.parse(stored).status === 'active') window.location.reload(); } catch {}
       }
     }, 120000);
     return () => clearInterval(interval);
   }, [reason, user]);
 
-  // 승인 대기 화면
   if (reason === 'pending_approval') {
     return (
       <div style={s.container}>
@@ -39,7 +36,6 @@ export default function LoginPage({ reason, user }) {
     );
   }
 
-  // 로그인 화면
   return (
     <div style={s.container}>
       <div style={s.card}>
@@ -47,11 +43,16 @@ export default function LoginPage({ reason, user }) {
         <h2 style={s.title}>리포트 허브</h2>
         <p style={s.sub}>증권사 리서치 리포트 통합 뷰어</p>
 
-        <button style={{ ...s.btn, background: '#0088cc' }} onClick={() => window.open(BOT_LINK, '_blank')}>
-          텔레그램으로 로그인
+        <button
+          style={{ ...s.btn, background: '#0088cc', opacity: isAuthenticating ? 0.6 : 1 }}
+          onClick={loginWithTelegram}
+          disabled={isAuthenticating}
+        >
+          {isAuthenticating ? '인증 중...' : '로그인'}
         </button>
+
         <p style={s.hint}>
-          <a href={BOT_LINK} target="_blank" rel="noopener">@{BOT}</a> 에서 인증 후 이용 가능합니다.
+          Header의 로그인 버튼과 동일하게 동작합니다.
         </p>
         <a href="/" style={s.link}>메인으로 돌아가기</a>
       </div>
@@ -66,6 +67,6 @@ const s = {
   title: { fontSize: '24px', fontWeight: 700, margin: '0 0 8px 0' },
   sub: { fontSize: '15px', color: '#666', margin: '0 0 24px 0' },
   btn: { width: '100%', padding: '14px', background: '#1976d2', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer' },
-  hint: { fontSize: '12px', color: '#999', margin: '12px 0 0 0' },
-  link: { fontSize: '12px', color: '#1976d2', display: 'block', marginTop: '12px', textDecoration: 'none' },
+  hint: { fontSize: '11px', color: '#aaa', margin: '12px 0 0 0' },
+  link: { fontSize: '12px', color: '#1976d2', display: 'block', marginTop: '8px', textDecoration: 'none' },
 };
