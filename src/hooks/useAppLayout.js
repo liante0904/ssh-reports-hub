@@ -99,7 +99,12 @@ export function useAppLayout() {
 
     const updateHeaderHeight = () => {
       if (headerNode) {
-        document.documentElement.style.setProperty('--header-height', `${headerNode.offsetHeight}px`);
+        // safe-area-inset-top는 .main-content가 이미 독립적으로 처리하므로
+        // 헤더 측정값에서 제외해 이중 가산을 방지한다.
+        const safeAreaTop = parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-top')
+        ) || 0;
+        document.documentElement.style.setProperty('--header-height', `${headerNode.offsetHeight - safeAreaTop}px`);
       }
     };
 

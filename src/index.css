@@ -1,4 +1,8 @@
 :root {
+  /* safe-area 환경변수 — JS에서도 읽을 수 있도록 커스텀 프로퍼티로 노출 */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+
   /* HSL 기반 글로벌 테마 컬러 */
   --primary-color: hsl(210, 100%, 50%);         /* 생동감 넘치는 블루 (#007aff) */
   --primary-glow: hsla(210, 100%, 50%, 0.15);
@@ -151,12 +155,12 @@ body {
 
 .main-content {
   flex-grow: 1;
-  padding-top: calc(var(--header-height, 110px) + 20px); 
+  padding-top: calc(var(--header-height, 110px) + 20px + var(--safe-area-inset-top, 0px));
 }
 
 @media (min-width: 1024px) {
   .main-content {
-    padding-top: calc(var(--header-height, 130px) + 30px);
+    padding-top: calc(var(--header-height, 130px) + 30px + var(--safe-area-inset-top, 0px));
   }
 }
 
