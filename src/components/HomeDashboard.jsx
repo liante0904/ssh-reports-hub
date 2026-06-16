@@ -123,8 +123,11 @@ function HomeDashboard() {
 
     const loadGlobal = async () => {
       try {
+        // 전용 /global 엔드포인트 사용 (mkt_tp=global 검색 파라미터 대체)
+        // - 국내 종목코드·코스피/코스닥 키워드 자동 제외
+        // - 60초 Redis 캐시 (vs search 30초)
         const data = await request(
-          `${CONFIG.API.REPORT_API_URL}/search?limit=${PREVIEW_LIMIT}&offset=0&mkt_tp=global`,
+          `${CONFIG.API.REPORT_API_URL}/global?limit=${PREVIEW_LIMIT}&offset=0`,
           { signal: controller.signal }
         );
         setSectionState('global', {
