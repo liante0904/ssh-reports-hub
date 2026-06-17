@@ -11,12 +11,21 @@ const PDFViewerModal = ({ report, onClose }) => {
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
   useEffect(() => { if (report) setLoading(true); }, [report]);
 
-  // body scroll lock
+  // body scroll lock + pinch zoom 허용 (뷰어 열릴 때만)
   useEffect(() => {
     if (!report) return;
-    const p = document.body.style.overflow;
+    const vp = document.querySelector('meta[name="viewport"]');
+    const prevContent = vp?.getAttribute('content') || '';
+    const prevOverflow = document.body.style.overflow;
+
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = p; };
+    // user-scalable 일시 허용 → iframe 내 PDF pinch zoom 가능
+    if (vp) vp.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=10.0, user-scalable=yes, viewport-fit=cover');
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      if (vp) vp.setAttribute('content', prevContent);
+    };
   }, [report]);
 
   // iOS PWA viewport height
