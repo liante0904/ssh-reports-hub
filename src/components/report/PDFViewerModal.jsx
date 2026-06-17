@@ -2,33 +2,100 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getProxyPdfUrl } from '../../utils/reportLinks';
 import './PDFViewerModal.css';
 
+// ---------------------------------------------------------------------------
+// pdf.js lazy loader
+// ---------------------------------------------------------------------------
+let _pdfjs = null;
+async function getPdfjs() {
+  if (_pdfjs) return _pdfjs;
+  _pdfjs = await import(/* @vite-ignore */ '/lib/pdfjs/build/pdf.mjs');
+  _pdfjs.GlobalWorkerOptions.workerSrc = '/lib/pdfjs/build/pdf.worker.mjs';
+  return _pdfjs;
+}
+
+// ---------------------------------------------------------------------------
+// PageCanvas: 단일 PDF 페이지 → canvas
+// ---------------------------------------------------------------------------
+const MAX_DPR = 2;
+
+function PageCanvas({ page, scale }) {
+  const ref = useRef(null);
+  const renderRef = useRef(null);
+  const destroyedRef = useRef(false);
+
+  useEffect(() => {
+    destroyedRef.current = false;
+    return () => { destroyedRef.current = true; if (renderRef.current) renderRef.current.cancel(); };
+  }, [page, scale]);
+
+  useEffect(() => {
+    if (!page || !ref.current) return;
+    if (renderRef.current) renderRef.current.cancel();
+    const canvas = ref.current;
+    const ctx = canvas.getContext('2d');
+    let cancelled = false;
+
+    (async () => {
+      const vp = page.getViewport({ scale });
+      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+      const pw = Math.min(Math.floor(vp.width * dpr), 2400);
+      const ph = Math.floor(vp.height * (pw / (vp.width * dpr)) * dpr);
+      canvas.width = pw;
+      canvas.height = ph;
+      canvas.style.width = `${vp.width}px`;
+      canvas.style.height = `${vp.height}px`;
+      if (cancelled || destroyedRef.current) return;
+      renderRef.current = page.render({ canvasContext: ctx, viewport: vp });
+      await renderRef.current.promise;
+    })().catch(() => {});
+
+    return () => { cancelled = true; };
+  }, [page, scale]);
+
+  return <canvas ref={ref} className="pdf-page-canvas" />;
+}
+
+const PageCanvasMemo = React.memo(PageCanvas);
+
+// ---------------------------------------------------------------------------
+// PDFViewerModal
+// ---------------------------------------------------------------------------
 const PDFViewerModal = ({ report, onClose }) => {
   const histRef = useRef(false);
-  const onCloseRef = useRef(onClose);
+  const bodyRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [pages, setPages] = useState([]);       // {pageNum, page}[]
+  const [scale, setScale] = useState(1);
+  const pwRef = useRef(null);                     // page 1 viewport width at scale=1
+  const onCloseRef = useRef(onClose);
 
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
-  useEffect(() => { if (report) setLoading(true); }, [report]);
 
-  // body scroll lock + pinch zoom 허용 (뷰어 열릴 때만)
+  // reset
+  useEffect(() => {
+    if (!report) return;
+    setLoading(true);
+    setPages([]);
+    setScale(1);
+    pwRef.current = null;
+  }, [report]);
+
+  // body lock + viewport pinch-zoom toggle
   useEffect(() => {
     if (!report) return;
     const vp = document.querySelector('meta[name="viewport"]');
-    const prevContent = vp?.getAttribute('content') || '';
-    const prevOverflow = document.body.style.overflow;
-
+    const prevVP = vp?.getAttribute('content') || '';
+    const prevO = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    // user-scalable 일시 허용 → iframe 내 PDF pinch zoom 가능
     if (vp) vp.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=10.0, user-scalable=yes, viewport-fit=cover');
-
     return () => {
-      document.body.style.overflow = prevOverflow;
-      if (vp) vp.setAttribute('content', prevContent);
+      document.body.style.overflow = prevO;
+      if (vp) vp.setAttribute('content', prevVP);
     };
   }, [report]);
 
-  // iOS PWA viewport height
+  // iOS PWA height
   useEffect(() => {
     if (!report) return;
     const setH = () => document.documentElement.style.setProperty('--pdf-viewer-height', `${window.visualViewport?.height || window.innerHeight}px`);
@@ -38,7 +105,7 @@ const PDFViewerModal = ({ report, onClose }) => {
     return () => { window.visualViewport?.removeEventListener('resize', setH); window.removeEventListener('resize', setH); document.documentElement.style.removeProperty('--pdf-viewer-height'); };
   }, [report]);
 
-  // history back-button close
+  // history back
   useEffect(() => {
     if (!report) return;
     window.history.pushState({ ...window.history.state, pdf: 1 }, '', window.location.href);
@@ -49,8 +116,83 @@ const PDFViewerModal = ({ report, onClose }) => {
   }, [report]);
 
   const { title = '', firm = '', writer = '', shareUrl = '' } = report || {};
+  const proxyUrl = useMemo(() => report ? getProxyPdfUrl(report, window.location.origin) : '', [report]);
 
-  const viewerUrl = useMemo(() => report ? getProxyPdfUrl(report, window.location.origin) : '', [report]);
+  // fetch → blob → pdf.js → 모든 페이지 로드 → fit-width scale → 끝
+  useEffect(() => {
+    if (!proxyUrl) return;
+    let ok = true;
+
+    (async () => {
+      try {
+        // 1. fetch blob
+        const r = await fetch(proxyUrl);
+        if (!r.ok || !ok) return;
+        const blob = await r.blob();
+        if (!ok) return;
+
+        // 2. pdf.js
+        const pdfjs = await getPdfjs();
+        const url = URL.createObjectURL(blob);
+        const doc = await pdfjs.getDocument({ url, cMapUrl: '/lib/pdfjs/web/cmaps/', cMapPacked: true }).promise;
+        if (!ok) { doc.destroy(); URL.revokeObjectURL(url); return; }
+
+        // 3. 모든 페이지 객체 미리 로드
+        const pageList = [];
+        for (let i = 1; i <= doc.numPages; i++) {
+          const pg = await doc.getPage(i);
+          pageList.push({ pageNum: i, page: pg });
+        }
+
+        // 4. fit-width scale 계산
+        const pw = pageList[0].page.getViewport({ scale: 1 }).width;
+        pwRef.current = pw;
+        const cw = bodyRef.current?.clientWidth || window.innerWidth;
+        const s = cw > 0 && pw > 0 ? cw / pw : 1;
+
+        if (!ok) { doc.destroy(); URL.revokeObjectURL(url); return; }
+        setPages(pageList);
+        setScale(s);
+        setLoading(false);
+      } catch (e) { console.warn('[PDFViewer]', e); if (ok) setLoading(false); }
+    })();
+
+    return () => { ok = false; };
+  }, [proxyUrl]);
+
+  // pinch zoom (user-scalable=no 환경에서도 동작)
+  const zoomRef = useRef(1);
+  const pinchRef = useRef({ dist: 0, base: 1 });
+  useEffect(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+    const dist = (t) => { const dx = t[0].clientX - t[1].clientX; const dy = t[0].clientY - t[1].clientY; return Math.sqrt(dx * dx + dy * dy); };
+    const onStart = (e) => { if (e.touches.length === 2) { pinchRef.current = { dist: dist(e.touches), base: zoomRef.current }; } };
+    const onMove = (e) => {
+      if (e.touches.length !== 2 || !pinchRef.current.dist) return;
+      const z = Math.max(0.5, Math.min(5, pinchRef.current.base * (dist(e.touches) / pinchRef.current.dist)));
+      zoomRef.current = z;
+      setScale((pwRef.current && bodyRef.current) ? (bodyRef.current.clientWidth / pwRef.current) * z : z);
+    };
+    const onEnd = () => { pinchRef.current = { dist: 0, base: 1 }; };
+    el.addEventListener('touchstart', onStart, { passive: false });
+    el.addEventListener('touchmove', onMove, { passive: false });
+    el.addEventListener('touchend', onEnd);
+    el.addEventListener('touchcancel', onEnd);
+    return () => { el.removeEventListener('touchstart', onStart); el.removeEventListener('touchmove', onMove); el.removeEventListener('touchend', onEnd); el.removeEventListener('touchcancel', onEnd); };
+  }, []);
+
+  // resize → scale 재계산
+  useEffect(() => {
+    const onR = () => {
+      if (!bodyRef.current || !pwRef.current) return;
+      const cw = bodyRef.current.clientWidth;
+      if (cw > 0) setScale(cw / pwRef.current);
+    };
+    window.addEventListener('resize', onR);
+    window.visualViewport?.addEventListener('resize', onR);
+    return () => { window.removeEventListener('resize', onR); window.visualViewport?.removeEventListener('resize', onR); };
+  }, []);
 
   const copyUrl = useCallback(async () => { try { await navigator.clipboard.writeText(shareUrl || window.location.href); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {} }, [shareUrl]);
 
@@ -85,21 +227,21 @@ const PDFViewerModal = ({ report, onClose }) => {
           </button>
         </div>
       </div>
-      <div className="pdf-viewer-body">
+
+      <div className="pdf-viewer-body" ref={bodyRef}>
         {loading && (
           <div className="pdf-viewer-spinner">
             <svg viewBox="0 0 24 24" width="48" height="48" className="spinner-icon"><circle cx="12" cy="12" r="10" fill="none" stroke="var(--primary-color, #007aff)" strokeWidth="2.5" strokeDasharray="31.4 31.4" strokeLinecap="round"/></svg>
             <span>PDF 불러오는 중...</span>
           </div>
         )}
-        <iframe
-          src={viewerUrl}
-          className="pdf-viewer-iframe"
-          title="PDF Viewer"
-          allow="fullscreen"
-          onLoad={() => setLoading(false)}
-          style={{ opacity: loading ? 0 : 1 }}
-        />
+        <div className="pdf-viewer-pages" style={{ visibility: loading ? 'hidden' : 'visible' }}>
+          {pages.map(({ pageNum, page }) => (
+            <div key={pageNum} className="pdf-page-wrapper">
+              <PageCanvasMemo page={page} scale={scale} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
