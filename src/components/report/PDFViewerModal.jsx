@@ -41,12 +41,7 @@ const PDFViewerModal = ({ report, onClose }) => {
 
   const { title = '', firm = '', writer = '', shareUrl = '' } = report || {};
 
-  // #view=FitH → Chrome/iOS Safari 너비에 맞춤
-  const viewerUrl = useMemo(() => {
-    if (!report) return '';
-    const base = getProxyPdfUrl(report, window.location.origin);
-    return base ? `${base}#view=FitH` : '';
-  }, [report]);
+  const viewerUrl = useMemo(() => report ? getProxyPdfUrl(report, window.location.origin) : '', [report]);
 
   const copyUrl = useCallback(async () => { try { await navigator.clipboard.writeText(shareUrl || window.location.href); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {} }, [shareUrl]);
 
