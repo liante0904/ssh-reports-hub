@@ -115,9 +115,52 @@
   position: relative;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   box-sizing: border-box;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
+/* custom pdf viewer pages */
+.pdf-viewer-pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 8px;
+}
+
+.pdf-page-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.pdf-page-canvas-wrap {
+  display: block;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  background: #fff;
+}
+
+.pdf-page-canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.pdf-page-skeleton {
+  width: 100%;
+  aspect-ratio: 0.72;
+  background: linear-gradient(180deg, #6a6e71 0%, #525659 100%);
+  border-radius: 2px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+/* 기존 iframe 스타일 유지 (fallback) */
 .pdf-viewer-iframe {
   display: block;
   width: 100%;

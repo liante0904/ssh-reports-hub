@@ -1,19 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useGridOverlay } from '../hooks/useGridOverlay';
 import { hasGridSelection } from '../utils/gridSelect';
-import { FIRM_OPTIONS, getFirmNameByOrder } from '../constants/firms';
+import { getFirmNameByOrder, getFirmOrderByName } from '../constants/firms';
+import { request } from '../utils/api';
+import { CONFIG } from '../constants/config';
 import './CompanySelect.css';
 
-// 증권사별 테마 색상 (선택 사항 - 시각적 구분용)
 const firm_colors = {
   "삼성증권": "#0052A4", "미래에셋증권": "#FF6B00", "키움증권": "#9B218B",
   "NH투자증권": "#004098", "KB증권": "#FFCC00", "신한증권": "#0046FF",
   "한국투자증권": "#000000", "하나증권": "#00918E", "토스증권": "#2461FF"
 };
 
+/** /external/api/companies API에서 증권사 목록을 가져온다 (하드코딩 대체) */
+function useFirmOptions() {
+  const [firms, setFirms] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await request(CONFIG.API.COMPANIES_URL, { skipAuth: true });
+        if (cancelled || !Array.isArray(data)) return;
+        const mapped = data.map((item, idx) => {
+          const fallbackOrder = getFirmOrderByName(item.name);
+          return {
+            order: fallbackOrder !== null ? fallbackOrder : idx,
+            name: item.name,
+            report_count: item.report_count,
+          };
+        });
+        // report_count 내림차순 정렬 (ALL 제외)
+        mapped.sort((a, b) => b.report_count - a.report_count);
+        if (!cancelled) setFirms(mapped);
+      } catch { /* API 실패 시 하드코딩 fallback 없음 - 빈 목록 */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  return firms;
+}
+
 function CompanySelect({ value, onChange, className = '' }) {
   const { isOpen, searchTerm, setSearchTerm, toggleOverlay, closeOverlay } = useGridOverlay();
+  const firms = useFirmOptions();
   const selectedValue = value === null || value === undefined ? '' : value.toString();
 
   const selectedName = hasGridSelection(value) ? (getFirmNameByOrder(value) || "증권사 필터") : "증권사 필터";
@@ -26,8 +57,9 @@ function CompanySelect({ value, onChange, className = '' }) {
     closeOverlay();
   };
 
-  const filteredFirms = FIRM_OPTIONS
-    .filter(item => item.name.includes(searchTerm));
+  const filteredFirms = firms.filter(item =>
+    item.name.includes(searchTerm)
+  );
 
   const overlay = (
     <div className="grid-overlay-portal company-grid-overlay">
