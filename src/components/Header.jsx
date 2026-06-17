@@ -28,6 +28,7 @@ function normalizeNotificationItem(item) {
     created_at: item.created_at,
     pdf_url: item.pdf_url || null,
     telegram_url: item.telegram_url || null,
+    article_url: item.article_url || null,
   };
 }
 
@@ -195,6 +196,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
         article_title: item.article_title || '',
         firm_nm: item.firm_nm || '',
         pdf_url: pdfUrl,
+        article_url: item.article_url || '',
       });
     } else if (item.article_title) {
       handleSearch(item.article_title);
