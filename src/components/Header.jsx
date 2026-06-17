@@ -188,15 +188,17 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     }
     setActivePopover(null);
 
-    // PDF URL이 있으면 인앱 뷰어로 열고, 없으면 검색으로 이동
-    const pdfUrl = item.pdf_url || item.telegram_url;
-    if (pdfUrl && item.report_id) {
+    // 웹 리포트 제목 클릭과 동일하게 전체 report 객체 전달
+    if ((item.pdf_url || item.telegram_url) && item.report_id) {
       setViewerReport({
         report_id: item.report_id,
         article_title: item.article_title || '',
         firm_nm: item.firm_nm || '',
-        pdf_url: pdfUrl,
-        article_url: item.article_url || '',
+        pdf_url: item.pdf_url || null,
+        download_url: item.download_url || null,
+        telegram_url: item.telegram_url || null,
+        article_url: item.article_url || null,
+        writer: item.writer || '',
       });
     } else if (item.article_title) {
       handleSearch(item.article_title);
