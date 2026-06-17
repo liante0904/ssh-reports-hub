@@ -26,6 +26,8 @@ function normalizeNotificationItem(item) {
     source: item.summary_model ? 'summary' : 'telegram',
     notification_key: item.notification_key || `${item.summary_model ? 'summary' : 'telegram'}:${item.id}`,
     created_at: item.created_at,
+    pdf_url: item.pdf_url || null,
+    telegram_url: item.telegram_url || null,
   };
 }
 
@@ -61,6 +63,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     activeSearch,
     telegramUser,
     logout,
+    setViewerReport,
   } = useReport();
   const { isAuthenticating, loginWithTelegram } = useTelegramAuth();
   const keywordState = useKeywords(telegramUser);
@@ -184,11 +187,20 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     }
     setActivePopover(null);
 
-    if (item.article_title) {
+    // PDF URL이 있으면 인앱 뷰어로 열고, 없으면 검색으로 이동
+    const pdfUrl = item.pdf_url || item.telegram_url;
+    if (pdfUrl && item.report_id) {
+      setViewerReport({
+        report_id: item.report_id,
+        article_title: item.article_title || '',
+        firm_nm: item.firm_nm || '',
+        pdf_url: pdfUrl,
+      });
+    } else if (item.article_title) {
       handleSearch(item.article_title);
       navigate('/');
     }
-  }, [readNotifyIds, handleSearch, navigate]);
+  }, [readNotifyIds, handleSearch, navigate, setViewerReport]);
 
   useEffect(() => {
     const handleSummaryNotification = (event) => {
