@@ -29,6 +29,7 @@ function normalizeNotificationItem(item) {
     pdf_url: item.pdf_url || null,
     telegram_url: item.telegram_url || null,
     article_url: item.article_url || null,
+    sec_firm_order: item.sec_firm_order ?? null,
   };
 }
 
@@ -194,6 +195,8 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
         report_id: item.report_id,
         article_title: item.article_title || '',
         firm_nm: item.firm_nm || '',
+        sec_firm_order: item.sec_firm_order ?? null,
+        link: item.pdf_url || item.telegram_url || '',
         pdf_url: item.pdf_url || null,
         download_url: item.download_url || null,
         telegram_url: item.telegram_url || null,
