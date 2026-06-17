@@ -55,11 +55,13 @@ export function getDirectUrl(report) {
   const { id, link } = report;
   
   // 1. 반드시 프록시(share)를 타야 하는 경우 (CORS, 쿠키 등 대행이 필수적인 곳)
-  // DS투자증권은 여전히 프록시가 안정적임
+  // DS투자증권, 흥국증권은 share URL이 더 안정적
   const isDs = isDsReport(report);
-  
-  const needsProxy = 
-    isDs || 
+  const isHeungkuk = String(report?.sec_firm_order) === '28' || (report?.firm_nm || report?.firm || '').includes('흥국');
+
+  const needsProxy =
+    isDs ||
+    isHeungkuk ||
     !link || link === '#';
 
   if (needsProxy) {
