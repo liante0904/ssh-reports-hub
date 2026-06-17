@@ -1,72 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getProxyPdfUrl } from '../../utils/reportLinks';
-import { usePdfDocument } from '../../hooks/usePdfDocument';
-import { usePinchZoom } from '../../hooks/usePinchZoom';
 import './PDFViewerModal.css';
-
-const MAX_DPR = 2;
-const MAX_CANVAS_W = 2048;
-
-/**
- * 단일 페이지 렌더링. canvas ref 직접 관리.
- */
-function PdfCanvas({ pdf, pageNum, scale }) {
-  const canvasRef = useRef(null);
-  const renderRef = useRef(null);
-  const destroyedRef = useRef(false);
-
-  useEffect(() => {
-    destroyedRef.current = false;
-    return () => { destroyedRef.current = true; if (renderRef.current) renderRef.current.cancel(); };
-  }, [pageNum]);
-
-  useEffect(() => {
-    if (!pdf || !canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    let cancelled = false;
-
-    if (renderRef.current) renderRef.current.cancel();
-
-    (async () => {
-      try {
-        const page = await pdf.getPage(pageNum);
-        if (cancelled || destroyedRef.current) { page.cleanup(); return; }
-        const vp = page.getViewport({ scale });
-        const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
-        const pw = Math.min(Math.floor(vp.width * dpr), MAX_CANVAS_W);
-        const ph = Math.floor(vp.height * (pw / (vp.width * dpr)) * dpr);
-        canvas.width = pw;
-        canvas.height = ph;
-        canvas.style.width = `${vp.width}px`;
-        canvas.style.height = `${vp.height}px`;
-        renderRef.current = page.render({ canvasContext: ctx, viewport: vp.clone({ width: pw / dpr, height: ph / dpr }) });
-        await renderRef.current.promise;
-        page.cleanup();
-      } catch (e) { if (!cancelled) console.warn('[PdfCanvas]', e); }
-    })();
-
-    return () => { cancelled = true; };
-  }, [pdf, pageNum, scale]);
-
-  return <canvas ref={canvasRef} className="pdf-page-canvas" />;
-}
-
-const PdfCanvasMemo = React.memo(PdfCanvas);
 
 const PDFViewerModal = ({ report, onClose }) => {
   const histRef = useRef(false);
   const onCloseRef = useRef(onClose);
-  const bodyRef = useRef(null);
-  const pageWRef = useRef(null);
-
   const [loading, setLoading] = useState(true);
-  const [numPages, setNumPages] = useState(0);
-  const [fitS, setFitS] = useState(1);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
-  useEffect(() => { if (!report) return; setLoading(true); setNumPages(0); setFitS(1); }, [report]);
+  useEffect(() => { if (report) setLoading(true); }, [report]);
 
   // body scroll lock
   useEffect(() => {
@@ -76,7 +19,7 @@ const PDFViewerModal = ({ report, onClose }) => {
     return () => { document.body.style.overflow = p; };
   }, [report]);
 
-  // iOS PWA height
+  // iOS PWA viewport height
   useEffect(() => {
     if (!report) return;
     const setH = () => document.documentElement.style.setProperty('--pdf-viewer-height', `${window.visualViewport?.height || window.innerHeight}px`);
@@ -86,7 +29,7 @@ const PDFViewerModal = ({ report, onClose }) => {
     return () => { window.visualViewport?.removeEventListener('resize', setH); window.removeEventListener('resize', setH); document.documentElement.style.removeProperty('--pdf-viewer-height'); };
   }, [report]);
 
-  // history back
+  // history back-button close
   useEffect(() => {
     if (!report) return;
     window.history.pushState({ ...window.history.state, pdf: 1 }, '', window.location.href);
@@ -97,65 +40,8 @@ const PDFViewerModal = ({ report, onClose }) => {
   }, [report]);
 
   const { title = '', firm = '', writer = '', shareUrl = '' } = report || {};
-  const proxyUrl = useMemo(() => report ? getProxyPdfUrl(report, window.location.origin) : '', [report]);
 
-  // fetch PDF binary
-  const [dataUrl, setDataUrl] = useState('');
-  useEffect(() => {
-    if (!proxyUrl) return;
-    let ok = true;
-    (async () => { try { const r = await fetch(proxyUrl); if (r.ok && ok) setDataUrl(URL.createObjectURL(await r.blob())); } catch {} })();
-    return () => { ok = false; };
-  }, [proxyUrl]);
-
-  const { pdf } = usePdfDocument(dataUrl);
-
-  // fit-width scale (scale 계산 완료 전까지 loading 유지 → scale=1로 깜빡임 방지)
-  useEffect(() => {
-    if (!pdf) return;
-    setNumPages(pdf.numPages);
-    let ok = true;
-    const fallbackTimer = setTimeout(() => { if (ok) setLoading(false); }, 5000);
-    // defer: container가 DOM에 paint된 후 width 측정
-    const tryCalc = (retry) => {
-      if (!ok) return;
-      const cw = bodyRef.current?.clientWidth || window.innerWidth;
-      if (cw === 0 && retry > 0) {
-        requestAnimationFrame(() => tryCalc(retry - 1));
-        return;
-      }
-      pdf.getPage(1).then(p => {
-        if (!ok) return;
-        clearTimeout(fallbackTimer);
-        const pw = p.getViewport({ scale: 1 }).width;
-        pageWRef.current = pw;
-        setFitS(cw > 0 && pw > 0 ? cw / pw : 1);
-        p.cleanup();
-        setLoading(false);
-      }).catch(() => { clearTimeout(fallbackTimer); if (ok) setLoading(false); });
-    };
-    requestAnimationFrame(() => tryCalc(5)); // 최대 5번 재시도 (~80ms)
-    return () => { ok = false; clearTimeout(fallbackTimer); };
-  }, [pdf]);
-
-  // pinch zoom
-  const { zoom, resetZoom } = usePinchZoom(bodyRef);
-  const scale = fitS * zoom;
-
-  // resize
-  useEffect(() => {
-    const onR = () => {
-      if (!bodyRef.current || !pageWRef.current) return;
-      const cw = bodyRef.current.clientWidth;
-      if (cw > 0) setFitS(cw / pageWRef.current);
-    };
-    window.addEventListener('resize', onR);
-    window.visualViewport?.addEventListener('resize', onR);
-    return () => { window.removeEventListener('resize', onR); window.visualViewport?.removeEventListener('resize', onR); };
-  }, []);
-
-  // cleanup
-  useEffect(() => () => { if (dataUrl) URL.revokeObjectURL(dataUrl); }, [dataUrl]);
+  const viewerUrl = useMemo(() => report ? getProxyPdfUrl(report, window.location.origin) : '', [report]);
 
   const copyUrl = useCallback(async () => { try { await navigator.clipboard.writeText(shareUrl || window.location.href); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {} }, [shareUrl]);
 
@@ -190,27 +76,21 @@ const PDFViewerModal = ({ report, onClose }) => {
           </button>
         </div>
       </div>
-
-      <div className="pdf-viewer-body" ref={bodyRef}>
-        {zoom !== 1 && (
-          <button className="pdf-zoom-reset" onClick={resetZoom}>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-            <span>{Math.round(zoom * 100)}%</span>
-          </button>
-        )}
+      <div className="pdf-viewer-body">
         {loading && (
           <div className="pdf-viewer-spinner">
             <svg viewBox="0 0 24 24" width="48" height="48" className="spinner-icon"><circle cx="12" cy="12" r="10" fill="none" stroke="var(--primary-color, #007aff)" strokeWidth="2.5" strokeDasharray="31.4 31.4" strokeLinecap="round"/></svg>
             <span>PDF 불러오는 중...</span>
           </div>
         )}
-        <div className="pdf-viewer-pages" style={{ visibility: loading ? 'hidden' : 'visible' }}>
-          {Array.from({ length: numPages }, (_, i) => (
-            <div key={i + 1} className="pdf-page-wrapper">
-              <PdfCanvasMemo pdf={pdf} pageNum={i + 1} scale={scale} />
-            </div>
-          ))}
-        </div>
+        <iframe
+          src={viewerUrl}
+          className="pdf-viewer-iframe"
+          title="PDF Viewer"
+          allow="fullscreen"
+          onLoad={() => setLoading(false)}
+          style={{ opacity: loading ? 0 : 1 }}
+        />
       </div>
     </div>
   );
