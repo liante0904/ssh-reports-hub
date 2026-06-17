@@ -123,23 +123,22 @@ export function NotificationPopover({
           <div className="notification-list-container">
             {notifications.map((item) => {
               const isUnread = !readNotifyIds.includes(getNotificationKey(item)) && !readNotifyIds.includes(item.id);
-              const isDeepseek = item.summary_model === 'deepseek';
-              const isTelegram = item.source === 'telegram';
+              const isSummary = item.source === 'summary';
               return (
                 <div
                   key={getNotificationKey(item)}
-                  className={`notification-item ${isUnread ? 'unread' : ''} ${isTelegram ? 'telegram' : ''}`}
+                  className={`notification-item ${isUnread ? 'unread' : ''}`}
                   onClick={() => onNotificationClick?.(item)}
                 >
-                  <span className={`notification-item-icon ${isTelegram ? 'telegram' : isDeepseek ? 'deepseek' : 'gemini'}`}>
-                    {isTelegram ? 'T' : isDeepseek ? '!' : '▲'}
+                  <span className={`notification-item-icon ${isSummary ? 'gemini' : 'telegram'}`}>
+                    {isSummary ? '▲' : 'T'}
                   </span>
                   <div className="notification-item-content">
                     <div className="notification-item-message">
                       {item.message}
                     </div>
                     <div className="notification-item-time">
-                      {isTelegram ? '텔레그램 발송' : 'AI 요약'} · {formatRelativeTime(item.created_at)}
+                      {isSummary ? 'AI 요약' : '텔레그램 발송'} · {formatRelativeTime(item.created_at)}
                     </div>
                   </div>
                 </div>

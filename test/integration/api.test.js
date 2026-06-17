@@ -201,45 +201,13 @@ async function runTests() {
   }
 
   // ────────────────────────────────────────────
-  // Section 2.4: AI Summary Notifications API
+  // Section 2.4: 통합 리포트 알림 API (send-history)
   // ────────────────────────────────────────────
-  console.log('\n─── [Section 2.4] AI Summary Notifications API ───');
-
-  const notificationsCheck = await assertHttpOk(
-    `${BASE_URL}/external/api/reports/notifications?limit=5`,
-    'GET /external/api/reports/notifications (알림 목록)'
-  );
-
-  if (notificationsCheck.status === 404) {
-    skip('GET /external/api/reports/notifications', '서버가 아직 신규 API 배포 전 상태입니다.');
-  } else {
-    assert(notificationsCheck.status === 200, 'GET /external/api/reports/notifications 응답 성공', `HTTP ${notificationsCheck.status}`);
-    if (notificationsCheck.res && notificationsCheck.status === 200) {
-      try {
-        const data = await notificationsCheck.res.json();
-        assert(Array.isArray(data), 'notifications 응답: 배열 형태 확인', `length=${data.length}`);
-        if (data.length > 0) {
-          const item = data[0];
-          assert(typeof item.id === 'number', 'notification 아이템: id는 숫자');
-          assert(typeof item.report_id === 'number', 'notification 아이템: report_id는 숫자');
-          assert(typeof item.message === 'string', 'notification 아이템: message는 문자열');
-        }
-      } catch (e) {
-        console.log(`  ❌ FAIL: notifications 응답 파싱 실패 (${e.message})`);
-        failed++;
-      }
-    }
-  }
-
-
-  // ────────────────────────────────────────────
-  // Section 2.5: Telegram Send History API
-  // ────────────────────────────────────────────
-  console.log('\n─── [Section 2.5] Telegram Send History API ───');
+  console.log('\n─── [Section 2.4] 통합 리포트 알림 (send-history) API ───');
 
   const sendHistoryCheck = await assertHttpOk(
     `${BASE_URL}/external/api/reports/send-history?limit=5`,
-    'GET /external/api/reports/send-history (텔레그램 발송 내역)'
+    'GET /external/api/reports/send-history (통합 알림 내역)'
   );
 
   if (sendHistoryCheck.status === 404) {

@@ -20,26 +20,16 @@ function getNotificationKey(item) {
   return item?.notification_key || `${item?.source || 'summary'}:${item?.id}`;
 }
 
-function normalizeSummaryNotification(item) {
-  return {
-    ...item,
-    source: item.source || 'summary',
-    notification_key: item.notification_key || `summary:${item.id}`,
-    created_at: item.created_at,
-  };
-}
-
 function normalizeSendHistoryItem(item) {
-  const reportTitle = item.article_title || item.report_title || item.title || '텔레그램 알림';
+  const reportTitle = item.article_title || item.report_title || item.title || '리포트 알림';
   const keyword = item.keyword ? ` [${item.keyword}]` : '';
   return {
     id: item.id,
     report_id: item.report_id,
     article_title: reportTitle,
     firm_nm: item.firm_nm || item.firm || '',
-    summary_model: null,
-    source: 'telegram',
-    notification_key: `telegram:${item.id}`,
+    source: item.keyword === 'AI 요약' ? 'summary' : 'telegram',
+    notification_key: `${item.keyword === 'AI 요약' ? 'summary' : 'telegram'}:${item.id}`,
     message: item.message || `${keyword} ${reportTitle}`.trim(),
     created_at: item.sent_at || item.created_at,
     keyword: item.keyword || null,
@@ -53,7 +43,6 @@ function normalizeLocalSummaryEvent(detail) {
     report_id: detail.report_id,
     article_title: detail.article_title,
     firm_nm: detail.firm_nm || '',
-    summary_model: detail.summary_model,
     source: 'summary',
     notification_key: `local-summary:${id}`,
     message: detail.message,
@@ -148,7 +137,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const [notifications, setNotifications] = useState([]);
   const [localNotifications, setLocalNotifications] = useState([]);
   const [notificationToast, setNotificationToast] = useState(null);
-  const sendHistoryUnsupportedRef = useRef(false);
   const [readNotifyIds, setReadNotifyIds] = useState(() => {
     try {
       const saved = localStorage.getItem('ssh_read_notifications');
@@ -160,29 +148,14 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
   const fetchNotifications = useCallback(async () => {
     try {
-      const url = `${CONFIG.API.REPORT_API_URL}/reports/notifications?limit=30`;
+      const url = `${CONFIG.API.REPORT_API_URL}/reports/send-history?limit=50`;
       const data = await request(url, { skipAuth: false });
-      const summaryItems = Array.isArray(data) ? data.map(normalizeSummaryNotification) : [];
-
-      let sendHistoryItems = [];
-      if (!sendHistoryUnsupportedRef.current) {
-        try {
-          const historyUrl = `${CONFIG.API.REPORT_API_URL}/reports/send-history?limit=30`;
-          const historyData = await request(historyUrl, { skipAuth: false, logoutOn401: false });
-          sendHistoryItems = Array.isArray(historyData) ? historyData.map(normalizeSendHistoryItem) : [];
-        } catch (err) {
-          if (err.message?.includes('404')) {
-            sendHistoryUnsupportedRef.current = true;
-          }
-          sendHistoryItems = [];
-        }
-      }
-
-      setNotifications([...summaryItems, ...sendHistoryItems].sort((a, b) => (
+      const items = Array.isArray(data) ? data.map(normalizeSendHistoryItem) : [];
+      setNotifications(items.sort((a, b) => (
         new Date(b.created_at || 0) - new Date(a.created_at || 0)
       )));
     } catch (err) {
-      console.error('Failed to fetch summary notifications:', err);
+      console.error('Failed to fetch send history:', err);
     }
   }, []);
 
@@ -339,7 +312,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
           }}
         >
           <span className={`notification-toast-icon ${notificationToast.source || 'summary'}`}>
-            {notificationToast.source === 'telegram' ? 'T' : notificationToast.summary_model === 'deepseek' ? '!' : '▲'}
+            {notificationToast.source === 'telegram' ? 'T' : '▲'}
           </span>
           <span>{notificationToast.message}</span>
         </button>
