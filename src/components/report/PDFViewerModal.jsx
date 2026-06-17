@@ -110,21 +110,32 @@ const PDFViewerModal = ({ report, onClose }) => {
 
   const { pdf } = usePdfDocument(dataUrl);
 
-  // fit-width scale
+  // fit-width scale (scale 계산 완료 전까지 loading 유지 → scale=1로 깜빡임 방지)
   useEffect(() => {
     if (!pdf) return;
     setNumPages(pdf.numPages);
-    setLoading(false);
     let ok = true;
-    pdf.getPage(1).then(p => {
+    const fallbackTimer = setTimeout(() => { if (ok) setLoading(false); }, 5000);
+    // defer: container가 DOM에 paint된 후 width 측정
+    const tryCalc = (retry) => {
       if (!ok) return;
-      const pw = p.getViewport({ scale: 1 }).width;
-      pageWRef.current = pw;
-      const c = bodyRef.current;
-      setFitS(c && c.clientWidth > 0 ? c.clientWidth / pw : 1);
-      p.cleanup();
-    }).catch(() => {});
-    return () => { ok = false; };
+      const cw = bodyRef.current?.clientWidth || window.innerWidth;
+      if (cw === 0 && retry > 0) {
+        requestAnimationFrame(() => tryCalc(retry - 1));
+        return;
+      }
+      pdf.getPage(1).then(p => {
+        if (!ok) return;
+        clearTimeout(fallbackTimer);
+        const pw = p.getViewport({ scale: 1 }).width;
+        pageWRef.current = pw;
+        setFitS(cw > 0 && pw > 0 ? cw / pw : 1);
+        p.cleanup();
+        setLoading(false);
+      }).catch(() => { clearTimeout(fallbackTimer); if (ok) setLoading(false); });
+    };
+    requestAnimationFrame(() => tryCalc(5)); // 최대 5번 재시도 (~80ms)
+    return () => { ok = false; clearTimeout(fallbackTimer); };
   }, [pdf]);
 
   // pinch zoom
