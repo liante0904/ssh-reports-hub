@@ -20,19 +20,12 @@ function getNotificationKey(item) {
   return item?.notification_key || `${item?.source || 'summary'}:${item?.id}`;
 }
 
-function normalizeSendHistoryItem(item) {
-  const reportTitle = item.article_title || item.report_title || item.title || '리포트 알림';
-  const keyword = item.keyword ? ` [${item.keyword}]` : '';
+function normalizeNotificationItem(item) {
   return {
-    id: item.id,
-    report_id: item.report_id,
-    article_title: reportTitle,
-    firm_nm: item.firm_nm || item.firm || '',
-    source: item.keyword === 'AI 요약' ? 'summary' : 'telegram',
-    notification_key: `${item.keyword === 'AI 요약' ? 'summary' : 'telegram'}:${item.id}`,
-    message: item.message || `${keyword} ${reportTitle}`.trim(),
-    created_at: item.sent_at || item.created_at,
-    keyword: item.keyword || null,
+    ...item,
+    source: item.summary_model ? 'summary' : 'telegram',
+    notification_key: item.notification_key || `${item.summary_model ? 'summary' : 'telegram'}:${item.id}`,
+    created_at: item.created_at,
   };
 }
 
@@ -148,14 +141,14 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
   const fetchNotifications = useCallback(async () => {
     try {
-      const url = `${CONFIG.API.REPORT_API_URL}/reports/send-history?limit=50`;
+      const url = `${CONFIG.API.REPORT_API_URL}/reports/notifications?limit=50`;
       const data = await request(url, { skipAuth: false });
-      const items = Array.isArray(data) ? data.map(normalizeSendHistoryItem) : [];
+      const items = Array.isArray(data) ? data.map(normalizeNotificationItem) : [];
       setNotifications(items.sort((a, b) => (
         new Date(b.created_at || 0) - new Date(a.created_at || 0)
       )));
     } catch (err) {
-      console.error('Failed to fetch send history:', err);
+      console.error('Failed to fetch notifications:', err);
     }
   }, []);
 
