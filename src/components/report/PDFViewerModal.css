@@ -13,6 +13,7 @@
   animation: slideUp 0.3s ease-out;
   box-sizing: border-box;
   overflow: hidden;
+  touch-action: manipulation; /* header 영역 더블탭 확대 방지 */
 }
 
 .pdf-viewer-header {
@@ -127,12 +128,14 @@
   align-items: center;
   padding: 12px 0;
   gap: 8px;
+  touch-action: pinch-zoom pan-x pan-y; /* iOS PWA pinch zoom 허용 */
 }
 
 .pdf-page-wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
+  touch-action: pinch-zoom pan-x pan-y;
 }
 
 .pdf-page-canvas-wrap {

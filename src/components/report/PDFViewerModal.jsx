@@ -1,13 +1,21 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getProxyPdfUrl } from '../../utils/reportLinks';
 import { usePdfDocument } from '../../hooks/usePdfDocument';
-import { useFitWidthScale } from '../../hooks/useFitWidthScale';
 import { createRenderQueue } from '../../utils/renderQueue';
 import PdfPage from './PdfPage';
 import './PDFViewerModal.css';
 
 const PRELOAD_PAGES = 1;
 const MAX_CACHED_PAGES = 6;
+// iOS PWA: fit-width 강제 + pinch zoom 허용
+const INITIAL_SCALE_FALLBACK = 1;
+
+/** 컨테이너 width / 첫 페이지 viewport width → fit-width scale */
+function calcFitScale(container, pageWidth) {
+  if (!container || !pageWidth) return INITIAL_SCALE_FALLBACK;
+  const cw = container.clientWidth;
+  return cw > 0 && pageWidth > 0 ? cw / pageWidth : INITIAL_SCALE_FALLBACK;
+}
 
 const PDFViewerModal = ({ report, onClose }) => {
   const historyPushedRef = useRef(false);
@@ -16,14 +24,16 @@ const PDFViewerModal = ({ report, onClose }) => {
   const observerRef = useRef(null);
   const renderQueue = useRef(createRenderQueue());
   const renderedRef = useRef(new Set());
+  const pageWidthRef = useRef(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [numPages, setNumPages] = useState(0);
   const [visiblePages, setVisiblePages] = useState(new Set([1]));
+  const [scale, setScale] = useState(INITIAL_SCALE_FALLBACK);
 
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
-  useEffect(() => { if (report) { setIsLoading(true); setNumPages(0); renderedRef.current = new Set(); } }, [report]);
+  useEffect(() => { if (report) { setIsLoading(true); setNumPages(0); renderedRef.current = new Set(); setScale(INITIAL_SCALE_FALLBACK); } }, [report]);
 
   // body scroll lock
   useEffect(() => {
@@ -75,13 +85,39 @@ const PDFViewerModal = ({ report, onClose }) => {
 
   const { pdf } = usePdfDocument(pdfDataUrl);
 
+  // PDF 로드 → 첫 페이지 viewport width 측정 → fit-width scale 계산
   useEffect(() => {
     if (!pdf) return;
     setNumPages(pdf.numPages);
     setIsLoading(false);
+
+    let cancelled = false;
+    pdf.getPage(1).then(page => {
+      if (!cancelled) {
+        pageWidthRef.current = page.getViewport({ scale: 1 }).width;
+        const s = calcFitScale(containerRef.current, pageWidthRef.current);
+        setScale(s);
+        page.cleanup();
+      }
+    }).catch(() => {});
+    return () => { cancelled = true; };
   }, [pdf]);
 
-  const scale = useFitWidthScale(containerRef, pdf);
+  // scale 변경 시 모든 렌더 초기화 → 새 scale로 다시 그림
+  useEffect(() => {
+    renderedRef.current = new Set();
+  }, [scale]);
+
+  // resize → scale 재계산 + 렌더 초기화
+  useEffect(() => {
+    const onResize = () => {
+      const s = calcFitScale(containerRef.current, pageWidthRef.current);
+      setScale(s);
+    };
+    window.addEventListener('resize', onResize);
+    window.visualViewport?.addEventListener('resize', onResize);
+    return () => { window.removeEventListener('resize', onResize); window.visualViewport?.removeEventListener('resize', onResize); };
+  }, []);
 
   // IntersectionObserver: 보이는 페이지 감지
   useEffect(() => {
@@ -116,7 +152,6 @@ const PDFViewerModal = ({ report, onClose }) => {
     targets.forEach(pageNum => {
       renderedRef.current.add(pageNum);
       renderQueue.current.enqueue(`p${pageNum}`, async () => {
-        // 너무 많은 canvas면 먼 쪽 제거
         if (renderedRef.current.size > MAX_CACHED_PAGES) {
           const far = [...renderedRef.current]
             .filter(n => !visiblePages.has(n))
