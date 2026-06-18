@@ -6,6 +6,7 @@ import KeywordOverlay from './menu/KeywordOverlay';
 import { AccountPopover, BellIcon, NotificationPopover } from './HeaderPopovers';
 import { useReport } from '../context/useReport';
 import { request } from '../utils/api';
+import { getDirectUrl } from '../utils/reportLinks';
 import { CONFIG } from '../constants/config';
 import { HEADER_PATHS } from '../utils/headerNavigation';
 import { useHeaderSearchState } from '../hooks/useHeaderSearchState';
@@ -65,7 +66,6 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     activeSearch,
     telegramUser,
     logout,
-    setViewerReport,
   } = useReport();
   const { isAuthenticating, loginWithTelegram } = useTelegramAuth();
   const keywordState = useKeywords(telegramUser);
@@ -189,25 +189,25 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     }
     setActivePopover(null);
 
-    // 웹 리포트 제목 클릭과 동일하게 전체 report 객체 전달
-    if ((item.pdf_url || item.telegram_url) && item.report_id) {
-      setViewerReport({
-        report_id: item.report_id,
-        article_title: item.article_title || '',
-        firm_nm: item.firm_nm || '',
-        sec_firm_order: item.sec_firm_order ?? null,
-        link: item.pdf_url || item.telegram_url || '',
-        pdf_url: item.pdf_url || null,
-        download_url: item.download_url || null,
-        telegram_url: item.telegram_url || null,
-        article_url: item.article_url || null,
-        writer: item.writer || '',
-      });
+    // 게시글 제목 클릭과 동일한 방식으로 링크 열기
+    const report = {
+      report_id: item.report_id,
+      article_title: item.article_title || '',
+      firm_nm: item.firm_nm || '',
+      sec_firm_order: item.sec_firm_order ?? null,
+      link: item.pdf_url || item.telegram_url || '',
+      pdf_url: item.pdf_url || null,
+      download_url: item.download_url || null,
+      telegram_url: item.telegram_url || null,
+    };
+    const url = getDirectUrl(report);
+    if (url && item.report_id) {
+      window.open(url, '_blank');
     } else if (item.article_title) {
       handleSearch(item.article_title);
       navigate('/');
     }
-  }, [readNotifyIds, handleSearch, navigate, setViewerReport]);
+  }, [readNotifyIds, handleSearch, navigate]);
 
   useEffect(() => {
     const handleSummaryNotification = (event) => {
