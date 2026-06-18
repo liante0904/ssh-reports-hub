@@ -135,14 +135,35 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const [notifications, setNotifications] = useState([]);
   const [localNotifications, setLocalNotifications] = useState([]);
   const [notificationToast, setNotificationToast] = useState(null);
-  const [readNotifyIds, setReadNotifyIds] = useState(() => {
+  const [readNotifyIds, setReadNotifyIds] = useState([]);
+
+  // DB에서 읽음 상태 로드
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await request(`${CONFIG.API.REPORT_API_URL}/reports/notifications/read-status`, { skipAuth: false, logoutOn401: false });
+        if (Array.isArray(data)) setReadNotifyIds(data);
+      } catch {}
+    })();
+  }, []);
+
+  // localStorage → DB 마이그레이션 (1회)
+  useEffect(() => {
     try {
       const saved = localStorage.getItem('ssh_read_notifications');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+      if (saved) {
+        const ids = JSON.parse(saved);
+        if (Array.isArray(ids) && ids.length > 0 && readNotifyIds.length === 0) {
+          setReadNotifyIds(ids);
+          request(`${CONFIG.API.REPORT_API_URL}/reports/notifications/mark-all-read`, {
+            method: 'POST', skipAuth: false, logoutOn401: false,
+            body: JSON.stringify({ keys: ids }),
+          }).catch(() => {});
+        }
+        localStorage.removeItem('ssh_read_notifications');
+      }
+    } catch {}
+  }, [readNotifyIds]);
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -177,7 +198,10 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
   const handleMarkAllAsRead = useCallback(() => {
     const allIds = visibleNotifications.flatMap((item) => [getNotificationKey(item), item.id]);
     setReadNotifyIds(allIds);
-    localStorage.setItem('ssh_read_notifications', JSON.stringify(allIds));
+    request(`${CONFIG.API.REPORT_API_URL}/reports/notifications/mark-all-read`, {
+      method: 'POST', skipAuth: false, logoutOn401: false,
+      body: JSON.stringify({ keys: allIds }),
+    }).catch(() => {});
   }, [visibleNotifications]);
 
   const handleNotificationItemClick = useCallback((item) => {
@@ -185,7 +209,10 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     if (!readNotifyIds.includes(notificationKey) && !readNotifyIds.includes(item.id)) {
       const nextReadIds = [...readNotifyIds, notificationKey, item.id];
       setReadNotifyIds(nextReadIds);
-      localStorage.setItem('ssh_read_notifications', JSON.stringify(nextReadIds));
+      request(`${CONFIG.API.REPORT_API_URL}/reports/notifications/mark-read`, {
+        method: 'POST', skipAuth: false, logoutOn401: false,
+        body: JSON.stringify({ notification_key: notificationKey }),
+      }).catch(() => {});
     }
     setActivePopover(null);
 
