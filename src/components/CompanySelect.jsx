@@ -31,8 +31,8 @@ function useFirmOptions() {
             report_count: item.report_count,
           };
         });
-        // report_count 내림차순 정렬 (ALL 제외)
-        mapped.sort((a, b) => b.report_count - a.report_count);
+        // sec_firm_order 오름차순 정렬
+        mapped.sort((a, b) => a.order - b.order);
         if (!cancelled) setFirms(mapped);
       } catch { /* API 실패 시 하드코딩 fallback 없음 - 빈 목록 */ }
     })();
