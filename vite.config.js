@@ -23,6 +23,7 @@ export default defineConfig({
     // 500kb 이상의 청크 경고 설정
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
+      external: ['/lib/pdfjs/build/pdf.mjs', '/lib/pdfjs/build/pdf.worker.mjs'],
       output: {
         // 매뉴얼 청크 분리: 벤더 라이브러리(React 등)를 별도 파일로 분리하여 캐싱 효율 극대화
         manualChunks(id) {
