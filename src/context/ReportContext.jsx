@@ -22,14 +22,13 @@ export function ReportProvider({ children }) {
     try {
       const savedLocal = localStorage.getItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
       if (savedLocal) return JSON.parse(savedLocal);
-      // 과거 세션 저장 사용자의 일시적 호환을 위해 fallback만 유지한다.
-      const savedSession = sessionStorage.getItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
-      if (savedSession) return JSON.parse(savedSession);
       return null;
     } catch {
       return null;
     }
   });
+  // 토큰 검증 중 여부 (true일 때는 401 → 로그아웃 건너뜀)
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // LLM 요약 노출 범위 설정 ('admin' 또는 'telegram')
   const [llmVisibility, setLlmVisibility] = useState('admin');
@@ -47,6 +46,64 @@ export function ReportProvider({ children }) {
       }
     };
     fetchLlmSetting();
+  }, []);
+
+  // ── 앱 시작 시 토큰 검증 (localStorage 맹신 방지) ──
+  useEffect(() => {
+    const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    const savedUser = localStorage.getItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
+    if (!token || !savedUser) return;
+
+    let cancelled = false;
+    setIsVerifying(true);
+
+    const verify = async () => {
+      try {
+        // /keywords는 auth required — 200이면 토큰 유효, 401이면 만료
+        const res = await fetch(`${CONFIG.API.BASE_URL}/keywords`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined,
+        });
+        if (cancelled) return;
+        if (!res.ok && (res.status === 401 || res.status === 403)) {
+          // 토큰 만료/무효 → 조용히 로그아웃 (전체 리로드 없음)
+          localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+          localStorage.removeItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
+          localStorage.removeItem(CONFIG.STORAGE_KEYS.REMEMBER_ME);
+          setTelegramUser(null);
+        }
+        // 그 외(200, 네트워크 에러 등) → 기존 상태 유지
+      } catch {
+        // 네트워크 오류 → 기존 상태 유지 (오프라인 시 로그아웃 방지)
+      } finally {
+        if (!cancelled) setIsVerifying(false);
+      }
+    };
+
+    verify();
+    return () => { cancelled = true; };
+  }, []);
+
+  // ── 크로스탭 동기화 (다른 탭에서 로그인/로그아웃 감지) ──
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === CONFIG.STORAGE_KEYS.AUTH_TOKEN && !e.newValue) {
+        // 다른 탭에서 토큰 삭제 → 동기화
+        setTelegramUser(null);
+      }
+      if (e.key === CONFIG.STORAGE_KEYS.TELEGRAM_USER) {
+        if (e.newValue) {
+          try {
+            const user = JSON.parse(e.newValue);
+            if (user?.id) setTelegramUser(user);
+          } catch { /* 무시 */ }
+        } else {
+          setTelegramUser(null);
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   // LLM 노출 설정 변경 (관리자 전용)
@@ -151,7 +208,6 @@ export function ReportProvider({ children }) {
     sessionStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TELEGRAM_USER);
     setTelegramUser(null);
-    window.location.reload();
   }, []);
 
   const value = {
@@ -186,6 +242,7 @@ export function ReportProvider({ children }) {
     toggleTheme,
     telegramUser,
     setTelegramUser,
+    isVerifying,
     llmVisibility,
     updateLlmSetting,
     logout

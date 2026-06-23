@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CONFIG } from '../constants/config';
 import { HOME_SECTIONS } from '../constants/reportSections';
@@ -60,7 +60,11 @@ function HomeDashboard() {
     global: { items: [], isLoading: true, error: '' },
   }));
 
-  useEffect(() => {
+  // 탭이 다시 보일 때 자동 갱신을 위한 refresh counter
+  const [refreshKey, setRefreshKey] = useState(0);
+  const lastRefreshRef = useRef(0);
+
+  const loadAllSections = useCallback(() => {
     const controller = new AbortController();
 
     const setSectionState = (key, nextState) => {
@@ -123,9 +127,6 @@ function HomeDashboard() {
 
     const loadGlobal = async () => {
       try {
-        // 전용 /global 엔드포인트 사용 (mkt_tp=global 검색 파라미터 대체)
-        // - 국내 종목코드·코스피/코스닥 키워드 자동 제외
-        // - 60초 Redis 캐시 (vs search 30초)
         const data = await request(
           `${CONFIG.API.REPORT_API_URL}/global?limit=${PREVIEW_LIMIT}&offset=0`,
           { signal: controller.signal }
@@ -146,7 +147,28 @@ function HomeDashboard() {
     loadIndustry();
     loadGlobal();
 
+    return controller;
+  }, []);
+
+  // 최초 로딩 + refreshKey 변경 시 갱신
+  useEffect(() => {
+    const controller = loadAllSections();
     return () => controller.abort();
+  }, [loadAllSections, refreshKey]);
+
+  // 탭 visibility 변경 감지 → 홈으로 돌아올 때 자동 갱신 (30초 throttle)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        const now = Date.now();
+        if (now - lastRefreshRef.current > 30000) {
+          lastRefreshRef.current = now;
+          setRefreshKey((k) => k + 1);
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
   return (
