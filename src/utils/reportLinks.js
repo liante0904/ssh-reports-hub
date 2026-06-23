@@ -53,21 +53,21 @@ export function prefetchPdf(report, origin = window.location.origin) {
 
 export function getDirectUrl(report) {
   const { id, link } = report;
-  
-  // 1. 반드시 프록시(share)를 타야 하는 경우 (CORS, 쿠키 등 대행이 필수적인 곳)
-  // DS투자증권, 흥국증권은 share URL이 더 안정적
+
+  // 1. 반드시 share(프록시)를 타야 하는 경우 — CORS, 쿠키 등 대행이 필수적인 곳
   const isDs = isDsReport(report);
   const isHeungkuk = String(report?.sec_firm_order) === '28' || (report?.firm_nm || report?.firm || '').includes('흥국');
 
-  const needsProxy =
-    isDs ||
-    isHeungkuk ||
-    !link || link === '#';
-
-  if (needsProxy) {
+  if (isDs || !link || link === '#') {
     return getShareUrl(id);
   }
 
-  // 2. DB증권을 포함한 일반적인 경우는 원본 링크(link)로 즉시 이동하여 성능 최적화
+  // 2. 흥국증권: download.do URL이 Content-Disposition: attachment → 다운로드되므로
+  //    proxy URL로 감싸서 Content-Type: application/pdf로 인라인 렌더링
+  if (isHeungkuk) {
+    return getProxyPdfUrl(report);
+  }
+
+  // 3. 일반적인 경우는 원본 링크(link)로 즉시 이동
   return link;
 }
