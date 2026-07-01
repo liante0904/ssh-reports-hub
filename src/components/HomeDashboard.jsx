@@ -94,7 +94,7 @@ function HomeDashboard() {
     const loadRecent = async () => {
       try {
         const data = await request(
-          `${CONFIG.API.REPORT_API_URL}/search?limit=${PREVIEW_LIMIT}&offset=0`,
+          `${CONFIG.API.REPORT_API_URL}/recent?limit=${PREVIEW_LIMIT}&offset=0`,
           { signal: controller.signal }
         );
         setSectionState('recent', {
