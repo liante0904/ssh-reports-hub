@@ -100,10 +100,28 @@ GET {BASE}/external/api/search/?{params}
 
 **테스트**: `test/integration/api.test.js` Section 2, 4
 **호출 위치**:
-- `src/hooks/useReportFetch.js` → `buildReportFetchUrl()` → `/external/api/search`
+- `src/hooks/useReportFetch.js` → `buildReportFetchUrl()` → `/external/api/search` (또는 `/external/api/recent`)
 - `src/components/HomeDashboard.jsx` → 글로벌 섹션 프리뷰: `/external/api/search?mkt_tp=global`
-- `src/utils/reportFetch.js` → URL 빌드 로직
+- `src/utils/reportFetch.js` → URL 빌드 로직 (recent 페이지 시 `/recent` 엔드포인트 분기)
 - `netlify/functions/share.js` → `buildReportSearchUrl()` → 단일 리포트 조회
+
+---
+
+### 1.1.2 최근 리포트 조회
+
+```
+GET {BASE}/external/api/recent?{params}
+```
+
+| Param | Type | 필수 | 설명 |
+|-------|------|------|------|
+| `limit` | number | - | 페이지 크기 (기본값 서버에서 결정, 프론트 기본 30) |
+| `offset` | number | - | 페이지 오프셋 |
+
+**Response**: `GET /search`와 동일한 형식.
+
+**호출 위치**:
+- `src/hooks/useReportFetch.js` → `buildReportFetchUrl()` → `/external/api/recent` (최근 리포트 페이지 `/recent`인 경우)
 
 ---
 
@@ -791,7 +809,8 @@ navigator.share({ title, text })
 
 | 소스 파일 | HTTP | 엔드포인트 |
 |----------|------|-----------|
-| `src/hooks/useReportFetch.js:58` | GET | `/external/api/search?offset=&sort=&title=&writer=&company=&board=&mkt_tp=&has_summary=` |
+| `src/hooks/useReportFetch.js:58` | GET | `/external/api/search?offset=&sort=&title=&writer=&company=&board=&mkt_tp=&has_summary=` (검색, outlook, ai-summary 등) |
+| `src/hooks/useReportFetch.js:58` | GET | `/external/api/recent?offset=&limit=` (최근 리포트 페이지 `/recent` 호출 시) |
 | `src/components/HomeDashboard.jsx` | GET | `/api/fnguide/report-summaries?limit=&offset=` |
 | `src/components/HomeDashboard.jsx` | GET | `/external/api/industry?limit=&offset=` |
 | `src/components/HomeDashboard.jsx` | GET | `/external/api/search?limit=&offset=&mkt_tp=global` |
