@@ -74,8 +74,20 @@ export async function request(url, options = {}, logout) {
     }
   };
 
-  try {
+  // nginx reload 등 일시적 게이트웨이 오류 1회 재시도
+  const GATEWAY_RETRY_CODES = [502, 503, 504];
+
+  const doFetch = async (attempt) => {
     const response = await fetch(url, mergedOptions);
+    if (GATEWAY_RETRY_CODES.includes(response.status) && attempt === 1) {
+      await new Promise(r => setTimeout(r, 1000));
+      return doFetch(2);
+    }
+    return response;
+  };
+
+  try {
+    const response = await doFetch(1);
 
     if (response.status === 401) {
       const errorData = await readErrorBody(response);
