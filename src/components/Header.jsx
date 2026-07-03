@@ -139,16 +139,18 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
   // DB에서 읽음 상태 로드
   useEffect(() => {
+    if (!telegramUser) return;
     (async () => {
       try {
         const data = await request(`${CONFIG.API.REPORT_API_URL}/reports/notifications/read-status`, { skipAuth: false, logoutOn401: false });
         if (Array.isArray(data)) setReadNotifyIds(data);
       } catch {}
     })();
-  }, []);
+  }, [telegramUser]);
 
   // localStorage → DB 마이그레이션 (1회)
   useEffect(() => {
+    if (!telegramUser) return;
     try {
       const saved = localStorage.getItem('ssh_read_notifications');
       if (saved) {
@@ -163,9 +165,10 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
         localStorage.removeItem('ssh_read_notifications');
       }
     } catch {}
-  }, [readNotifyIds]);
+  }, [readNotifyIds, telegramUser]);
 
   const fetchNotifications = useCallback(async () => {
+    if (!telegramUser) return;
     try {
       const url = `${CONFIG.API.REPORT_API_URL}/reports/notifications?limit=50`;
       const data = await request(url, { skipAuth: false });
@@ -176,13 +179,17 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
     }
-  }, []);
+  }, [telegramUser]);
 
   useEffect(() => {
+    if (!telegramUser) {
+      setNotifications([]);
+      return;
+    }
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
-  }, [fetchNotifications]);
+  }, [fetchNotifications, telegramUser]);
 
   const visibleNotifications = [...localNotifications, ...notifications]
     .filter((item, index, items) => (
@@ -238,6 +245,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
   useEffect(() => {
     const handleSummaryNotification = (event) => {
+      if (!telegramUser) return;
       const item = normalizeLocalSummaryEvent(event.detail || {});
       setLocalNotifications((current) => [item, ...current].slice(0, 20));
       setNotificationToast(item);
@@ -245,7 +253,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
 
     window.addEventListener(SUMMARY_NOTIFICATION_EVENT, handleSummaryNotification);
     return () => window.removeEventListener(SUMMARY_NOTIFICATION_EVENT, handleSummaryNotification);
-  }, []);
+  }, [telegramUser]);
 
   useEffect(() => {
     if (!notificationToast) return undefined;
@@ -302,20 +310,22 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
                 <line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
             </button>
-            <button
-              type="button"
-              className="header-notification-button"
-              onClick={handleNotificationClick}
-              title="리포트 알림"
-              aria-label="리포트 알림"
-              aria-expanded={activePopover === 'notifications'}
-              aria-haspopup="dialog"
-            >
-              <BellIcon />
-              {unreadCount > 0 && (
-                <span className="notification-badge">{unreadCount}</span>
-              )}
-            </button>
+            {telegramUser && (
+              <button
+                type="button"
+                className="header-notification-button"
+                onClick={handleNotificationClick}
+                title="리포트 알림"
+                aria-label="리포트 알림"
+                aria-expanded={activePopover === 'notifications'}
+                aria-haspopup="dialog"
+              >
+                <BellIcon />
+                {unreadCount > 0 && (
+                  <span className="notification-badge">{unreadCount}</span>
+                )}
+              </button>
+            )}
             <button type="button" className="hamburger-menu" onClick={toggleMenuTop} title="메뉴" aria-label="메뉴 열기">
               <div></div>
               <div></div>
@@ -325,7 +335,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
         </div>
       </header>
 
-      {activePopover === 'notifications' && (
+      {activePopover === 'notifications' && telegramUser && (
         <NotificationPopover
           telegramUser={telegramUser}
           keywords={keywordState.keywords}
@@ -341,7 +351,7 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
         />
       )}
 
-      {notificationToast && (
+      {notificationToast && telegramUser && (
         <button
           type="button"
           className="header-notification-toast"
