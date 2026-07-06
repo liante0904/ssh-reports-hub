@@ -590,7 +590,7 @@ function AdminConsole() {
                       <td style={{ padding: '3px 8px', color: '#666', fontSize: '11px' }}>{f.sec_firm_order}</td>
                       <td style={{ padding: '3px 8px', fontWeight: f.status === 'STALE' ? 600 : 400 }}>{f.firm_nm}</td>
                       <td style={{ textAlign: 'right', padding: '3px 8px', color: '#888' }}>{f.total.toLocaleString()}</td>
-                      <td style={{ textAlign: 'right', padding: '3px 8px', fontFamily: 'monospace' }}>{f.last_reg_dt || '-'}</td>
+                      <td style={{ textAlign: 'right', padding: '3px 8px', fontFamily: 'monospace' }}>{f.last_report_date || '-'}</td>
                       <td style={{ textAlign: 'right', padding: '3px 8px', color: statusColor, fontWeight: 600 }}>{f.days_ago >= 0 ? `${f.days_ago}d` : '?'}</td>
                       <td style={{ textAlign: 'center', padding: '3px 8px' }}>
                         <span style={{ color: statusColor, fontWeight: 600, fontSize: '11px' }}>{f.status}</span>

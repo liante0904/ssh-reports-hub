@@ -144,7 +144,7 @@ function normalizeReportItem(item) {
     sec_firm_order: item.sec_firm_order,
     gemini_summary: item.gemini_summary,
     firm,
-    date: formatDate(item.reg_dt),
+    date: formatDate(item.report_date),
     shareUrl,
     openUrl: shareUrl
   };
@@ -155,7 +155,7 @@ const mockItem = {
   article_title: '테스트 리포트',
   writer: '홍길동',
   firm_nm: '삼성증권',
-  reg_dt: '20240421',
+  report_date: '20240421',
   telegram_url: 'https://t.me/test/123',
   download_url: 'https://example.com/dl',
   sec_firm_order: 5,
@@ -169,13 +169,13 @@ assertEqual(normalized.id, 12345, 'id = report_id');
 assertEqual(normalized.title, '테스트 리포트', 'title = article_title');
 assertEqual(normalized.writer, '홍길동', 'writer = writer');
 assertEqual(normalized.firm, '삼성증권', 'firm = firm_nm trim');
-assertEqual(normalized.date, '2024-04-21', 'date = formatDate(reg_dt)');
+assertEqual(normalized.date, '2024-04-21', 'date = formatDate(report_date)');
 assertEqual(normalized.link, 'https://t.me/test/123', 'link 우선순위: telegram_url');
 assertEqual(normalized.shareUrl, '/share?id=12345', 'shareUrl 생성');
 assertEqual(normalized.openUrl, '/share?id=12345', 'openUrl = shareUrl');
 
 // fallback 테스트
-const minimalItem = { report_id: 1, article_title: '', reg_dt: '' };
+const minimalItem = { report_id: 1, article_title: '', report_date: '' };
 const minimalNormalized = normalizeReportItem(minimalItem);
 assertEqual(minimalNormalized.title, '제목 없음', 'title fallback');
 assertEqual(minimalNormalized.writer, '작성자 미상', 'writer fallback');
@@ -379,7 +379,7 @@ const previewItem = {
   article_title: '프리뷰 리포트',
   writer: '이순신',
   firm_nm: '키움증권',
-  reg_dt: '20240505',
+  report_date: '20240505',
 };
 
 const previewResult = normalizeReportPreview(previewItem);

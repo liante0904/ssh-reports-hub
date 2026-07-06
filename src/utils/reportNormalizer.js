@@ -35,7 +35,7 @@ export function normalizeReportItem(item) {
     sector: item.sector || '',
     pdf_archive: item.pdf_archive || null,
     firm,
-    date: formatDate(item.reg_dt),
+    date: formatDate(item.report_date),
     // 명칭 분리 및 하위 호환성 유지
     shareUrl: shareUrl,
     openUrl: openUrl,

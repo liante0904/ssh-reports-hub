@@ -67,7 +67,7 @@ async function runTests() {
       assert(typeof data.hasMore === 'boolean', 'hasMore 필드가 있음');
       if (data.items && data.items.length > 0) {
         assert(data.count > 0, 'count > 0 (데이터 존재)');
-        assert(data.items[0]?.save_time, '최신 항목에 save_time이 있음');
+        assert(data.items[0]?.save_at, '최신 항목에 save_at이 있음');
         assert(data.items[0]?.firm_nm, '최신 항목에 firm_nm이 있음');
         assert(data.items[0]?.article_title, '최신 항목에 article_title이 있음');
       } else {
@@ -126,7 +126,7 @@ async function runTests() {
 
       // 오늘 날짜의 항목이 하나라도 있는지 확인
       if (itemCount > 0) {
-        const todayItems = data.items.filter(item => item.reg_dt === todayStr);
+        const todayItems = data.items.filter(item => item.report_date === todayStr);
         assert(todayItems.length >= 0, '오늘 데이터 포함 가능', `오늘 ${todayItems.length}건`);
         if (todayItems.length > 0) {
           assert(true, '오늘 날짜 데이터 존재 확인', `${todayItems[0]?.firm_nm} - ${todayItems[0]?.article_title?.substring(0, 30)}`);
@@ -177,12 +177,12 @@ async function runTests() {
     if (freshRes.ok) {
       const data = await freshRes.json();
       const latest = data.items?.[0];
-      if (latest?.save_time) {
-        // save_time은 KST 기준 문자열이므로 timezone 보정 (+09:00)
-        const savedAt = new Date(latest.save_time + '+09:00');
+      if (latest?.save_at) {
+        // save_at은 KST 기준 문자열이므로 timezone 보정 (+09:00)
+        const savedAt = new Date(latest.save_at + '+09:00');
         const now = new Date();
-        assert(!isNaN(savedAt.getTime()), 'save_time이 유효한 Date로 파싱됨');
-        assert(savedAt <= now, 'save_time이 현재 시각 이전');
+        assert(!isNaN(savedAt.getTime()), 'save_at이 유효한 Date로 파싱됨');
+        assert(savedAt <= now, 'save_at이 현재 시각 이전');
 
         const diffMs = now - savedAt;
         const diffMin = Math.floor(diffMs / 60000);

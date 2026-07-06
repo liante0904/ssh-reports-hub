@@ -254,8 +254,8 @@ async function runTests() {
         assert(typeof item.report_id === 'number', '아이템에 report_id 있음');
         assert(typeof item.firm_nm === 'string', '아이템에 firm_nm 있음');
         assert(typeof item.article_title === 'string', '아이템에 article_title 있음');
-        assert(typeof item.reg_dt === 'string', '아이템에 reg_dt 있음');
-        assert(typeof item.save_time === 'string', '아이템에 save_time 있음');
+        assert(typeof item.report_date === 'string', '아이템에 report_date 있음');
+        assert(typeof item.save_at === 'string', '아이템에 save_at 있음');
       }
     } catch (e) {
       console.log(`  ❌ FAIL: search 응답 파싱 실패 (${e.message})`);
