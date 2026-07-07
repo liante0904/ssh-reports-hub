@@ -10,6 +10,8 @@ function buildReportRoute(pathname, baseUrl) {
     return { apiUrl: `${apiUrl}/industry`, params };
   }
   // 최근 페이지 → 전용 /recent 엔드포인트 사용
+  // [2026-07-01]: 백엔드 성능 최적화(ORM -> Raw SQL 전환) 및 라우터 분리에 따라
+  // 전체 최근 리포트 조회는 무겁고 복잡한 /search 대신 전용 /recent API 엔드포인트를 타도록 처리.
   if (pathname.includes('recent')) {
     return { apiUrl: `${apiUrl}/recent`, params };
   }
@@ -27,7 +29,7 @@ export function buildReportFetchUrl({ pathname, offset, sortBy, searchQuery, bas
   if (limit) {
     params.append('limit', limit);
   } else if (pathname.includes('recent')) {
-    // 최근 페이지 무한스크롤 시 기본 limit를 30으로 설정
+    // 최근 페이지 무한스크롤 시 기본 limit를 30으로 설정하여 초기 로딩 부하 최적화
     params.append('limit', 30);
   }
 

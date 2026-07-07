@@ -107,7 +107,7 @@ GET {BASE}/external/api/search/?{params}
 
 ---
 
-### 1.1.2 최근 리포트 조회
+### 1.1.2 최근 리포트 조회 (/recent)
 
 ```
 GET {BASE}/external/api/recent?{params}
@@ -119,6 +119,11 @@ GET {BASE}/external/api/recent?{params}
 | `offset` | number | - | 페이지 오프셋 |
 
 **Response**: `GET /search`와 동일한 형식.
+
+**성능 최적화 및 구현 상세 (2026-07-01)**:
+- **reports router prefix**: `/reports`였던 기존 라우터 prefix가 통합 관리를 위해 `/external/api`로 변경되었습니다.
+- **ORM → SQL 전환**: 성능 최적화의 일환으로 기존 SQLAlchemy ORM 방식의 조회 및 다중 조인(JOIN) 쿼리를 **psycopg2 기반의 Raw SQL** 방식으로 완전히 전환하여 쿼리 응답 속도가 비약적으로 단축되었습니다.
+- **최근 조회 전용**: 전체 통합 검색(/search) 대신 최적화된 최근 리포트 전용 `/recent` API를 프론트엔드 최근 페이지에서 단독 호출하여 백엔드 부하를 최소화합니다.
 
 **호출 위치**:
 - `src/hooks/useReportFetch.js` → `buildReportFetchUrl()` → `/external/api/recent` (최근 리포트 페이지 `/recent`인 경우)

@@ -1,3 +1,12 @@
+# Frontend Development Guide (Pitfalls, Keywords & Routing)
+
+> **통합 일자**: 2026-07-01
+> **대상 원본 문서**: LLM_CODING_PITFALLS.md, fnguide-keywords.md, pdf-routing.md
+
+---
+
+## [통합 섹션] LLM_CODING_PITFALLS
+
 # 📊 장기 운영을 위한 LLM 혼동 코딩 포인트 분석 보고서 (LLM Coding Pitfalls)
 
 본 문서는 대규모 언어 모델(LLM)을 사용하여 지속적으로 코드를 수정하거나 기능을 개발할 때, LLM이 실수하기 쉬운 고질적인 패턴과 구조적 특징들을 분석하여 장애를 예방하기 위해 작성되었습니다.
@@ -140,3 +149,99 @@ p {
    ```
 2. **React CSS Modules 혹은 CSS 변수(`var()`)의 엄격한 상속 구조 설계**:
    글로벌 공통 클래스는 최소화하고 테마나 전역 스타일은 변수를 통해 공유하며, 각 컴포넌트는 격리된 네임스페이스를 활용하도록 유도합니다.
+
+
+---
+
+## [통합 섹션] fnguide-keywords
+
+# FnGuide 중요 키워드 관리
+
+## 관리 위치
+
+- 운영 마스터: `public.tbm_fnguide_keyword_dictionary`
+- 재현 가능한 DDL/seed: `docs/sql/tbm_fnguide_keyword_dictionary.sql`
+- 프론트 런타임 스냅샷: `src/constants/fnguideKeywords.js`
+- 토큰화 로직: `src/utils/fnguide.js`
+- 화면 스타일: `src/components/FnGuideList.css`
+- 회귀 테스트: `test/unit/utils.test.js`
+
+현재 프론트는 API 연동 전이므로 `FNGUIDE_KEYWORD_GROUPS`를 런타임 스냅샷으로 사용한다.
+키워드를 변경할 때는 운영 마스터와 스냅샷을 함께 갱신한다.
+띄어쓰기가 있는 표현은 붙여 쓴 문장도 자동으로 인식한다.
+
+## 분류
+
+| 분류 | 의미 | 예시 |
+|---|---|---|
+| `positive` | 실적·가격·수급의 긍정 변화 | 리레이팅, 증산, 고가 수주, 판가 인상 |
+| `negative` | 실적·가격·수급의 부정 변화 | 감산, 저가 수주, 공급 과잉, 감익 |
+| `catalyst` | 방향 확정 전 확인할 주요 사건 | 증설, 수주, 양산, 임상, CAPEX |
+
+## 운영 DB 기준
+
+2026년 6월 6일 운영 PostgreSQL에 `tbm_fnguide_keyword_dictionary`를 생성하고
+`tbl_fnguide_report_summaries` 9,732건을 정규화해 전수 집계했다.
+
+주요 등장 횟수:
+
+- 수주 5,486
+- 성장률 1,043
+- 증설 1,264
+- 가동률 1,100
+- 리레이팅 541
+- 판가 인상 300
+- 증산 67
+- 감산 44
+- 저가 수주 10
+- 고가 수주 4
+
+공백 제거 후 집계하므로 붙여 쓴 표현도 같은 키워드로 계산한다.
+
+## 추가 기준
+
+1. 투자 판단의 방향이나 촉매를 바꾸는 표현만 추가한다.
+2. `개선`, `상승`, `성장` 같은 일반 단어는 단독 등록하지 않는다.
+3. 긍정·부정 의미가 문맥에 따라 달라지는 단어는 `catalyst`로 둔다.
+4. 추가 시 실제 FnGuide 문장과 붙여쓰기 변형을 유닛 테스트에 포함한다.
+5. 강조가 지나치게 많아지면 빈도보다 판단 중요도를 우선해 제거한다.
+
+
+---
+
+## [통합 섹션] pdf-routing
+
+# PDF Routing
+
+## Current behavior
+
+- Report links now always go through `/share?id=...`.
+- `share` resolves the original PDF URL, then applies platform-specific routing.
+
+## Platform rules
+
+- iOS: use the proxy PDF URL directly.
+- Non-iOS: open the proxy PDF through `pdf.js`.
+- If the proxy preflight returns HTML or an error, fall back to the raw database URL instead of sending the user into `pdf.js`.
+
+## Special cases
+
+- DB Securities URLs such as `whub.dbsec.co.kr/pv/gate` are excluded from `pdf.js`.
+- Those URLs use the vendor flow because they are StreamDocs gate/viewer pages, not raw PDF files.
+- DB Securities JSON links like `m.db-fi.com/appData/descRsh/*.json` are resolved server-side and converted to the `pv/gate?q=...` entrypoint before redirecting.
+
+## Proxy notes
+
+- The PDF proxy sends the file inline with CORS headers so `pdf.js` can fetch it.
+- If a report source requires a referer or cookie bootstrap, the proxy can prime that first.
+- The viewer is started with a minimal hash (`#pagemode=none&zoom=page-width`) to avoid extra sidebar work on first paint.
+
+## Change log
+
+- 2026-04-22: MyAsset/유안타 계열은 `article_url`보다 `pdf_url/download_url/telegram_url`을 우선 사용하도록 변경.
+- 2026-04-22: `pdf.js` 실패 가능성이 보이면 raw database URL로 fallback 하도록 변경.
+- 2026-04-22: proxy 에러 메시지의 DS 고정 문구를 제거하고 실제 host 기준으로 출력하도록 변경.
+
+
+---
+
