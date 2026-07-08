@@ -26,6 +26,9 @@ import {
   buildDateTagCloud,
   createTagSearch,
 } from '../../src/utils/tagCloud.js';
+import {
+  buildReportFetchUrl,
+} from '../../src/utils/reportFetch.js';
 
 // ─── 테스트 헬퍼 ───
 let passed = 0;
@@ -217,6 +220,34 @@ assertEqual(normalizeGridValue(0), '0', '0 → "0"');
 assertEqual(normalizeGridValue(''), '', '빈 문자열 → 빈 문자열');
 assertEqual(normalizeGridValue(null), '', 'null → 빈 문자열');
 assertEqual(normalizeGridValue(undefined), '', 'undefined → 빈 문자열');
+
+// ─── Test 5: buildReportFetchUrl (reportFetch.js) ───
+console.log('\n─── [Test 5] Report Fetch URL (reportFetch.js) ───');
+
+const outlookUrl = buildReportFetchUrl({
+  pathname: '/outlook',
+  offset: 0,
+  sortBy: 'date',
+  searchQuery: {},
+  baseUrl: 'https://ssh-oci.duckdns.org/external/api',
+  outlookYear: 2026,
+});
+
+assert(
+  outlookUrl.startsWith('https://ssh-oci.duckdns.org/external/api/outlook?'),
+  'outlook page uses dedicated /outlook endpoint',
+  outlookUrl
+);
+assert(
+  outlookUrl.includes('outlook_year=2026'),
+  'outlook year is preserved',
+  outlookUrl
+);
+assert(
+  !outlookUrl.includes('/search') && !outlookUrl.includes('outlook=true'),
+  'outlook page no longer uses search outlook flag',
+  outlookUrl
+);
 
 // ─── Test 5: isDsReport (reportLinks.js) ───
 console.log('\n─── [Test 5] isDsReport (reportLinks.js) ───');

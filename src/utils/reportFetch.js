@@ -15,7 +15,11 @@ function buildReportRoute(pathname, baseUrl) {
   if (pathname.includes('recent')) {
     return { apiUrl: `${apiUrl}/recent`, params };
   }
-  // 그 외(최근, 검색, outlook, ai-summary 등) → 통합 /search 엔드포인트
+  // 전망 페이지 → 전용 /outlook 엔드포인트 사용
+  if (pathname.includes('outlook')) {
+    return { apiUrl: `${apiUrl}/outlook`, params };
+  }
+  // 그 외(검색, ai-summary 등) → 통합 /search 엔드포인트
 
   return { apiUrl: `${apiUrl}/search`, params };
 }
@@ -54,7 +58,6 @@ export function buildReportFetchUrl({ pathname, offset, sortBy, searchQuery, bas
   }
 
   if (pathname.includes('outlook')) {
-    params.append('outlook', 'true');
     if (outlookYear) {
       params.append('outlook_year', outlookYear);
     }
