@@ -27,9 +27,9 @@ function normalizeNotificationItem(item) {
     source: item.summary_model ? 'summary' : 'telegram',
     notification_key: item.notification_key || `${item.summary_model ? 'summary' : 'telegram'}:${item.id}`,
     created_at: item.created_at,
-    pdf_url: item.pdf_url || null,
+    pdf_url: item.pdf_file_url || null,
     telegram_url: item.telegram_url || null,
-    article_url: item.article_url || null,
+    source_url: item.source_url || null,
     sec_firm_order: item.sec_firm_order ?? null,
   };
 }
@@ -229,9 +229,8 @@ const Header = forwardRef(({ isNavVisible }, ref) => {
       article_title: item.article_title || '',
       firm_nm: item.firm_nm || '',
       sec_firm_order: item.sec_firm_order ?? null,
-      link: item.pdf_url || item.telegram_url || '',
-      pdf_url: item.pdf_url || null,
-      download_url: item.download_url || null,
+      link: item.pdf_file_url || item.telegram_url || '',
+      pdf_file_url: item.pdf_file_url || null,
       telegram_url: item.telegram_url || null,
     };
     const url = getDirectUrl(report);

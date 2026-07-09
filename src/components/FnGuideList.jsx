@@ -343,7 +343,7 @@ function FnGuideList() {
           )}
           
           {item.sec_reports && item.sec_reports.length > 0 && item.sec_reports.map((secReport) => {
-            const reportUrl = secReport.pdf_url || secReport.download_url || secReport.telegram_url;
+            const reportUrl = secReport.pdf_file_url || secReport.telegram_url;
             if (!reportUrl) return null;
             return (
               <a

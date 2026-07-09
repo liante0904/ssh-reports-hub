@@ -138,10 +138,9 @@ function normalizeReportItem(item) {
     id: item.report_id,
     title: item.article_title || '제목 없음',
     writer: item.writer || '작성자 미상',
-    link: item.telegram_url || item.download_url || item.article_url || '#',
-    article_url: item.article_url,
-    download_url: item.download_url,
-    pdf_url: item.pdf_url,
+    link: item.telegram_url || '#',
+    source_url: item.source_url,
+    pdf_file_url: item.pdf_file_url,
     telegram_url: item.telegram_url,
     firm_id: item.firm_id,
     sec_firm_order: item.sec_firm_order,
@@ -160,7 +159,7 @@ const mockItem = {
   firm_nm: '삼성증권',
   report_date: '20240421',
   telegram_url: 'https://t.me/test/123',
-  download_url: 'https://example.com/dl',
+  pdf_file_url: 'https://example.com/dl',
   sec_firm_order: 5,
   firm_id: 5,
 };
@@ -188,11 +187,11 @@ assert(minimalNormalized.date === 'Unknown', 'date fallback = Unknown');
 
 // null/undefined
 assertEqual(normalizeReportItem(null), null, 'null → null');
-assertEqual(normalizeReportItem(undefined), null, 'undefined → null');
+assertEqual(normalizeReportItem(undefined), null, 'undefined → undefined');
 
-// link 우선순위: telegram > download > article > #
-const linkTest = { ...mockItem, telegram_url: null, download_url: 'https://dl.com' };
-assertEqual(normalizeReportItem(linkTest).link, 'https://dl.com', 'link: download_url fallback');
+// link 우선순위: telegram_url > #
+const linkTest = { ...mockItem, telegram_url: null };
+assertEqual(normalizeReportItem(linkTest).link, '#', 'link: telegram_url null → # fallback');
 
 // ─── Test 4: hasGridSelection / normalizeGridValue (gridSelect.js) ───
 console.log('\n─── [Test 4] Grid Selection 유틸리티 (gridSelect.js) ───');
@@ -253,8 +252,8 @@ assert(
 console.log('\n─── [Test 5] isDsReport (reportLinks.js) ───');
 
 function isDsReport(report) {
-  const { firm, firm_id, sec_firm_order, link, download_url, pdf_url } = report || {};
-  const sourceUrl = pdf_url || download_url || link || '';
+  const { firm, firm_id, sec_firm_order, link, pdf_file_url } = report || {};
+  const sourceUrl = pdf_file_url || link || '';
   return String(sec_firm_order) === '11' ||
     String(firm_id) === '11' ||
     firm?.includes('DS') ||
@@ -267,7 +266,7 @@ assert(isDsReport({ firm_id: 11 }), 'firm_id=11 → DS');
 assert(isDsReport({ sec_firm_order: '11' }), 'sec_firm_order="11" → DS');
 assert(isDsReport({ firm: 'DS투자증권' }), 'firm="DS투자증권" → DS');
 assert(isDsReport({ firm: '디에스투자증권' }), 'firm="디에스투자증권" → DS');
-assert(isDsReport({ pdf_url: 'https://ds-sec.co.kr/file.pdf' }), 'url ds-sec.co.kr → DS');
+assert(isDsReport({ pdf_file_url: 'https://ds-sec.co.kr/file.pdf' }), 'url ds-sec.co.kr → DS');
 assert(!isDsReport({ sec_firm_order: 0 }), 'sec_firm_order=0 → not DS');
 assert(!isDsReport({}), 'empty → not DS');
 assert(!isDsReport(null), 'null → not DS');
@@ -289,10 +288,10 @@ console.log('\n─── [Test 7] getProxyPdfUrl (reportLinks.js) ───');
 
 function getProxyPdfUrl(report, origin = 'https://localhost') {
   const { title = 'report', firm = '증권사', link = '' } = report || {};
-  const sourceUrl = report?.pdf_url || report?.download_url || link;
+  const sourceUrl = report?.pdf_file_url || link;
   if (!sourceUrl || sourceUrl === '#') return '';
   const fileName = encodeURIComponent(`[${firm}] ${title}.pdf`);
-  const referer = report?.article_url;
+  const referer = report?.source_url;
   const functionName = isDsReport(report) ? 'proxy-ds' : 'proxy';
   return `${origin}/.netlify/functions/${functionName}?url=${encodeURIComponent(sourceUrl)}&filename=${fileName}${referer ? `&referer=${encodeURIComponent(referer)}` : ''}`;
 }
@@ -300,8 +299,8 @@ function getProxyPdfUrl(report, origin = 'https://localhost') {
 const proxyReport = {
   title: '테스트',
   firm: 'LS증권',
-  pdf_url: 'https://example.com/report.pdf',
-  article_url: 'https://example.com/page',
+  pdf_file_url: 'https://example.com/report.pdf',
+  source_url: 'https://example.com/page',
 };
 
 const proxyUrl = getProxyPdfUrl(proxyReport);
@@ -311,13 +310,13 @@ assert(proxyUrl.includes('filename='), 'filename 파라미터 포함');
 assert(proxyUrl.includes('referer='), 'referer 파라미터 포함');
 
 // DS 증권 → proxy-ds
-const dsReport = { title: 'DS리포트', firm: 'DS투자증권', pdf_url: 'https://ds-sec.co.kr/file.pdf' };
+const dsReport = { title: 'DS리포트', firm: 'DS투자증권', pdf_file_url: 'https://ds-sec.co.kr/file.pdf' };
 const dsProxyUrl = getProxyPdfUrl(dsReport);
 assert(dsProxyUrl.includes('/.netlify/functions/proxy-ds?'), 'DS증권 → proxy-ds 함수');
 
 // 빈 URL
 assertEqual(getProxyPdfUrl({}), '', '소스 URL 없음 → 빈 문자열');
-assertEqual(getProxyPdfUrl({ pdf_url: '#' }), '', 'pdf_url="#" → 빈 문자열');
+assertEqual(getProxyPdfUrl({ pdf_file_url: '#' }), '', 'pdf_file_url="#" → 빈 문자열');
 
 // ─── Test 8: getDirectUrl (reportLinks.js) ───
 console.log('\n─── [Test 8] getDirectUrl (reportLinks.js) ───');

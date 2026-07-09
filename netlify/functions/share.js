@@ -118,14 +118,11 @@ export const handler = async (event) => {
     if (!report) return { statusCode: 404, body: 'Report not found' };
 
     // 1. 원본 PDF URL 추출
-    // MyAsset/유안타처럼 article_url은 상세 뷰어 페이지이고,
-    // pdf_url/download_url/telegram_url이 실제 PDF 원본인 경우가 많다.
+    // pdf_file_url이 실제 PDF 원본, telegram_url이 발송용 URL
     const candidates = [
-      report.pdf_url,
-      report.download_url,
+      report.pdf_file_url,
       report.telegram_url,
-      report.key,
-      report.article_url,
+      report.source_url,
     ];
     let pdfUrl = candidates.find(u => u && u.startsWith('http') && !u.includes('netlify.app'));
 
@@ -170,7 +167,7 @@ export const handler = async (event) => {
       finalUrl = pdfUrl;
     } else if (pdfUrl.startsWith('http')) {
       const fileName = `[${company}] ${title}.pdf`;
-      const boardUrl = report.article_url || pdfUrl.replace('download.php', 'board.php');
+      const boardUrl = report.source_url || pdfUrl.replace('download.php', 'board.php');
       const proxyFunction = isDs ? 'proxy-ds' : 'proxy';
       const proxyUrl = `${requestOrigin}/.netlify/functions/${proxyFunction}?url=${encodeURIComponent(pdfUrl)}&filename=${encodeURIComponent(fileName)}${boardUrl ? `&referer=${encodeURIComponent(boardUrl)}` : ''}`;
       let proxyLooksGood = isDs;

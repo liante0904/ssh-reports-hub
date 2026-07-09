@@ -3,8 +3,8 @@ export function getShareUrl(reportId, origin = window.location.origin) {
 }
 
 export function isDsReport(report) {
-  const { firm, firm_id, sec_firm_order, link, download_url, pdf_url } = report || {};
-  const sourceUrl = pdf_url || download_url || link || '';
+  const { firm, firm_id, sec_firm_order, link, pdf_file_url } = report || {};
+  const sourceUrl = pdf_file_url || link || '';
   return String(sec_firm_order) === '11' ||
     String(firm_id) === '11' ||
     firm?.includes('DS') ||
@@ -14,11 +14,11 @@ export function isDsReport(report) {
 
 export function getProxyPdfUrl(report, origin = window.location.origin) {
   const { title = 'report', firm = '증권사', link = '' } = report || {};
-  const sourceUrl = report?.pdf_url || report?.download_url || link;
+  const sourceUrl = report?.pdf_file_url || link;
   if (!sourceUrl || sourceUrl === '#') return '';
 
   const fileName = encodeURIComponent(`[${firm}] ${title}.pdf`);
-  const referer = report?.article_url;
+  const referer = report?.source_url;
   const functionName = isDsReport(report) ? 'proxy-ds' : 'proxy';
   return `${origin}/.netlify/functions/${functionName}?url=${encodeURIComponent(sourceUrl)}&filename=${fileName}${referer ? `&referer=${encodeURIComponent(referer)}` : ''}`;
 }

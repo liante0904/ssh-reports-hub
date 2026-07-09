@@ -18,7 +18,7 @@ const ReportItem = ({
   summaryRequestedIds,
   summaryCompletedIds
 }) => {
-  const { id, title, writer, gemini_summary, fnguide_summary, firm, pdf_url, tags, stock_names, sector } = report;
+  const { id, title, writer, gemini_summary, fnguide_summary, firm, pdf_file_url, tags, stock_names, sector } = report;
   const { setViewerReport, telegramUser, llmVisibility } = useReport();
   const [showConfirm, setShowConfirm] = useState(null);
   /* 기존 주석 유지: 요약 요청 및 완료 여부 파악 */
@@ -38,8 +38,8 @@ const ReportItem = ({
   const finalLink = getDirectUrl(report);
 
   const handleViewerClick = () => {
-    if (firm === '현대차증권' && pdf_url) {
-      setViewerReport({ ...report, link: pdf_url });
+    if (firm === '현대차증권' && pdf_file_url) {
+      setViewerReport({ ...report, link: pdf_file_url });
     } else {
       setViewerReport(report);
     }

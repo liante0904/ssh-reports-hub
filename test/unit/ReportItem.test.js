@@ -35,7 +35,7 @@ describe('ReportItem Component', () => {
       target_price: '100,000'
     },
     firm: '현대차증권',
-    pdf_url: 'https://example.com/test.pdf',
+    pdf_file_url: 'https://example.com/test.pdf',
     tags: ['반도체'],
     stock_names: ['삼성전자'],
     sector: 'IT'
