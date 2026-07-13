@@ -38,7 +38,12 @@ describe('ReportItem Component', () => {
     pdf_file_url: 'https://example.com/test.pdf',
     tags: ['반도체'],
     stock_names: ['삼성전자'],
-    sector: 'IT'
+    stock_tickers: ['005930'],
+    sector: 'IT',
+    target_price: 100000,
+    rating: 'BUY',
+    revision_type: 'UPGRADE',
+    report_type: 'COMPANY'
   };
 
   it('should render FnGuide summary with break styles to prevent layout overflow', () => {
@@ -65,6 +70,19 @@ describe('ReportItem Component', () => {
     expect(style.wordBreak).toBe('break-all');
     expect(style.overflowWrap).toBe('break-word');
     expect(fnguideSummaryContainer.textContent).toContain('FnGuide 요약 내용입니다.');
+  });
+
+  it('should show direct investment signals when the API provides them', () => {
+    const { container } = render(
+      <ReportItem report={mockReport} onToggleSummary={jest.fn()} />
+    );
+
+    const signals = container.querySelector('.report-signals');
+    expect(signals).not.toBeNull();
+    expect(signals.textContent).toContain('의견 BUY');
+    expect(signals.textContent).toContain('목표가 100,000');
+    expect(signals.textContent).toContain('UPGRADE');
+    expect(signals.textContent).toContain('005930');
   });
 
   it('should render re-summarize options for admin when summary already exists', () => {
@@ -112,7 +130,12 @@ describe('ReportItem Component', () => {
     });
 
     // onTriggerSummary가 올바른 파라미터(id=1, engine='ag', force=true)로 호출되었는지 검증
-    expect(mockOnTriggerSummary).toHaveBeenCalledWith(1, 'ag', true);
+    expect(mockOnTriggerSummary).toHaveBeenCalledWith(
+      1,
+      'ag',
+      true,
+      expect.objectContaining({ id: 1 })
+    );
 
     // 토스트 UI가 노출되었는지 검증
     const toastContainer = container.querySelector('.toast-container');
@@ -120,4 +143,3 @@ describe('ReportItem Component', () => {
     expect(toastContainer.textContent).toContain('기존 요약이 존재하여 AI 재처리 요약을 요청합니다...');
   });
 });
-

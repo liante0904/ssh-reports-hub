@@ -18,7 +18,11 @@ const ReportItem = ({
   summaryRequestedIds,
   summaryCompletedIds
 }) => {
-  const { id, title, writer, gemini_summary, fnguide_summary, firm, pdf_file_url, tags, stock_names, sector } = report;
+  const {
+    id, title, writer, gemini_summary, fnguide_summary, firm, pdf_file_url,
+    tags, stock_names, stock_tickers, sector, target_price, rating, revision_type,
+    report_type
+  } = report;
   const { setViewerReport, telegramUser, llmVisibility } = useReport();
   const [showConfirm, setShowConfirm] = useState(null);
   /* 기존 주석 유지: 요약 요청 및 완료 여부 파악 */
@@ -77,6 +81,10 @@ const ReportItem = ({
   const hasSummary = isLlmSummaryVisible();
   const hasFnguideSummary = !!fnguide_summary?.summary_text?.trim();
   const hasAnySummary = hasSummary || hasFnguideSummary;
+  const hasDirectSignal = Boolean(target_price || rating || revision_type || report_type || stock_tickers?.length);
+  const formattedTargetPrice = Number.isFinite(Number(target_price)) && Number(target_price) > 0
+    ? Number(target_price).toLocaleString('ko-KR')
+    : null;
 
   return (
     <div className={`report-container-item ${hasAnySummary ? 'has-summary' : ''}`} key={id}>
@@ -100,6 +108,17 @@ const ReportItem = ({
               )}
             </div>
           </div>
+          {hasDirectSignal && (
+            <div className="report-signals" aria-label="리포트 투자 신호">
+              {rating && <span className="signal signal-rating">의견 {rating}</span>}
+              {formattedTargetPrice && <span className="signal signal-target">목표가 {formattedTargetPrice}</span>}
+              {revision_type && <span className="signal signal-revision">{revision_type}</span>}
+              {report_type && <span className="signal signal-type">{report_type}</span>}
+              {stock_tickers?.slice(0, 3).map((ticker) => (
+                <span key={`ticker-${ticker}`} className="signal signal-ticker">{ticker}</span>
+              ))}
+            </div>
+          )}
           {(tags && tags.length > 0 || stock_names && stock_names.length > 0 || sector) && (
             <div className="report-tags">
               {sector && <span className="tag tag-sector">{sector}</span>}

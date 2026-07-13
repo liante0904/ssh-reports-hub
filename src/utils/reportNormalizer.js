@@ -31,7 +31,12 @@ export function normalizeReportItem(item) {
     fnguide_summary: item.fnguide_summary || null,
     tags: item.tags || [],
     stock_names: item.stock_names || [],
+    stock_tickers: item.stock_tickers || [],
     sector: item.sector || '',
+    target_price: item.target_price ?? null,
+    rating: item.rating || '',
+    revision_type: item.revision_type || '',
+    report_type: item.report_type || '',
     pdf_archive: item.pdf_archive || null,
     firm,
     date: formatDate(item.report_date),
@@ -41,4 +46,3 @@ export function normalizeReportItem(item) {
     sourceUrl: sourceUrl
   };
 }
-
