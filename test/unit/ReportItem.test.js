@@ -79,10 +79,8 @@ describe('ReportItem Component', () => {
 
     const signals = container.querySelector('.report-signals');
     expect(signals).not.toBeNull();
-    expect(signals.textContent).toContain('의견 BUY');
-    expect(signals.textContent).toContain('목표가 100,000');
-    expect(signals.textContent).toContain('UPGRADE');
     expect(signals.textContent).toContain('005930');
+    expect(signals.textContent).not.toContain('출처 확인 필요');
   });
 
   it('should render re-summarize options for admin when summary already exists', () => {

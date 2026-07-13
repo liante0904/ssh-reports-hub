@@ -81,7 +81,10 @@ const ReportItem = ({
   const hasSummary = isLlmSummaryVisible();
   const hasFnguideSummary = !!fnguide_summary?.summary_text?.trim();
   const hasAnySummary = hasSummary || hasFnguideSummary;
-  const hasDirectSignal = Boolean(target_price || rating || revision_type || report_type || stock_tickers?.length);
+  // target_price/rating is historically almost entirely FnGuide-derived.
+  // Do not show it as a second, broker-originated signal beside the FnGuide card.
+  const hasUnverifiedValuation = !fnguide_summary && Boolean(target_price || rating || revision_type);
+  const hasDirectSignal = Boolean(hasUnverifiedValuation || report_type || stock_tickers?.length);
   const formattedTargetPrice = Number.isFinite(Number(target_price)) && Number(target_price) > 0
     ? Number(target_price).toLocaleString('ko-KR')
     : null;
@@ -110,9 +113,9 @@ const ReportItem = ({
           </div>
           {hasDirectSignal && (
             <div className="report-signals" aria-label="리포트 투자 신호">
-              {rating && <span className="signal signal-rating">의견 {rating}</span>}
-              {formattedTargetPrice && <span className="signal signal-target">목표가 {formattedTargetPrice}</span>}
-              {revision_type && <span className="signal signal-revision">{revision_type}</span>}
+              {hasUnverifiedValuation && rating && <span className="signal signal-rating">출처 확인 필요 · 의견 {rating}</span>}
+              {hasUnverifiedValuation && formattedTargetPrice && <span className="signal signal-target">출처 확인 필요 · 목표가 {formattedTargetPrice}</span>}
+              {hasUnverifiedValuation && revision_type && <span className="signal signal-revision">출처 확인 필요 · {revision_type}</span>}
               {report_type && <span className="signal signal-type">{report_type}</span>}
               {stock_tickers?.slice(0, 3).map((ticker) => (
                 <span key={`ticker-${ticker}`} className="signal signal-ticker">{ticker}</span>
