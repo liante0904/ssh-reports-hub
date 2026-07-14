@@ -83,7 +83,15 @@ const ReportItem = ({
   const hasAnySummary = hasSummary || hasFnguideSummary;
   // target_price/rating is historically almost entirely FnGuide-derived.
   // Do not show it as a second, broker-originated signal beside the FnGuide card.
-  const hasUnverifiedValuation = !fnguide_summary && Boolean(target_price || rating || revision_type);
+  // Industry/macro reports do not carry a single-company recommendation.
+  // Historical enrichment wrote BUY/MAINTAIN defaults to some of these rows;
+  // never present those defaults as an investment signal.
+  const hasCompanyContext = report_type === 'COMPANY'
+    || Boolean(stock_tickers?.length)
+    || Boolean(stock_names?.length);
+  const hasUnverifiedValuation = !fnguide_summary
+    && hasCompanyContext
+    && Boolean(target_price || rating || revision_type);
   const hasDirectSignal = Boolean(hasUnverifiedValuation || report_type || stock_tickers?.length);
   const formattedTargetPrice = Number.isFinite(Number(target_price)) && Number(target_price) > 0
     ? Number(target_price).toLocaleString('ko-KR')
