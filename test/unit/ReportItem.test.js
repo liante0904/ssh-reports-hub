@@ -83,6 +83,26 @@ describe('ReportItem Component', () => {
     expect(signals.textContent).not.toContain('출처 확인 필요');
   });
 
+  it('does not show BUY or MAINTAIN defaults for an industry report', () => {
+    const industryReport = {
+      ...mockReport,
+      stock_names: [],
+      stock_tickers: [],
+      fnguide_summary: null,
+      target_price: null,
+      rating: 'BUY',
+      revision_type: 'MAINTAIN',
+      report_type: 'INDUSTRY'
+    };
+
+    const { container } = render(
+      <ReportItem report={industryReport} onToggleSummary={jest.fn()} />
+    );
+
+    expect(container.textContent).not.toContain('출처 확인 필요');
+    expect(container.textContent).toContain('INDUSTRY');
+  });
+
   it('should render re-summarize options for admin when summary already exists', () => {
     const mockOnTriggerSummary = jest.fn();
     const { container } = render(
