@@ -160,18 +160,24 @@ GET {BASE}/external/api/industry?{params}
 
 ---
 
-### 1.3 FnGuide 종목요약 조회
+### 1.3 FnGuide 리포트 및 종목요약 조회 (/api/fnguide)
+
+> **계약 규약**: 지원 대상 프론트엔드 API 표준 경로는 `/api/fnguide/*` 입니다.
+> 이전 공개 엔드포인트 경로인 `/pub/api/fnguide/*` 는 외부 호출자와의 상위 호환성을 위해 유지되는 legacy/public-compatible 에일리어스이나, 프론트엔드 앱 코드에서는 반드시 `/api/fnguide/*` 계약 경로를 사용해야 합니다.
+> 이 엔드포인트들은 `VITE_API_PATH` prefix(`/external/api`)를 사용하지 않고 `VITE_API_URL`에 직접 연결됩니다.
+
+#### 1.3.1 FnGuide 종목요약 목록 조회 (/report-summaries)
 
 ```
 GET {BASE}/api/fnguide/report-summaries?{params}
+(호환 경로: GET {BASE}/pub/api/fnguide/report-summaries)
 ```
-
-> 이 엔드포인트는 `VITE_API_PATH` prefix(`/external/api`)를 사용하지 않고 `VITE_API_URL`에 직접 붙는다.
 
 | Param | Type | 필수 | 설명 |
 |-------|------|------|------|
 | `q` | string | - | 회사명, 제목, 요약 본문 검색 |
 | `provider` | string | - | 증권사/제공자 필터 |
+| `author` | string | - | 작성자 검색 필터 |
 | `report_date` | string | - | 특정 리포트 일자 필터 |
 | `limit` | number | - | 페이지 크기 |
 | `offset` | number | - | 페이지 오프셋 |
@@ -200,10 +206,34 @@ GET {BASE}/api/fnguide/report-summaries?{params}
 > `pdf_url`은 `tbl_fnguide_report_summaries` 테이블에서 직접 조회한 원본 PDF URL.
 > 프론트엔드 `FnGuideList.jsx` → `card-actions` 영역에 `PDF 보기` 버튼으로 렌더링됨 (빨간색, `FnGuide 원문 보기` 왼쪽).
 
+#### 1.3.2 FnGuide 리포트 일자 목록 조회 (/report-dates)
+
+```
+GET {BASE}/api/fnguide/report-dates?{params}
+(호환 경로: GET {BASE}/pub/api/fnguide/report-dates)
+```
+
+| Param | Type | 필수 | 설명 |
+|-------|------|------|------|
+| `q` | string | - | 회사명, 제목, 요약 본문 검색 |
+| `provider` | string | - | 증권사/제공자 필터 |
+| `author` | string | - | 작성자 검색 필터 |
+
+**Response**:
+```json
+[
+  {
+    "report_date": "2026-07-18",
+    "report_count": 12
+  }
+]
+```
+
 **테스트**: `test/integration/api.test.js` Section 2.2
 **호출 위치**:
-- `src/components/FnGuideList.jsx` → 종목요약 목록 조회
+- `src/components/FnGuideList.jsx` → 종목요약 목록 및 날짜 목록 조회
 - `src/components/HomeDashboard.jsx` → 종목요약 섹션 프리뷰
+
 
 ---
 
