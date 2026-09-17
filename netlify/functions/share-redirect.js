@@ -5,7 +5,13 @@ const KNOWN_REPORT_API_PATHS = [
   '/external/api',
   '/pub/api',
 ];
-const DEFAULT_KAKAO_NATIVE_PDF_FIRMS = ['SK증권'];
+const DEFAULT_KAKAO_NATIVE_PDF_FIRMS = [
+  'IBK투자증권', 'IM증권', 'KB증권', 'LS증권', 'NH투자증권', 'SK증권',
+  '교보증권', '다올투자증권', '대신증권', '리딩투자증권', '메리츠증권',
+  '미래에셋증권', '삼성증권', '상상인증권', '신영증권', '신한증권',
+  '유안타증권', '키움증권', '토스증권', '하나증권', '한국투자증권',
+  '한양증권', '한화투자증권', '현대차증권',
+];
 
 async function fetchWithTimeout(url, options = {}, ms = FETCH_TIMEOUT_MS) {
   const controller = new AbortController();
@@ -199,7 +205,7 @@ export const handler = async (event) => {
     const title = report.article_title || '증권사 리포트';
     const company = report.firm_nm || '증권사';
     const isDs = isDsReport(report, pdfUrl);
-    const useNativeKakaoPdf = isIos && isKakaoTalk && supportsNativeKakaoPdf(company);
+    const useNativeKakaoPdf = isKakaoTalk && supportsNativeKakaoPdf(company);
     
     // 2. 리다이렉트 경로 결정
     let finalUrl = pdfUrl;
