@@ -205,7 +205,7 @@ export const handler = async (event) => {
     const title = report.article_title || '증권사 리포트';
     const company = report.firm_nm || '증권사';
     const isDs = isDsReport(report, pdfUrl);
-    const useNativeKakaoPdf = isKakaoTalk && supportsNativeKakaoPdf(company);
+    const useNativeKakaoPdf = isIos && isKakaoTalk && supportsNativeKakaoPdf(company);
     
     // 2. 리다이렉트 경로 결정
     let finalUrl = pdfUrl;
