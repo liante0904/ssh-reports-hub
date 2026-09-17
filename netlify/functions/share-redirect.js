@@ -5,6 +5,7 @@ const KNOWN_REPORT_API_PATHS = [
   '/external/api',
   '/pub/api',
 ];
+const DEFAULT_KAKAO_NATIVE_PDF_FIRMS = ['SK증권'];
 
 async function fetchWithTimeout(url, options = {}, ms = FETCH_TIMEOUT_MS) {
   const controller = new AbortController();
@@ -25,6 +26,14 @@ function isDsReport(report, pdfUrl = '') {
 
 function isKakaoTalkBrowser(userAgent = '') {
   return /KAKAOTALK/i.test(userAgent);
+}
+
+function supportsNativeKakaoPdf(firmName = '', env = process.env) {
+  const configuredFirms = String(env.KAKAO_NATIVE_PDF_FIRMS || DEFAULT_KAKAO_NATIVE_PDF_FIRMS)
+    .split(',')
+    .map(firm => firm.trim().toLowerCase())
+    .filter(Boolean);
+  return configuredFirms.includes(String(firmName).trim().toLowerCase());
 }
 
 function isAttachmentDisposition(value = '') {
@@ -190,6 +199,7 @@ export const handler = async (event) => {
     const title = report.article_title || '증권사 리포트';
     const company = report.firm_nm || '증권사';
     const isDs = isDsReport(report, pdfUrl);
+    const useNativeKakaoPdf = isIos && isKakaoTalk && supportsNativeKakaoPdf(company);
     
     // 2. 리다이렉트 경로 결정
     let finalUrl = pdfUrl;
@@ -226,7 +236,9 @@ export const handler = async (event) => {
         const viewerBase = `${requestOrigin}/lib/pdfjs/web/viewer.html`;
         const viewerParams = `file=${encodeURIComponent(proxyUrl)}`;
         const viewerHash = 'pagemode=none&zoom=page-width';
-        finalUrl = isKakaoTalk || proxyLooksGood === 'attachment'
+        finalUrl = useNativeKakaoPdf
+          ? proxyUrl
+          : isKakaoTalk || proxyLooksGood === 'attachment'
           ? `${viewerBase}?${viewerParams}#${viewerHash}`
           : isIos || isDs
           ? proxyUrl
