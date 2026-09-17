@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+  <title>리포트 PDF</title>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #20252b; background: #eef1f4; font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    header { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 8px 12px; background: #fff; box-shadow: 0 1px 5px #0002; }
+    #title { flex: 1; overflow: hidden; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    button { border: 0; border-radius: 7px; padding: 8px 11px; color: #fff; background: #2367b1; font: inherit; }
+    button:disabled { opacity: .45; }
+    #page { min-width: 48px; text-align: center; }
+    #message { padding: 36px 18px; color: #5e6872; text-align: center; }
+    #document { display: flex; justify-content: center; padding: 14px 8px 28px; }
+    canvas { display: block; max-width: 100%; height: auto; background: #fff; box-shadow: 0 1px 7px #0003; }
+  </style>
+</head>
+<body>
+  <header>
+    <div id="title">리포트를 불러오는 중...</div>
+    <button id="previous" type="button" disabled>‹</button>
+    <span id="page">- / -</span>
+    <button id="next" type="button" disabled>›</button>
+  </header>
+  <div id="message">PDF를 준비하는 중입니다...</div>
+  <main id="document" hidden><canvas id="canvas"></canvas></main>
+  <script type="module">
+    import { getDocument, GlobalWorkerOptions } from '/lib/pdfjs/build/pdf.mjs';
+
+    GlobalWorkerOptions.workerSrc = '/lib/pdfjs/build/pdf.worker.mjs';
+    const params = new URLSearchParams(window.location.search);
+    const file = params.get('file');
+    const title = params.get('title') || '리포트 PDF';
+    const message = document.querySelector('#message');
+    const documentView = document.querySelector('#document');
+    const canvas = document.querySelector('#canvas');
+    const pageLabel = document.querySelector('#page');
+    const previous = document.querySelector('#previous');
+    const next = document.querySelector('#next');
+    let pdf;
+    let pageNumber = 1;
+
+    document.querySelector('#title').textContent = title;
+
+    async function renderPage() {
+      const page = await pdf.getPage(pageNumber);
+      const baseViewport = page.getViewport({ scale: 1 });
+      const availableWidth = Math.max(280, Math.min(window.innerWidth - 16, 900));
+      const scale = Math.min(2, availableWidth / baseViewport.width);
+      const viewport = page.getViewport({ scale });
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      const context = canvas.getContext('2d');
+      canvas.width = Math.floor(viewport.width * pixelRatio);
+      canvas.height = Math.floor(viewport.height * pixelRatio);
+      canvas.style.width = `${Math.floor(viewport.width)}px`;
+      canvas.style.height = `${Math.floor(viewport.height)}px`;
+      await page.render({ canvasContext: context, viewport, transform: pixelRatio !== 1 ? [pixelRatio, 0, 0, pixelRatio, 0, 0] : null }).promise;
+      pageLabel.textContent = `${pageNumber} / ${pdf.numPages}`;
+      previous.disabled = pageNumber <= 1;
+      next.disabled = pageNumber >= pdf.numPages;
+      message.hidden = true;
+      documentView.hidden = false;
+    }
+
+    async function load() {
+      if (!file) throw new Error('PDF 주소가 없습니다.');
+      const loadingTask = getDocument({ url: file, rangeChunkSize: 65536, disableStream: false, disableAutoFetch: false });
+      loadingTask.onProgress = ({ loaded, total }) => {
+        if (total) message.textContent = `PDF를 불러오는 중... ${Math.round((loaded / total) * 100)}%`;
+      };
+      pdf = await loadingTask.promise;
+      await renderPage();
+    }
+
+    previous.addEventListener('click', async () => { if (pageNumber > 1) { pageNumber -= 1; await renderPage(); } });
+    next.addEventListener('click', async () => { if (pageNumber < pdf.numPages) { pageNumber += 1; await renderPage(); } });
+    window.addEventListener('resize', () => { if (pdf) renderPage().catch(() => {}); });
+    load().catch((error) => { message.textContent = `PDF를 열 수 없습니다: ${error.message}`; });
+  </script>
+</body>
+</html>
