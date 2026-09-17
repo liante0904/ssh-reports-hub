@@ -237,7 +237,7 @@ export const handler = async (event) => {
         const viewerParams = `file=${encodeURIComponent(proxyUrl)}`;
         const viewerHash = 'pagemode=none&zoom=page-width';
         finalUrl = useNativeKakaoPdf
-          ? proxyUrl
+          ? pdfUrl
           : isKakaoTalk || proxyLooksGood === 'attachment'
           ? `${viewerBase}?${viewerParams}#${viewerHash}`
           : isIos || isDs
