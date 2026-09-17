@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF 열기 방식 테스트</title>
+  <style>
+    body { margin: 0; padding: 20px; color: #17202a; background: #f5f7fa; font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    main { max-width: 760px; margin: 0 auto; }
+    h1 { font-size: 22px; margin: 0 0 8px; }
+    .note { color: #59636e; margin: 0 0 18px; }
+    .status { padding: 12px; border-radius: 10px; background: #fff; margin-bottom: 12px; }
+    .card { background: #fff; border: 1px solid #e1e6eb; border-radius: 12px; padding: 14px; margin: 10px 0; }
+    .firm { font-weight: 700; }
+    .meta { color: #68737e; font-size: 12px; margin: 3px 0 10px; }
+    a { display: inline-block; margin: 3px 8px 3px 0; padding: 7px 10px; border-radius: 7px; color: #1256a3; background: #edf4ff; text-decoration: none; }
+    a.source { color: #176b42; background: #eaf8f0; }
+    .missing { color: #9a4b00; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>증권사 PDF 열기 테스트</h1>
+    <p class="note">메뉴에 노출되지 않는 내부 테스트 페이지입니다. 각 회사의 공유 경로와 증권사 원본 PDF를 Android 브라우저·PWA·카카오톡에서 각각 열어보세요.</p>
+    <div id="status" class="status">검증된 아카이브 레코드를 불러오는 중...</div>
+    <section id="list"></section>
+  </main>
+  <script>
+    const API = 'https://ssh-oci.duckdns.org/external/api';
+    const list = document.querySelector('#list');
+    const status = document.querySelector('#status');
+    const isVerifiedArchive = (item) => {
+      const archive = item.pdf_archive || {};
+      return archive.archive_status === 'ARCHIVED' && archive.storage_backend === 'googledrive' && archive.storage_key && Number(archive.file_size) > 0;
+    };
+    const addLink = (parent, label, href, className = '') => {
+      const link = document.createElement('a');
+      link.textContent = label;
+      link.href = href;
+      link.className = className;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      parent.append(link);
+    };
+    async function load() {
+      const pages = await Promise.all(Array.from({ length: 30 }, (_, index) =>
+        fetch(`${API}/search/?limit=100&offset=${index * 100}`).then((response) => response.ok ? response.json() : { items: [] })
+      ));
+      const items = pages.flatMap((page) => Array.isArray(page.items) ? page.items : []);
+      const byFirm = new Map();
+      for (const item of items) {
+        if (!item.firm_nm || !item.pdf_file_url) continue;
+        const current = byFirm.get(item.firm_nm);
+        if (!current || (!isVerifiedArchive(current) && isVerifiedArchive(item))) byFirm.set(item.firm_nm, item);
+      }
+      const rows = [...byFirm.values()].sort((a, b) => a.firm_nm.localeCompare(b.firm_nm));
+      status.textContent = `${rows.length}개 회사 · GDrive 저장 검증 레코드 우선 선택 · 현재 기기에서 두 링크를 비교하세요.`;
+      for (const item of rows) {
+        const card = document.createElement('article');
+        card.className = 'card';
+        const firm = document.createElement('div');
+        firm.className = 'firm';
+        firm.textContent = item.firm_nm;
+        const meta = document.createElement('div');
+        meta.className = `meta${isVerifiedArchive(item) ? '' : ' missing'}`;
+        meta.textContent = `report_id ${item.report_id} · ${isVerifiedArchive(item) ? 'GDrive 아카이브 검증 조건 충족' : 'GDrive 검증 조건 미충족'}`;
+        card.append(firm, meta);
+        addLink(card, '공유 경로', `/share?id=${encodeURIComponent(item.report_id)}`);
+        addLink(card, '증권사 원본 PDF', item.pdf_file_url, 'source');
+        list.append(card);
+      }
+    }
+    load().catch((error) => { status.textContent = `목록을 불러오지 못했습니다: ${error.message}`; });
+  </script>
+</body>
+</html>
