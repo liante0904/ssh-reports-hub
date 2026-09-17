@@ -221,7 +221,7 @@ export const handler = async (event) => {
         }
       }
 
-      if (!proxyLooksGood && proxyLooksGood !== 'attachment' && !isKakaoTalk) {
+      if (!proxyLooksGood && proxyLooksGood !== 'attachment' && !isKakaoTalk && !isAndroid) {
         finalUrl = pdfUrl;
       } else {
         const viewerBase = isAndroid
@@ -229,7 +229,7 @@ export const handler = async (event) => {
           : `${requestOrigin}/lib/pdfjs/web/viewer.html`;
         const viewerParams = `file=${encodeURIComponent(proxyUrl)}`;
         const viewerHash = 'pagemode=none&zoom=page-width';
-        finalUrl = isKakaoTalk || proxyLooksGood === 'attachment'
+        finalUrl = isAndroid || isKakaoTalk || proxyLooksGood === 'attachment'
           ? `${viewerBase}?${viewerParams}#${viewerHash}`
           : isIos || isDs
           ? proxyUrl
