@@ -26,13 +26,38 @@
     <section id="list"></section>
   </main>
   <script>
-    const API = 'https://ssh-oci.duckdns.org/external/api';
+    const ITEMS = [
+      { firm_nm: 'DB증권', report_id: 262112752, pdf_file_url: 'https://whub.dbsec.co.kr/streamdocs/v4/documents/a9hijCwGJ_fSYVRbj8SN7m5KLFJJZmnufw8Y3B7TZpY', archived: false },
+      { firm_nm: 'DS투자증권', report_id: 262090284, pdf_file_url: 'https://www.ds-sec.co.kr/bbs/download.php?bo_table=sub03_02&wr_id=3706&no=0', archived: false },
+      { firm_nm: 'IBK투자증권', report_id: 261786237, pdf_file_url: 'https://download.ibks.com/emsdata/tradeinfo/indreport/20260914160923130_ko.pdf', archived: true },
+      { firm_nm: 'IM증권', report_id: 261795980, pdf_file_url: 'https://www.imfnsec.com/upload/R_E05/2026/09/%5B14132038%5D_261406.pdf', archived: true },
+      { firm_nm: 'KB증권', report_id: 261861458, pdf_file_url: 'http://rdata.kbsec.com/pdf_data/20260915142537910K.pdf', archived: true },
+      { firm_nm: 'LS증권', report_id: 261778704, pdf_file_url: 'https://msg.ls-sec.co.kr/eum/K_20260915_31635_241.pdf', archived: true },
+      { firm_nm: 'NH투자증권', report_id: 261787372, pdf_file_url: 'http://download.nhqv.com/CommFile/cis/rsh/epr/CISPPR20260914175806540.pdf', archived: true },
+      { firm_nm: 'SK증권', report_id: 261781902, pdf_file_url: 'https://www.sks.co.kr/data1/research/qna_file/20260915070830054_0_ko.pdf', archived: true },
+      { firm_nm: '교보증권', report_id: 261826582, pdf_file_url: 'https://www.iprovest.com/upload/research/report/idxnews/20260915/20260915_B2051_20250021_116.pdf', archived: true },
+      { firm_nm: '다올투자증권', report_id: 261787466, pdf_file_url: 'https://www.ktb.co.kr/common/download.jspx?cmd=viewPDF&path=/attach_file/RESEARCH/144468/1/20260915_B3510_jislee_465.pdf', archived: true },
+      { firm_nm: '대신증권', report_id: 261858742, pdf_file_url: 'http://money2.daishin.com/PDF/Out/intranet_data/Product/ResearchCenter/Report/2026/09/59168_260916_round2.pdf', archived: true },
+      { firm_nm: '리딩투자증권', report_id: 261787261, pdf_file_url: 'http://www.leading.co.kr/download?boardClassification=research&atchFileId=FILE_000000000077312', archived: true },
+      { firm_nm: '메리츠증권', report_id: 261848244, pdf_file_url: 'http://home.imeritz.com/include/resource/research/WorkFlow/20260913164118011K_02.pdf', archived: true },
+      { firm_nm: '미래에셋증권', report_id: 261846415, pdf_file_url: 'https://securities.miraeasset.com/bbs/download/2147290.pdf?attachmentId=2147290', archived: true },
+      { firm_nm: '삼성증권', report_id: 261857834, pdf_file_url: 'https://www.samsungpop.com/common.do?cmd=down&saveKey=research.pdf&fileName=2010/2026091508503324K_02_04.pdf&contentType=application/pdf&inlineYn=Y', archived: true },
+      { firm_nm: '상상인증권', report_id: 261870465, pdf_file_url: 'https://www.sangsanginib.com/_upload/attFile/CM0078/CM0078_5579_1.pdf', archived: true },
+      { firm_nm: '신영증권', report_id: 261802959, pdf_file_url: 'https://www.shinyoung.com/files/20260915/a12dc0f4fc998.pdf', archived: true },
+      { firm_nm: '신한증권', report_id: 261846852, pdf_file_url: 'https://bbs2.shinhansec.com/board/message/file.pdf.do?attachmentId=353862', archived: true },
+      { firm_nm: '유안타증권', report_id: 261824212, pdf_file_url: 'http://file.myasset.com/sitemanager/upload/2026/0915/090550/20260915090550353_0_ko.pdf', archived: true },
+      { firm_nm: '키움증권', report_id: 261821114, pdf_file_url: 'https://bbn.kiwoom.com/research/SPdfFileView?rMenuGb=CR&attaFile=1789428777869.pdf&makeDt=2026.09.15', archived: true },
+      { firm_nm: '토스증권', report_id: 261256156, pdf_file_url: 'https://home-files.tossinvest.com/files/investment-info/65344544-0353-4a46-82cf-028052b8252e.pdf', archived: true },
+      { firm_nm: '하나증권', report_id: 261869902, pdf_file_url: 'https://www.hanaw.com/main/research/research/download.cmd?bbsSeq=1288789&attachFileSeq=1&bbsId=&dbType=&bbsCd=1260', archived: true },
+      { firm_nm: '한국투자증권', report_id: 261847744, pdf_file_url: 'http://file.truefriend.com/Storage/research/research05/20260915155416743_ko.pdf', archived: true },
+      { firm_nm: '한양증권', report_id: 260340810, pdf_file_url: 'https://www.hygood.co.kr/download?atchFileId=FILE_000000000096557', archived: true },
+      { firm_nm: '한화투자증권', report_id: 261787506, pdf_file_url: 'https://www.hanwhawm.com/main/common/common_file/fileView.cmd?category=1&getFD=2&file=260915%20Macro%20Comment%20KRW.pdf&store=20260915073744745.pdf&dir=research/2026/09', archived: true },
+      { firm_nm: '현대차증권', report_id: 261823491, pdf_file_url: 'https://www.hmsec.com/documents/research/20260915073842557_ko.pdf', archived: true },
+      { firm_nm: '흥국증권', report_id: 261776569, pdf_file_url: 'https://www.heungkuksec.co.kr/research/market/view.do?key=21614', archived: true },
+    ];
     const list = document.querySelector('#list');
     const status = document.querySelector('#status');
-    const isVerifiedArchive = (item) => {
-      const archive = item.pdf_archive || {};
-      return archive.archive_status === 'ARCHIVED' && archive.storage_backend === 'googledrive' && archive.storage_key && Number(archive.file_size) > 0;
-    };
+    const isVerifiedArchive = (item) => item.archived === true;
     const addLink = (parent, label, href, className = '') => {
       const link = document.createElement('a');
       link.textContent = label;
@@ -43,10 +68,7 @@
       parent.append(link);
     };
     async function load() {
-      const pages = await Promise.all(Array.from({ length: 30 }, (_, index) =>
-        fetch(`${API}/search/?limit=100&offset=${index * 100}`).then((response) => response.ok ? response.json() : { items: [] })
-      ));
-      const items = pages.flatMap((page) => Array.isArray(page.items) ? page.items : []);
+      const items = ITEMS;
       const byFirm = new Map();
       for (const item of items) {
         if (!item.firm_nm || !item.pdf_file_url) continue;
