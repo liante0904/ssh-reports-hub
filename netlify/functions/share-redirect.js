@@ -201,7 +201,7 @@ export const handler = async (event) => {
       const fileName = `[${company}] ${title}.pdf`;
       const boardUrl = report.source_url || pdfUrl.replace('download.php', 'board.php');
       const proxyFunction = isDs ? 'proxy-ds' : 'proxy';
-      const proxyUrl = `${requestOrigin}/.netlify/functions/${proxyFunction}?url=${encodeURIComponent(pdfUrl)}&filename=${encodeURIComponent(fileName)}${boardUrl ? `&referer=${encodeURIComponent(boardUrl)}` : ''}`;
+      const proxyUrl = `${requestOrigin}/.netlify/functions/${proxyFunction}?v=2&url=${encodeURIComponent(pdfUrl)}&filename=${encodeURIComponent(fileName)}${boardUrl ? `&referer=${encodeURIComponent(boardUrl)}` : ''}`;
       // KakaoTalk Android WebView can download a direct PDF instead of
       // rendering it. Use the same self-hosted viewer on both Kakao platforms.
       let proxyLooksGood = isDs || isKakaoTalk;
