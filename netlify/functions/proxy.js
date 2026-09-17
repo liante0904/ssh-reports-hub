@@ -51,6 +51,7 @@ export const handler = async (event) => {
   const { url, filename, referer, warmup } = event.queryStringParameters || {};
   const isHead = event.httpMethod === 'HEAD';
   const isOptions = event.httpMethod === 'OPTIONS';
+  const requestedRange = event.headers?.range || event.headers?.Range;
 
   if (isOptions) {
     return {
@@ -137,6 +138,7 @@ export const handler = async (event) => {
     const dlHeaders = {
       ...baseHeaders,
       'Referer': boardUrl,
+      ...(requestedRange ? { 'Range': requestedRange } : {}),
       ...(cookies ? { 'Cookie': cookies } : {}),
     };
     
@@ -148,6 +150,9 @@ export const handler = async (event) => {
     }, isHead ? 5000 : FETCH_TIMEOUT_MS);
 
     const contentType = res.headers.get('content-type') || '';
+    const contentRange = res.headers.get('content-range') || '';
+    const isPartialResponse = res.status === 206 && Boolean(contentRange);
+    const acceptRanges = res.headers.get('accept-ranges') || (isPartialResponse ? 'bytes' : '');
     
     // HEAD 요청에 대한 빠른 응답
     if (isHead) {
@@ -156,6 +161,8 @@ export const handler = async (event) => {
         headers: {
           'Content-Type': contentType,
           'Content-Length': res.headers.get('content-length') || '0',
+          ...(acceptRanges ? { 'Accept-Ranges': acceptRanges } : {}),
+          ...(contentRange ? { 'Content-Range': contentRange } : {}),
           'Content-Disposition': res.headers.get('content-disposition') || 'inline',
           'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'no-store'
@@ -172,7 +179,7 @@ export const handler = async (event) => {
     const buffer = Buffer.from(arrayBuffer);
 
     // 에러 케이스 (HTML이 오거나 너무 작은 파일)
-    if (contentType.includes('text/html') || buffer.length < 5000) {
+    if (contentType.includes('text/html') || (!isPartialResponse && buffer.length < 5000)) {
       return { 
         statusCode: 502, 
         headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
@@ -181,9 +188,12 @@ export const handler = async (event) => {
     }
 
     return {
-      statusCode: 200,
+      statusCode: isPartialResponse ? 206 : 200,
       headers: {
         'Content-Type': 'application/pdf',
+        'Content-Length': res.headers.get('content-length') || String(buffer.length),
+        ...(acceptRanges ? { 'Accept-Ranges': acceptRanges } : {}),
+        ...(contentRange ? { 'Content-Range': contentRange } : {}),
         'Content-Disposition': `inline; filename="${encodeURIComponent(filename || 'report.pdf')}"`,
         'X-Content-Type-Options': 'nosniff',
         'Cache-Control': 'public, max-age=3600',
