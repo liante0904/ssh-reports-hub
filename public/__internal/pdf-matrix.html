@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF 열기 방식 테스트</title>
+  <style>
+    body { margin: 0; padding: 20px; color: #17202a; background: #f5f7fa; font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    main { max-width: 760px; margin: 0 auto; }
+    h1 { font-size: 22px; margin: 0 0 8px; }
+    .note { color: #59636e; margin: 0 0 18px; }
+    .status { padding: 12px; border-radius: 10px; background: #fff; margin-bottom: 12px; }
+    .card { background: #fff; border: 1px solid #e1e6eb; border-radius: 12px; padding: 14px; margin: 10px 0; }
+    .firm { font-weight: 700; }
+    .meta { color: #68737e; font-size: 12px; margin: 3px 0 10px; }
+    a { display: inline-block; margin: 3px 8px 3px 0; padding: 7px 10px; border-radius: 7px; color: #1256a3; background: #edf4ff; text-decoration: none; }
+    a.source { color: #176b42; background: #eaf8f0; }
+    .missing { color: #9a4b00; }
+    .qr { display: flex; align-items: center; gap: 14px; padding: 12px; margin-bottom: 12px; background: #fff; border-radius: 10px; }
+    .qr img { width: 132px; height: 132px; image-rendering: pixelated; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>증권사 PDF 열기 테스트</h1>
+    <p class="note">메뉴에 노출되지 않는 내부 테스트 페이지입니다. 공유 경로와 증권사 원본 PDF를 Android 브라우저·PWA·카카오톡에서 각각 비교해보세요. Android 브라우저의 원본 PDF 링크는 다운로드될 수 있습니다.</p>
+    <div class="qr"><img id="qr" alt="이 테스트 페이지 QR코드"><span>갤럭시 카메라로 스캔해서 이 페이지를 열 수 있습니다.</span></div>
+    <div id="status" class="status">검증된 아카이브 레코드를 불러오는 중...</div>
+    <section id="list"></section>
+  </main>
+  <script>
+    const ITEMS = [
+      { firm_nm: 'DB증권', report_id: 262112752, pdf_file_url: 'https://whub.dbsec.co.kr/streamdocs/v4/documents/a9hijCwGJ_fSYVRbj8SN7m5KLFJJZmnufw8Y3B7TZpY', archived: false },
+      { firm_nm: 'DS투자증권', report_id: 262090284, pdf_file_url: 'https://www.ds-sec.co.kr/bbs/download.php?bo_table=sub03_02&wr_id=3706&no=0', archived: false },
+      { firm_nm: 'IBK투자증권', report_id: 261786237, pdf_file_url: 'https://download.ibks.com/emsdata/tradeinfo/indreport/20260914160923130_ko.pdf', archived: true },
+      { firm_nm: 'IM증권', report_id: 261795980, pdf_file_url: 'https://www.imfnsec.com/upload/R_E05/2026/09/%5B14132038%5D_261406.pdf', archived: true },
+      { firm_nm: 'KB증권', report_id: 261861458, pdf_file_url: 'http://rdata.kbsec.com/pdf_data/20260915142537910K.pdf', archived: true },
+      { firm_nm: 'LS증권', report_id: 261778704, pdf_file_url: 'https://msg.ls-sec.co.kr/eum/K_20260915_31635_241.pdf', archived: true },
+      { firm_nm: 'NH투자증권', report_id: 261787372, pdf_file_url: 'http://download.nhqv.com/CommFile/cis/rsh/epr/CISPPR20260914175806540.pdf', archived: true },
+      { firm_nm: 'SK증권', report_id: 261781902, pdf_file_url: 'https://www.sks.co.kr/data1/research/qna_file/20260915070830054_0_ko.pdf', archived: true },
+      { firm_nm: '교보증권', report_id: 261826582, pdf_file_url: 'https://www.iprovest.com/upload/research/report/idxnews/20260915/20260915_B2051_20250021_116.pdf', archived: true },
+      { firm_nm: '다올투자증권', report_id: 261787466, pdf_file_url: 'https://www.ktb.co.kr/common/download.jspx?cmd=viewPDF&path=/attach_file/RESEARCH/144468/1/20260915_B3510_jislee_465.pdf', archived: true },
+      { firm_nm: '대신증권', report_id: 261858742, pdf_file_url: 'http://money2.daishin.com/PDF/Out/intranet_data/Product/ResearchCenter/Report/2026/09/59168_260916_round2.pdf', archived: true },
+      { firm_nm: '리딩투자증권', report_id: 261787261, pdf_file_url: 'http://www.leading.co.kr/download?boardClassification=research&atchFileId=FILE_000000000077312', archived: true },
+      { firm_nm: '메리츠증권', report_id: 261848244, pdf_file_url: 'http://home.imeritz.com/include/resource/research/WorkFlow/20260913164118011K_02.pdf', archived: true },
+      { firm_nm: '미래에셋증권', report_id: 261846415, pdf_file_url: 'https://securities.miraeasset.com/bbs/download/2147290.pdf?attachmentId=2147290', archived: true },
+      { firm_nm: '삼성증권', report_id: 261857834, pdf_file_url: 'https://www.samsungpop.com/common.do?cmd=down&saveKey=research.pdf&fileName=2010/2026091508503324K_02_04.pdf&contentType=application/pdf&inlineYn=Y', archived: true },
+      { firm_nm: '상상인증권', report_id: 261870465, pdf_file_url: 'https://www.sangsanginib.com/_upload/attFile/CM0078/CM0078_5579_1.pdf', archived: true },
+      { firm_nm: '신영증권', report_id: 261802959, pdf_file_url: 'https://www.shinyoung.com/files/20260915/a12dc0f4fc998.pdf', archived: true },
+      { firm_nm: '신한증권', report_id: 261846852, pdf_file_url: 'https://bbs2.shinhansec.com/board/message/file.pdf.do?attachmentId=353862', archived: true },
+      { firm_nm: '유안타증권', report_id: 261824212, pdf_file_url: 'http://file.myasset.com/sitemanager/upload/2026/0915/090550/20260915090550353_0_ko.pdf', archived: true },
+      { firm_nm: '키움증권', report_id: 261821114, pdf_file_url: 'https://bbn.kiwoom.com/research/SPdfFileView?rMenuGb=CR&attaFile=1789428777869.pdf&makeDt=2026.09.15', archived: true },
+      { firm_nm: '토스증권', report_id: 261256156, pdf_file_url: 'https://home-files.tossinvest.com/files/investment-info/65344544-0353-4a46-82cf-028052b8252e.pdf', archived: true },
+      { firm_nm: '하나증권', report_id: 261869902, pdf_file_url: 'https://www.hanaw.com/main/research/research/download.cmd?bbsSeq=1288789&attachFileSeq=1&bbsId=&dbType=&bbsCd=1260', archived: true },
+      { firm_nm: '한국투자증권', report_id: 261847744, pdf_file_url: 'http://file.truefriend.com/Storage/research/research05/20260915155416743_ko.pdf', archived: true },
+      { firm_nm: '한양증권', report_id: 260340810, pdf_file_url: 'https://www.hygood.co.kr/download?atchFileId=FILE_000000000096557', archived: true },
+      { firm_nm: '한화투자증권', report_id: 261787506, pdf_file_url: 'https://www.hanwhawm.com/main/common/common_file/fileView.cmd?category=1&getFD=2&file=260915%20Macro%20Comment%20KRW.pdf&store=20260915073744745.pdf&dir=research/2026/09', archived: true },
+      { firm_nm: '현대차증권', report_id: 261823491, pdf_file_url: 'https://www.hmsec.com/documents/research/20260915073842557_ko.pdf', archived: true },
+      { firm_nm: '흥국증권', report_id: 261776569, pdf_file_url: 'https://www.heungkuksec.co.kr/research/market/view.do?key=21614', archived: true },
+    ];
+    const list = document.querySelector('#list');
+    const status = document.querySelector('#status');
+    document.querySelector('#qr').src = `https://quickchart.io/qr?size=264&text=${encodeURIComponent(window.location.href)}`;
+    const isVerifiedArchive = (item) => item.archived === true;
+    const addLink = (parent, label, href, className = '') => {
+      const link = document.createElement('a');
+      link.textContent = label;
+      link.href = href;
+      link.className = className;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      parent.append(link);
+    };
+    async function load() {
+      const items = ITEMS;
+      const byFirm = new Map();
+      for (const item of items) {
+        if (!item.firm_nm || !item.pdf_file_url) continue;
+        const current = byFirm.get(item.firm_nm);
+        if (!current || (!isVerifiedArchive(current) && isVerifiedArchive(item))) byFirm.set(item.firm_nm, item);
+      }
+      const rows = [...byFirm.values()].sort((a, b) => a.firm_nm.localeCompare(b.firm_nm));
+      status.textContent = `${rows.length}개 회사 · GDrive 저장 검증 레코드 우선 선택 · 현재 기기에서 두 링크를 비교하세요.`;
+      for (const item of rows) {
+        const card = document.createElement('article');
+        card.className = 'card';
+        const firm = document.createElement('div');
+        firm.className = 'firm';
+        firm.textContent = item.firm_nm;
+        const meta = document.createElement('div');
+        meta.className = `meta${isVerifiedArchive(item) ? '' : ' missing'}`;
+        meta.textContent = `report_id ${item.report_id} · ${isVerifiedArchive(item) ? 'GDrive 아카이브 검증 조건 충족' : 'GDrive 검증 조건 미충족'}`;
+        card.append(firm, meta);
+        addLink(card, '공유 경로', `/share?id=${encodeURIComponent(item.report_id)}`);
+        addLink(card, '증권사 원본 PDF', item.pdf_file_url, 'source');
+        list.append(card);
+      }
+    }
+    load().catch((error) => { status.textContent = `목록을 불러오지 못했습니다: ${error.message}`; });
+  </script>
+</body>
+</html>
